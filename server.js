@@ -4,6 +4,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const { analyzeTranscript } = require('./llm');
+const { trackTranscript } = require('./repetition');
 const { flashLight } = require('./shelly');
 
 const PORT = 8080;
@@ -40,12 +41,20 @@ wss.on('connection', (ws) => {
       console.log('Received:', msg.type);
 
       if (msg.type === 'transcript') {
-        const result = await analyzeTranscript(msg.text, recentTopics);
+        const loop = trackTranscript(msg.text);
+        const loopContext = loop.isLoop ? loop.loopKeyword : null;
+        const result = await analyzeTranscript(msg.text, recentTopics, loopContext);
 
         if (result.found) {
           recentTopics.push(result.claim);
           if (recentTopics.length > 10) recentTopics.shift();
-          ws.send(JSON.stringify({ type: 'fact_check', ...result }));
+
+          if (loop.isLoop) {
+            ws.send(JSON.stringify({ type: 'loop_breaker', ...result, loopKeyword: loop.loopKeyword }));
+          } else {
+            ws.send(JSON.stringify({ type: 'fact_check', ...result }));
+          }
+
           console.log('[Shelly] Flashing light for new fact-check');
           flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
         }

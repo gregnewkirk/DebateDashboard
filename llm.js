@@ -24,10 +24,13 @@ CRITICAL RULES:
 - Vary humor_style across responses. Cycle through: sarcastic one-liners, rating scales (e.g. "CREDIBILITY: juice box science"), emoji reactions, boss battles (e.g. "BOSS DEFEATED: Flat Earth Karen"), absurd stats.
 - Return ONLY valid JSON. No markdown, no explanation.`;
 
-function buildPrompt(transcript, recentTopics) {
+function buildPrompt(transcript, recentTopics, loopContext) {
   let userMessage = `Analyze this transcript for anti-science claims:\n\n"${transcript}"`;
   if (recentTopics && recentTopics.length > 0) {
     userMessage += `\n\nAlready covered topics (do NOT repeat these): ${recentTopics.join(', ')}`;
+  }
+  if (loopContext) {
+    userMessage += `\n\nIMPORTANT: The topic '${loopContext}' keeps coming up repeatedly. Instead of the same rebuttal, provide a COMPLETELY NEW angle, surprising stat, or reframe.`;
   }
   return userMessage;
 }
@@ -65,9 +68,9 @@ function parseResponse(content) {
   }
 }
 
-async function analyzeTranscript(transcript, recentTopics) {
+async function analyzeTranscript(transcript, recentTopics, loopContext) {
   try {
-    const userMessage = buildPrompt(transcript, recentTopics);
+    const userMessage = buildPrompt(transcript, recentTopics, loopContext);
 
     const response = await fetch(LLM_URL, {
       method: 'POST',
