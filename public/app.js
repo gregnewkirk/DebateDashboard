@@ -16,6 +16,53 @@ const SCIENCE_FACTS = [
   "A day on Venus is longer than a year on Venus",
 ];
 
+const FUN_STATS = [
+  "Days since flat earth was proven: \u221E",
+  "Vaccines save 4\u20135 million lives per year",
+  "Your DNA is 99.9% identical to every other human",
+  "Sharks existed before trees",
+  "The scientific method: it just works\u2122",
+  "Peer review > YouTube review",
+  "97% of climate scientists agree",
+  "Correlation \u2260 causation",
+  "Evolution: 3.5 billion years of QA testing",
+  "mRNA degrades in 48 hours. Your DNA is fine.",
+  "Organic food is also made of chemicals",
+  "The dose makes the poison \u2014 Paracelsus",
+  "Water is a chemical. You drink chemicals daily.",
+  "Earth is 4.5 billion years old. Not 6,000.",
+  "There are more trees on Earth than stars in the Milky Way",
+  "GPS satellites correct for relativity every day",
+  "Antibiotics don\u2019t work on viruses. Pass it on.",
+  "The placebo effect is real. Irony is also real.",
+  "One lightning bolt could toast 100,000 slices of bread",
+  "Astronauts grow up to 2 inches taller in space",
+  "Gut bacteria outnumber your own cells 10:1",
+  "The human brain uses 20% of the body\u2019s energy",
+  "Double-blind studies: because we don\u2019t trust ourselves",
+  "Sunscreen works. Sunburn doesn\u2019t build immunity.",
+  "A photon takes 100,000 years to cross the Milky Way",
+  "Consensus isn\u2019t opinion. It\u2019s evidence agreeing.",
+  "Atoms are 99.9999% empty space. You\u2019re mostly nothing.",
+  "Gravity: still technically \u201Cjust a theory.\u201D",
+  "Fun fact: \u201Cnatural\u201D doesn\u2019t mean safe. Arsenic is natural.",
+  "There are more bacteria in your mouth than people on Earth",
+  "Microwaves don\u2019t make food radioactive. Relax.",
+  "Pluto was demoted by data, not feelings",
+  "Your nose can detect over 1 trillion scents",
+  "Science doesn\u2019t care about your beliefs",
+  "The MMR vaccine has been given 500M+ times safely",
+  "Steel beams melt at 1510\u00B0C. Jet fuel burns at 1000\u00B0C. Steel weakens at 600\u00B0C.",
+  "Fluoride in water: safe since 1945",
+  "5G uses non-ionizing radiation. Like a radio.",
+  "The universe is 93 billion light-years across",
+  "Sample size of 1 is not a study. It\u2019s an anecdote.",
+];
+
+// --- Idle Pop-in State ---
+let idleTimer = null;
+let isShowingCard = false;
+
 // --- WebSocket Connection ---
 let ws = null;
 
@@ -57,10 +104,13 @@ function connectWebSocket() {
 // --- Stub Functions (implemented in later tasks) ---
 
 function showFactCard(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
   const container = document.getElementById("main-content");
   if (!container) return;
 
-  // Clear any existing card
+  // Clear any existing card or idle stat
   container.innerHTML = "";
 
   // Create card
@@ -119,11 +169,15 @@ function showFactCard(data) {
       if (card.parentNode) {
         card.parentNode.removeChild(card);
       }
+      isShowingCard = false;
+      startIdlePopIns();
     }, 1000);
   }, 18000);
 }
 
 function showLoopBreaker(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
   const container = document.getElementById("main-content");
   if (!container) return;
 
@@ -191,6 +245,8 @@ function showLoopBreaker(data) {
       if (card.parentNode) {
         card.parentNode.removeChild(card);
       }
+      isShowingCard = false;
+      startIdlePopIns();
     }, 1000);
   }, 22000);
 }
@@ -313,6 +369,59 @@ function startIdleTicker() {
   track.classList.add("ticker-scroll");
 }
 
+// --- Idle Fun Stats Pop-ins ---
+
+function getRandomIdleInterval() {
+  // Random interval between 30-45 seconds
+  return 30000 + Math.random() * 15000;
+}
+
+function showIdleStat() {
+  if (isShowingCard) return;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+
+  // Pick a random fun stat
+  const stat = FUN_STATS[Math.floor(Math.random() * FUN_STATS.length)];
+
+  const el = document.createElement("div");
+  el.className = "idle-stat bounce-in";
+  el.textContent = stat;
+  container.appendChild(el);
+
+  // Display for 8 seconds, then fade out and remove
+  setTimeout(() => {
+    el.classList.add("fade-out");
+    setTimeout(() => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    }, 1000);
+  }, 8000);
+
+  // Schedule next pop-in
+  idleTimer = setTimeout(showIdleStat, getRandomIdleInterval());
+}
+
+function startIdlePopIns() {
+  stopIdlePopIns();
+  idleTimer = setTimeout(showIdleStat, getRandomIdleInterval());
+}
+
+function stopIdlePopIns() {
+  if (idleTimer) {
+    clearTimeout(idleTimer);
+    idleTimer = null;
+  }
+  // Remove any existing idle stat from the DOM
+  const container = document.getElementById("main-content");
+  if (container) {
+    const existing = container.querySelectorAll(".idle-stat");
+    existing.forEach((el) => el.remove());
+  }
+}
+
 // --- Debug Keyboard Shortcuts ---
 document.addEventListener("keydown", (e) => {
   if (e.key === "d" || e.key === "D") {
@@ -340,5 +449,6 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
   startIdleTicker();
+  startIdlePopIns();
   startSpeechRecognition();
 });
