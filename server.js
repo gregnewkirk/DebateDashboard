@@ -3,7 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const { WebSocketServer } = require('ws');
 
+const { analyzeTranscript } = require('./llm');
+
 const PORT = 8080;
+const recentTopics = [];
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -30,10 +33,23 @@ const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
-  ws.on('message', (msg) => {
-    const text = msg.toString();
-    console.log('Received:', text);
-    ws.send(JSON.stringify({ type: 'echo', text }));
+  ws.on('message', async (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString());
+      console.log('Received:', msg.type);
+
+      if (msg.type === 'transcript') {
+        const result = await analyzeTranscript(msg.text, recentTopics);
+
+        if (result.found) {
+          recentTopics.push(result.claim);
+          if (recentTopics.length > 10) recentTopics.shift();
+          ws.send(JSON.stringify({ type: 'fact_check', ...result }));
+        }
+      }
+    } catch (err) {
+      console.error('Message handling error:', err.message);
+    }
   });
   ws.on('close', () => console.log('Client disconnected'));
 });
