@@ -1,0 +1,348 @@
+/* ===========================================
+   DEBATE DASHBOARD — Bold News Ticker Theme
+   Portrait 9:16 layout (1080x1920 target)
+   =========================================== */
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-dark: #1a1a2e;
+  --bg-mid: #16213e;
+  --bg-deep: #0f3460;
+  --red: #e94560;
+  --gold: #ffd700;
+  --white: #ffffff;
+  --ticker-bg: rgba(10, 10, 30, 0.85);
+}
+
+/* --- Ambient Background --- */
+@keyframes ambient-shift {
+  0%   { filter: hue-rotate(0deg)   brightness(1); }
+  25%  { filter: hue-rotate(5deg)   brightness(1.03); }
+  50%  { filter: hue-rotate(-3deg)  brightness(0.97); }
+  75%  { filter: hue-rotate(4deg)   brightness(1.02); }
+  100% { filter: hue-rotate(0deg)   brightness(1); }
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: var(--white);
+  font-family: "Arial Black", "Impact", system-ui, sans-serif;
+  display: flex;
+  flex-direction: column;
+  animation: ambient-shift 13s ease-in-out infinite;
+}
+
+/* ===========================================
+   TOP BANNER  (~8% viewport height)
+   =========================================== */
+.top-banner {
+  height: 8vh;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 3px solid var(--red);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.top-banner .red-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.top-banner h1 {
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 900;
+  color: var(--white);
+  line-height: 1;
+}
+
+/* ===========================================
+   LISTENING INDICATOR  (top-right corner)
+   =========================================== */
+.listening-indicator {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--white);
+  opacity: 0.4;
+  transition: opacity 0.3s;
+  z-index: 100;
+}
+
+.listening-indicator.active {
+  opacity: 1;
+}
+
+.listening-indicator .mic-icon {
+  font-size: 1.3rem;
+}
+
+.listening-indicator.active .mic-icon {
+  color: var(--red);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ===========================================
+   MAIN CONTENT  (~75% viewport height)
+   =========================================== */
+#main-content {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2vh 4vw;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===========================================
+   FACT CARD
+   =========================================== */
+.fact-card {
+  width: 100%;
+  max-width: 960px;
+  padding: 3vh 5vw;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+}
+
+.fact-card .claim {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  text-transform: uppercase;
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--white);
+  /* Optional inline red highlight applied via JS with <mark> */
+}
+
+.fact-card .claim mark {
+  background: var(--red);
+  color: var(--white);
+  padding: 0 0.2em;
+  border-radius: 4px;
+}
+
+.fact-card .verdict {
+  font-size: clamp(2rem, 4.5vw, 4rem);
+  text-transform: uppercase;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+}
+
+.fact-card .fact-text {
+  font-size: clamp(1.2rem, 2.8vw, 2rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.35;
+  font-family: system-ui, sans-serif;
+}
+
+.fact-card .humor {
+  font-size: clamp(1rem, 2.4vw, 1.7rem);
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+}
+
+/* ===========================================
+   LOOP BREAKER (variant of fact-card)
+   =========================================== */
+.loop-breaker {
+  width: 100%;
+  max-width: 960px;
+  padding: 3vh 5vw;
+  border-radius: 18px;
+  background: rgba(233, 69, 96, 0.1);
+  border: 3px solid var(--red);
+  backdrop-filter: blur(6px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+  animation: glow-red-kf 1.5s ease-in-out infinite;
+}
+
+.loop-breaker .loop-header {
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  text-transform: uppercase;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: 0.12em;
+}
+
+.loop-breaker .claim,
+.loop-breaker .verdict,
+.loop-breaker .fact-text,
+.loop-breaker .humor {
+  /* Inherit same sizing from fact-card */
+}
+
+.loop-breaker .claim  { font-size: clamp(2.5rem, 5vw, 4.5rem); text-transform: uppercase; font-weight: 900; color: var(--white); line-height: 1.1; }
+.loop-breaker .verdict { font-size: clamp(2rem, 4.5vw, 4rem); text-transform: uppercase; font-weight: 900; color: var(--red); line-height: 1.15; }
+.loop-breaker .fact-text { font-size: clamp(1.2rem, 2.8vw, 2rem); font-weight: 600; color: var(--white); line-height: 1.35; font-family: system-ui, sans-serif; }
+.loop-breaker .humor { font-size: clamp(1rem, 2.4vw, 1.7rem); color: var(--gold); font-style: italic; font-weight: 600; font-family: system-ui, sans-serif; }
+
+/* ===========================================
+   BOTTOM TICKER  (~10% viewport height)
+   =========================================== */
+.bottom-ticker {
+  height: 10vh;
+  min-height: 60px;
+  background: var(--ticker-bg);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.ticker-track {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.ticker-track span {
+  display: inline-block;
+  padding: 0 3vw;
+  font-size: clamp(1rem, 2.2vw, 1.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--white);
+}
+
+.ticker-track span::after {
+  content: " \2022 ";
+  color: var(--red);
+  padding-left: 3vw;
+}
+
+/* ===========================================
+   ANIMATION CLASSES
+   =========================================== */
+
+/* 1. slide-in — slides up from below */
+@keyframes slide-in-kf {
+  0%   { transform: translateY(100vh); opacity: 0; }
+  100% { transform: translateY(0);     opacity: 1; }
+}
+.slide-in {
+  animation: slide-in-kf 0.6s ease-out forwards;
+}
+
+/* 2. slam-in — scale from 2x with bounce */
+@keyframes slam-in-kf {
+  0%   { transform: scale(2);   opacity: 0; }
+  60%  { transform: scale(0.9); opacity: 1; }
+  80%  { transform: scale(1.05); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.slam-in {
+  animation: slam-in-kf 0.4s ease-out forwards;
+}
+
+/* 3. pulse — continuous pulsing glow */
+@keyframes pulse-kf {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.15); }
+}
+.pulse {
+  animation: pulse-kf 1.2s ease-in-out infinite;
+}
+
+/* 4. ticker-scroll — continuous horizontal scroll */
+@keyframes ticker-scroll-kf {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-scroll {
+  animation: ticker-scroll-kf 30s linear infinite;
+}
+
+/* 5. fade-out */
+@keyframes fade-out-kf {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+.fade-out {
+  animation: fade-out-kf 1s ease-out forwards;
+}
+
+/* 6. shake */
+@keyframes shake-kf {
+  0%, 100% { transform: translateX(0); }
+  10%  { transform: translateX(-8px); }
+  20%  { transform: translateX(8px); }
+  30%  { transform: translateX(-6px); }
+  40%  { transform: translateX(6px); }
+  50%  { transform: translateX(-4px); }
+  60%  { transform: translateX(4px); }
+  70%  { transform: translateX(-2px); }
+  80%  { transform: translateX(2px); }
+  90%  { transform: translateX(-1px); }
+}
+.shake {
+  animation: shake-kf 0.5s ease-in-out;
+}
+
+/* 7. glow-red */
+@keyframes glow-red-kf {
+  0%, 100% { box-shadow: 0 0 10px rgba(233, 69, 96, 0.3); }
+  50%      { box-shadow: 0 0 30px rgba(233, 69, 96, 0.8), 0 0 60px rgba(233, 69, 96, 0.3); }
+}
+.glow-red {
+  animation: glow-red-kf 1.5s ease-in-out infinite;
+}
+
+/* 8. bounce-in — elastic scale bounce */
+@keyframes bounce-in-kf {
+  0%   { transform: scale(0);    opacity: 0; }
+  40%  { transform: scale(1.15); opacity: 1; }
+  60%  { transform: scale(0.9); }
+  75%  { transform: scale(1.05); }
+  90%  { transform: scale(0.98); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+.bounce-in {
+  animation: bounce-in-kf 0.6s ease-out forwards;
+}

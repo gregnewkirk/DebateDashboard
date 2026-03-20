@@ -3,8 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debate Dashboard</title>
+  <title>Debate Dashboard — LIVE</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+
+  <!-- Top Banner -->
+  <header class="top-banner">
+    <span class="red-dot pulse"></span>
+    <h1>Live Fact Check</h1>
+  </header>
+
+  <!-- Listening Indicator (top-right) -->
+  <div class="listening-indicator" id="listening-indicator">
+    <span class="mic-icon">&#127908;</span>
+    <span>Listening</span>
+  </div>
+
+  <!-- Main Content Area -->
+  <main id="main-content">
+    <!-- Fact cards will be injected here by JS -->
+  </main>
+
+  <!-- Bottom Ticker -->
+  <footer class="bottom-ticker">
+    <div class="ticker-track">
+      <!-- Populated by JS -->
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>
