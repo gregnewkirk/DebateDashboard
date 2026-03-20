@@ -4,6 +4,7 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const { analyzeTranscript } = require('./llm');
+const { flashLight } = require('./shelly');
 
 const PORT = 8080;
 const recentTopics = [];
@@ -45,6 +46,8 @@ wss.on('connection', (ws) => {
           recentTopics.push(result.claim);
           if (recentTopics.length > 10) recentTopics.shift();
           ws.send(JSON.stringify({ type: 'fact_check', ...result }));
+          console.log('[Shelly] Flashing light for new fact-check');
+          flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
         }
       }
     } catch (err) {
