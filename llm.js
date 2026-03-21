@@ -11,7 +11,8 @@ If you find a debatable or false claim, respond with ONLY this JSON (no extra te
   "verdict": "FALSE" or "MISLEADING" or "DEBUNKED",
   "fact": "5-10 word factual rebuttal",
   "humor": "punchy one-liner joke, max 15 words",
-  "humor_style": "sarcastic" or "rating" or "emoji" or "boss_battle" or "absurd_stat"
+  "humor_style": "sarcastic" or "rating" or "emoji" or "boss_battle" or "absurd_stat",
+  "source": "Lancet, 2014 (RETRACTED)"
 }
 
 If no anti-science claim is found, respond with ONLY: {"found": false}
@@ -21,6 +22,7 @@ CRITICAL RULES:
 - claim = MAX 5 words
 - fact = MAX 10 words
 - humor = MAX 15 words
+- source = credible source citation, max 30 chars. Format: "Journal/Org, Year" (e.g., "WHO, 2023", "Nature, 2021", "CDC Data, 2024")
 - Vary humor_style across responses. Cycle through: sarcastic one-liners, rating scales (e.g. "CREDIBILITY: juice box science"), emoji reactions, boss battles (e.g. "BOSS DEFEATED: Flat Earth Karen"), absurd stats.
 - Return ONLY valid JSON. No markdown, no explanation.`;
 

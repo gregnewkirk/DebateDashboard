@@ -180,6 +180,17 @@ body {
   font-family: system-ui, sans-serif;
 }
 
+.fact-card .source,
+.loop-breaker .source {
+  font-size: clamp(0.7rem, 1.6vw, 1rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: system-ui, sans-serif;
+  font-style: normal;
+}
+
 /* ===========================================
    LOOP BREAKER (variant of fact-card)
    =========================================== */

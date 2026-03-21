@@ -136,10 +136,16 @@ function showFactCard(data) {
   humorEl.textContent = data.humor || "";
   humorEl.style.opacity = "0";
 
+  const sourceEl = document.createElement("div");
+  sourceEl.className = "source";
+  sourceEl.textContent = data.source ? `SOURCE: ${data.source}` : "";
+  sourceEl.style.opacity = "0";
+
   card.appendChild(claimEl);
   card.appendChild(verdictEl);
   card.appendChild(factEl);
   card.appendChild(humorEl);
+  card.appendChild(sourceEl);
 
   // Add card with slide-in
   card.classList.add("slide-in");
@@ -160,6 +166,11 @@ function showFactCard(data) {
     humorEl.style.opacity = "";
     humorEl.classList.add("bounce-in");
   }, 900);
+
+  setTimeout(() => {
+    sourceEl.style.opacity = "";
+    sourceEl.classList.add("bounce-in");
+  }, 1200);
 
   // Fade out after 18 seconds
   setTimeout(() => {
@@ -211,11 +222,17 @@ function showLoopBreaker(data) {
   humorEl.textContent = data.humor || "";
   humorEl.style.opacity = "0";
 
+  const sourceEl = document.createElement("div");
+  sourceEl.className = "source";
+  sourceEl.textContent = data.source ? `SOURCE: ${data.source}` : "";
+  sourceEl.style.opacity = "0";
+
   card.appendChild(headerEl);
   card.appendChild(claimEl);
   card.appendChild(verdictEl);
   card.appendChild(factEl);
   card.appendChild(humorEl);
+  card.appendChild(sourceEl);
 
   // Add card with slide-in and shake
   card.classList.add("slide-in", "shake");
@@ -236,6 +253,11 @@ function showLoopBreaker(data) {
     humorEl.style.opacity = "";
     humorEl.classList.add("bounce-in");
   }, 900);
+
+  setTimeout(() => {
+    sourceEl.style.opacity = "";
+    sourceEl.classList.add("bounce-in");
+  }, 1200);
 
   // Fade out after 22 seconds
   setTimeout(() => {
@@ -426,7 +448,8 @@ document.addEventListener("keydown", (e) => {
       verdict: "FALSE. EXPOSED.",
       fact: "1.2M kids studied. Zero link found.",
       humor: "Correlation \u2260 causation. Unless you\u2019re a Facebook researcher.",
-      humor_style: "sarcastic"
+      humor_style: "sarcastic",
+      source: "Lancet, 2014 (RETRACTED)"
     });
   }
   if (e.key === "l" || e.key === "L") {
@@ -436,6 +459,7 @@ document.addEventListener("keydown", (e) => {
       fact: "Vaccines train immunity without the risk.",
       humor: "BOSS DEFEATED: \u2018just get sick\u2019 strategy \uD83D\uDCA5 K.O.",
       humor_style: "boss_battle",
+      source: "NEJM, 2022",
       loopKeyword: "natural immunity"
     });
   }
