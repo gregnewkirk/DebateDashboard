@@ -8,6 +8,10 @@ const { trackTranscript, getRecentKeywords } = require('./repetition');
 const { flashLight } = require('./shelly');
 const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname } = require('./session');
 const { generateNickname } = require('./nickname');
+const { detectMomJoke, generatePileOn } = require('./momjoke');
+
+const LLM_URL = 'http://localhost:3000/v1/chat/completions';
+const LLM_MODEL = 'qwen2.5';
 
 const CONFIG = {
   PORT: process.env.PORT || 8080,
@@ -34,6 +38,99 @@ const END_TRIGGERS = ["ok bye", "okay bye", "alright bye"];
 function matchesTrigger(text, triggers) {
   const lower = text.toLowerCase();
   return triggers.some(t => lower.includes(t));
+}
+
+async function generateReportCard(sessionData) {
+  const claimsList = sessionData.allClaims.length > 0
+    ? sessionData.allClaims.join(', ')
+    : 'No claims detected';
+
+  const prompt = `You are a comedy writer for a live debate fact-check show. Generate a funny "Truth Report Card" for a debater.
+
+Session info:
+- Nickname: ${sessionData.nickname}
+- Nickname history: ${sessionData.nicknameHistory.join(' → ')}
+- Total claims: ${sessionData.claimCount}
+- Debunked: ${sessionData.debunkedCount}
+- Misleading: ${sessionData.misleadingCount}
+- Loop breakers (repeated topics): ${sessionData.loopBreakerCount}
+- Mom jokes triggered: ${sessionData.momJokeCount}
+- Claims made: ${claimsList}
+
+Respond with ONLY this JSON (no extra text):
+{
+  "grade": "letter grade A+ through F-",
+  "grade_joke": "one-liner roasting the grade, max 15 words",
+  "superlatives": ["award 1 max 8 words", "award 2 max 8 words", "award 3 max 8 words"],
+  "closer": "closing one-liner, max 20 words"
+}
+
+RULES:
+- grade: letter grade from A+ to F-. Lower grades for more debunked claims.
+- grade_joke: savage one-liner about the grade. MAX 15 words.
+- superlatives: EXACTLY 3 funny awards. Each MAX 8 words. Make them specific to the claims.
+- closer: closing joke. MAX 20 words.
+- Return ONLY valid JSON. No markdown, no explanation.`;
+
+  try {
+    const response = await fetch(LLM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: LLM_MODEL,
+        temperature: 0.9,
+        messages: [
+          { role: 'system', content: 'You are a comedy writer. Return only valid JSON.' },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`[ReportCard] LLM request failed: ${response.status}`);
+      return fallbackReportCard();
+    }
+
+    const data = await response.json();
+    let content = data?.choices?.[0]?.message?.content || '';
+    content = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+    // Try to extract JSON
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (match) {
+        parsed = JSON.parse(match[0]);
+      } else {
+        return fallbackReportCard();
+      }
+    }
+
+    // Validate required fields
+    if (!parsed.grade || !parsed.grade_joke || !Array.isArray(parsed.superlatives) || !parsed.closer) {
+      return fallbackReportCard();
+    }
+
+    return parsed;
+  } catch (err) {
+    console.error('[ReportCard] Error:', err.message);
+    return fallbackReportCard();
+  }
+}
+
+function fallbackReportCard() {
+  return {
+    grade: 'F',
+    grade_joke: 'Even the participation trophy is embarrassed',
+    superlatives: [
+      'Most Creative Misuse of Statistics',
+      'Lifetime Achievement in Ignoring Peer Review',
+      'Gold Medal in Moving the Goalposts',
+    ],
+    closer: "Today's debate was brought to you by: Confirmation Bias and a YouTube algorithm",
+  };
 }
 
 function broadcast(wss, data) {
@@ -80,6 +177,41 @@ wss.on('connection', (ws) => {
           const sessionData = endSession();
           broadcast(wss, { type: 'session_end', data: sessionData });
           console.log('[Session] Ended');
+
+          // Generate and send report card
+          generateReportCard(sessionData).then((llmResult) => {
+            broadcast(wss, {
+              type: 'report_card',
+              nickname: sessionData.nickname,
+              nicknameHistory: sessionData.nicknameHistory,
+              grade: llmResult.grade,
+              gradeJoke: llmResult.grade_joke,
+              superlatives: llmResult.superlatives,
+              closer: llmResult.closer,
+              stats: {
+                claimCount: sessionData.claimCount,
+                debunkedCount: sessionData.debunkedCount,
+                misleadingCount: sessionData.misleadingCount,
+                loopBreakerCount: sessionData.loopBreakerCount,
+                momJokeCount: sessionData.momJokeCount,
+              },
+            });
+            console.log('[ReportCard] Sent to clients');
+          }).catch((err) => {
+            console.error('[ReportCard] Failed:', err.message);
+          });
+        }
+
+        // Mom joke detection — before fact-check, after triggers
+        if (detectMomJoke(msg.text) && isActive()) {
+          const lastTopic = recentTopics.length > 0 ? recentTopics[recentTopics.length - 1] : null;
+          const jokes = await generatePileOn(msg.text, lastTopic);
+          incrementStat('momJokeCount');
+          logEvent({ type: 'mom_joke', pileOn: jokes });
+          broadcast(wss, { type: 'mom_joke', jokes: jokes });
+          flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
+          console.log('[MomJoke] Detected! Piling on...');
+          return;
         }
 
         // Only run fact-check pipeline when session is active

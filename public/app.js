@@ -62,6 +62,7 @@ const FUN_STATS = [
 // --- Idle Pop-in State ---
 let idleTimer = null;
 let isShowingCard = false;
+let momJokeCount = 0;
 
 // --- WebSocket Connection ---
 let ws = null;
@@ -82,6 +83,9 @@ function connectWebSocket() {
           break;
         case "loop_breaker":
           showLoopBreaker(msg);
+          break;
+        case "mom_joke":
+          showMomJokePileOn(msg);
           break;
         case "nickname_update":
           updateNicknameDisplay(msg.nickname);
@@ -475,6 +479,82 @@ function stopIdlePopIns() {
     const existing = container.querySelectorAll(".idle-stat");
     existing.forEach((el) => el.remove());
   }
+}
+
+// --- Mom Joke Pile-On ---
+
+function showMomJokePileOn(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+  momJokeCount++;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const alert = document.createElement("div");
+  alert.className = "mom-joke-alert";
+  container.appendChild(alert);
+
+  // t=0: Show header
+  const header = document.createElement("div");
+  header.className = "alert-header shake glow-red";
+  header.textContent = "MOM JOKE DETECTED";
+  alert.appendChild(header);
+
+  const jokes = data.jokes || [];
+
+  // t=2s: First joke
+  setTimeout(() => {
+    const existing = alert.querySelector(".pile-on");
+    if (existing) existing.remove();
+    const joke1 = document.createElement("div");
+    joke1.className = "pile-on slam-in";
+    joke1.textContent = jokes[0] || "";
+    alert.appendChild(joke1);
+  }, 2000);
+
+  // t=5s: Second joke (larger)
+  setTimeout(() => {
+    const existing = alert.querySelector(".pile-on");
+    if (existing) existing.remove();
+    const joke2 = document.createElement("div");
+    joke2.className = "pile-on slam-in";
+    joke2.style.fontSize = "clamp(1.6rem, 3.8vw, 3rem)";
+    joke2.textContent = jokes[1] || "";
+    alert.appendChild(joke2);
+  }, 5000);
+
+  // t=8s: Third joke (largest, gold)
+  setTimeout(() => {
+    const existing = alert.querySelector(".pile-on");
+    if (existing) existing.remove();
+    const joke3 = document.createElement("div");
+    joke3.className = "pile-on final slam-in";
+    joke3.textContent = jokes[2] || "";
+    alert.appendChild(joke3);
+  }, 8000);
+
+  // t=11s: Mom joke count badge
+  setTimeout(() => {
+    const badge = document.createElement("div");
+    badge.className = "mom-counter bounce-in";
+    badge.textContent = "MOM JOKE COUNT: " + momJokeCount;
+    alert.appendChild(badge);
+  }, 11000);
+
+  // t=15s: Fade out and clean up
+  setTimeout(() => {
+    alert.classList.add("fade-out");
+    setTimeout(() => {
+      if (alert.parentNode) {
+        alert.parentNode.removeChild(alert);
+      }
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 15000);
 }
 
 // --- Debug Keyboard Shortcuts ---

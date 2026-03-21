@@ -408,3 +408,51 @@ body {
 .bounce-in {
   animation: bounce-in-kf 0.6s ease-out forwards;
 }
+
+/* ===========================================
+   MOM JOKE PILE-ON
+   =========================================== */
+.mom-joke-alert {
+  width: 100%;
+  max-width: 960px;
+  padding: 3vh 5vw;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+}
+
+.mom-joke-alert .alert-header {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--red);
+  text-shadow: 0 0 30px rgba(233, 69, 96, 0.6);
+  letter-spacing: 0.1em;
+}
+
+.mom-joke-alert .pile-on {
+  font-size: clamp(1.5rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1.2;
+  max-width: 90%;
+}
+
+.mom-joke-alert .pile-on.final {
+  color: var(--gold);
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+}
+
+.mom-counter {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--red);
+  padding: 0.5vh 2vw;
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  letter-spacing: 0.08em;
+}
