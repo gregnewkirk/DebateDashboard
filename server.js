@@ -5,10 +5,11 @@ const { WebSocketServer } = require('ws');
 
 const { analyzeTranscript } = require('./llm');
 const { trackTranscript, getRecentKeywords } = require('./repetition');
-const { flashLight } = require('./shelly');
+const { flashLight, flashPaymentLight, flashAllLights } = require('./shelly');
 const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname, saveSessionLog } = require('./session');
 const { generateNickname } = require('./nickname');
 const { detectMomJoke, generatePileOn } = require('./momjoke');
+const { onFactCheck, onLoopBreaker, onMomJoke, onPayment, onSessionStart, onSessionEnd, onReportCard } = require('./streamerbot');
 
 const LLM_URL = 'http://localhost:3000/v1/chat/completions';
 const LLM_MODEL = 'qwen2.5';
@@ -143,6 +144,43 @@ function broadcast(wss, data) {
 }
 
 const server = http.createServer((req, res) => {
+  // Payment webhook endpoint
+  if (req.method === 'POST' && req.url === '/api/payment') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const payment = JSON.parse(body);
+        // payment = { source: 'stripe'|'patreon', name: 'John', amount: '$5.00', message: 'Great stream!' }
+        console.log(`[Payment] ${payment.source}: ${payment.name} - ${payment.amount}`);
+
+        // Broadcast to all WebSocket clients
+        const msg = JSON.stringify({ type: 'payment', ...payment });
+        wss.clients.forEach(client => {
+          if (client.readyState === 1) client.send(msg);
+        });
+
+        // Flash payment light
+        flashPaymentLight().catch(err => console.warn('[Shelly] Error:', err.message));
+
+        // Streamer.bot payment alert
+        onPayment(payment);
+
+        // Log event if session active
+        if (isActive()) {
+          logEvent({ type: 'payment', data: payment });
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true }));
+      } catch (err) {
+        res.writeHead(400);
+        res.end('Bad request');
+      }
+    });
+    return;
+  }
+
   let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
@@ -170,12 +208,14 @@ wss.on('connection', (ws) => {
         if (matchesTrigger(msg.text, START_TRIGGERS)) {
           startSession();
           broadcast(wss, { type: 'session_start' });
+          onSessionStart();
           console.log('[Session] Started');
         }
 
         if (matchesTrigger(msg.text, END_TRIGGERS)) {
           const sessionData = endSession();
           broadcast(wss, { type: 'session_end', data: sessionData });
+          onSessionEnd(sessionData);
           console.log('[Session] Ended');
 
           // Generate and send report card
@@ -197,6 +237,12 @@ wss.on('connection', (ws) => {
               },
             });
             console.log('[ReportCard] Sent to clients');
+
+            // Streamer.bot report card reveal
+            onReportCard({ grade: llmResult.grade, nickname: sessionData.nickname });
+
+            // Flash all lights for report card finale
+            flashAllLights().catch(err => console.warn('[Shelly] Error:', err.message));
 
             // Save session log with report card data
             try {
@@ -225,6 +271,7 @@ wss.on('connection', (ws) => {
           incrementStat('momJokeCount');
           logEvent({ type: 'mom_joke', pileOn: jokes });
           broadcast(wss, { type: 'mom_joke', jokes: jokes });
+          onMomJoke({ count: jokes.length });
           flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
           console.log('[MomJoke] Detected! Piling on...');
           return;
@@ -257,11 +304,13 @@ wss.on('connection', (ws) => {
             if (loop.isLoop) {
               const payload = { type: 'loop_breaker', ...result, loopKeyword: loop.loopKeyword };
               ws.send(JSON.stringify(payload));
+              onLoopBreaker(result);
               logEvent({ type: 'loop_breaker', data: result });
               incrementStat('loopBreakerCount');
             } else {
               const payload = { type: 'fact_check', ...result };
               ws.send(JSON.stringify(payload));
+              onFactCheck(result);
               logEvent({ type: 'fact_check', data: result });
 
               // Increment debunked or misleading based on verdict

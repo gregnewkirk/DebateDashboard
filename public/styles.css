@@ -621,3 +621,72 @@ body {
   color: rgba(255, 255, 255, 0.4);
   font-family: system-ui, sans-serif;
 }
+
+/* ===========================================
+   PAYMENT ALERT
+   =========================================== */
+.payment-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 2000;
+  animation: flash-out 0.5s ease-out forwards;
+}
+
+@keyframes flash-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.payment-alert {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  z-index: 1500;
+  background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(15, 52, 96, 0.95) 100%);
+}
+
+.payment-alert .payment-source {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.payment-alert .payment-name {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+.payment-alert .payment-amount {
+  font-size: clamp(4rem, 12vw, 8rem);
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+  line-height: 1;
+}
+
+.payment-alert .payment-message {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  font-weight: 500;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: system-ui, sans-serif;
+  max-width: 80%;
+  text-align: center;
+}

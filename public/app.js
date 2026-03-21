@@ -103,6 +103,9 @@ function connectWebSocket() {
         case "report_card":
           showReportCard(msg);
           break;
+        case "payment":
+          showPaymentAlert(msg);
+          break;
         default:
           console.log("[WS] Unknown message type:", msg.type);
       }
@@ -835,6 +838,60 @@ function returnToStandby() {
   startIdlePopIns();
 }
 
+// --- Payment Alert ---
+
+function showPaymentAlert(data) {
+  // Full-page takeover that interrupts whatever is showing
+  // data = { type: 'payment', source: 'stripe'|'patreon', name: 'John', amount: '$5.00', message: 'Great stream!' }
+
+  // 1. Full-screen white flash overlay (200ms, fades quickly)
+  const flashOverlay = document.createElement("div");
+  flashOverlay.className = "payment-overlay";
+  document.body.appendChild(flashOverlay);
+
+  // Remove flash overlay after animation completes
+  setTimeout(() => {
+    if (flashOverlay.parentNode) flashOverlay.remove();
+  }, 500);
+
+  // 2. Create the payment alert card
+  const alert = document.createElement("div");
+  alert.className = "payment-alert bounce-in";
+
+  const sourceEl = document.createElement("div");
+  sourceEl.className = "payment-source";
+  sourceEl.textContent = (data.source || "DONATION").toUpperCase();
+
+  const nameEl = document.createElement("div");
+  nameEl.className = "payment-name";
+  nameEl.textContent = data.name || "ANONYMOUS";
+
+  const amountEl = document.createElement("div");
+  amountEl.className = "payment-amount";
+  amountEl.textContent = data.amount || "";
+
+  alert.appendChild(sourceEl);
+  alert.appendChild(nameEl);
+  alert.appendChild(amountEl);
+
+  if (data.message) {
+    const msgEl = document.createElement("div");
+    msgEl.className = "payment-message";
+    msgEl.textContent = data.message;
+    alert.appendChild(msgEl);
+  }
+
+  document.body.appendChild(alert);
+
+  // 3. Hold for 8 seconds, then fade out and remove
+  setTimeout(() => {
+    alert.classList.add("fade-out");
+    setTimeout(() => {
+      if (alert.parentNode) alert.remove();
+    }, 1000);
+  }, 8000);
+}
+
 // --- Debug Keyboard Shortcuts ---
 document.addEventListener("keydown", (e) => {
   if (e.key === "d" || e.key === "D") {
@@ -867,6 +924,15 @@ document.addEventListener("keydown", (e) => {
   }
   if (e.key === "Escape") {
     returnToStandby();
+  }
+  if (e.key === "p" || e.key === "P") {
+    showPaymentAlert({
+      type: "payment",
+      source: "stripe",
+      name: "John",
+      amount: "$5.00",
+      message: "Love the stream!"
+    });
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
