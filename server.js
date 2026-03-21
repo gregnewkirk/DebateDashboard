@@ -4,8 +4,9 @@ const path = require('path');
 const { WebSocketServer } = require('ws');
 
 const { analyzeTranscript } = require('./llm');
-const { trackTranscript } = require('./repetition');
+const { trackTranscript, getRecentKeywords } = require('./repetition');
 const { flashLight } = require('./shelly');
+const { startSession, endSession, isActive, logEvent, incrementStat, getSession } = require('./session');
 
 const CONFIG = {
   PORT: process.env.PORT || 8080,
@@ -23,6 +24,24 @@ const MIME_TYPES = {
   '.js': 'application/javascript',
   '.json': 'application/json',
 };
+
+// Fuzzy trigger phrases (all lowercase)
+const START_TRIGGERS = ["hey how's it going", "hey how is it going", "how's it going"];
+const END_TRIGGERS = ["ok bye", "okay bye", "alright bye"];
+
+function matchesTrigger(text, triggers) {
+  const lower = text.toLowerCase();
+  return triggers.some(t => lower.includes(t));
+}
+
+function broadcast(wss, data) {
+  const json = JSON.stringify(data);
+  for (const client of wss.clients) {
+    if (client.readyState === 1) {
+      client.send(json);
+    }
+  }
+}
 
 const server = http.createServer((req, res) => {
   let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
@@ -48,22 +67,65 @@ wss.on('connection', (ws) => {
       console.log('Received:', msg.type);
 
       if (msg.type === 'transcript') {
-        const loop = trackTranscript(msg.text);
-        const loopContext = loop.isLoop ? loop.loopKeyword : null;
-        const result = await analyzeTranscript(msg.text, recentTopics, loopContext);
+        // Check start/end triggers BEFORE fact-check pipeline
+        if (matchesTrigger(msg.text, START_TRIGGERS)) {
+          startSession();
+          broadcast(wss, { type: 'session_start' });
+          console.log('[Session] Started');
+        }
 
-        if (result.found) {
-          recentTopics.push(result.claim);
-          if (recentTopics.length > 10) recentTopics.shift();
+        if (matchesTrigger(msg.text, END_TRIGGERS)) {
+          const sessionData = endSession();
+          broadcast(wss, { type: 'session_end', data: sessionData });
+          console.log('[Session] Ended');
+        }
 
-          if (loop.isLoop) {
-            ws.send(JSON.stringify({ type: 'loop_breaker', ...result, loopKeyword: loop.loopKeyword }));
-          } else {
-            ws.send(JSON.stringify({ type: 'fact_check', ...result }));
+        // Only run fact-check pipeline when session is active
+        if (isActive()) {
+          const loop = trackTranscript(msg.text);
+          const loopContext = loop.isLoop ? loop.loopKeyword : null;
+          const result = await analyzeTranscript(msg.text, recentTopics, loopContext);
+
+          if (result.found) {
+            recentTopics.push(result.claim);
+            if (recentTopics.length > 10) recentTopics.shift();
+
+            // Track repeated topics using keywords from the repetition tracker
+            const activeKeywords = getRecentKeywords();
+            for (const kw of activeKeywords) {
+              const session = getSession();
+              if (!session.repeatedTopics[kw]) {
+                session.repeatedTopics[kw] = 0;
+              }
+              session.repeatedTopics[kw]++;
+            }
+
+            // Push claim to allClaims
+            getSession().allClaims.push(result.claim);
+            incrementStat('claimCount');
+
+            if (loop.isLoop) {
+              const payload = { type: 'loop_breaker', ...result, loopKeyword: loop.loopKeyword };
+              ws.send(JSON.stringify(payload));
+              logEvent({ type: 'loop_breaker', data: result });
+              incrementStat('loopBreakerCount');
+            } else {
+              const payload = { type: 'fact_check', ...result };
+              ws.send(JSON.stringify(payload));
+              logEvent({ type: 'fact_check', data: result });
+
+              // Increment debunked or misleading based on verdict
+              const verdict = (result.verdict || '').toUpperCase();
+              if (verdict === 'FALSE' || verdict === 'DEBUNKED') {
+                incrementStat('debunkedCount');
+              } else if (verdict === 'MISLEADING') {
+                incrementStat('misleadingCount');
+              }
+            }
+
+            console.log('[Shelly] Flashing light for new fact-check');
+            flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
           }
-
-          console.log('[Shelly] Flashing light for new fact-check');
-          flashLight().catch((err) => console.warn('[Shelly] Error:', err.message));
         }
       }
     } catch (err) {
