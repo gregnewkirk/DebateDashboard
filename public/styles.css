@@ -555,3 +555,31 @@ body {
   font-family: system-ui, sans-serif;
   margin-top: 1vh;
 }
+
+/* ===========================================
+   SESSION TIMER
+   =========================================== */
+.session-timer {
+  position: fixed;
+  top: 50px;
+  right: 16px;
+  font-size: clamp(0.8rem, 1.8vw, 1.1rem);
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: var(--white);
+  opacity: 0.6;
+  letter-spacing: 0.05em;
+  z-index: 100;
+}
+
+/* ===========================================
+   ROUND ANNOUNCEMENT
+   =========================================== */
+.round-announce {
+  font-size: clamp(4rem, 12vw, 8rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--red);
+  text-shadow: 0 0 60px rgba(233, 69, 96, 0.6);
+  text-align: center;
+}

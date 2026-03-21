@@ -64,6 +64,10 @@ let idleTimer = null;
 let isShowingCard = false;
 let momJokeCount = 0;
 
+// --- Session Timer State ---
+let sessionTimerInterval = null;
+let sessionStartTime = null;
+
 // --- WebSocket Connection ---
 let ws = null;
 
@@ -134,15 +138,78 @@ function updateNicknameDisplay(nickname) {
   el.classList.add("slam-in");
 }
 
+// --- Session Timer ---
+
+function startSessionTimer() {
+  stopSessionTimer();
+  sessionStartTime = Date.now();
+
+  // Create or show timer element
+  let timerEl = document.querySelector(".session-timer");
+  if (!timerEl) {
+    timerEl = document.createElement("div");
+    timerEl.className = "session-timer";
+    document.body.appendChild(timerEl);
+  }
+  timerEl.textContent = "00:00";
+  timerEl.style.display = "block";
+
+  sessionTimerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
+    const ss = String(elapsed % 60).padStart(2, "0");
+    timerEl.textContent = mm + ":" + ss;
+  }, 1000);
+}
+
+function stopSessionTimer() {
+  if (sessionTimerInterval) {
+    clearInterval(sessionTimerInterval);
+    sessionTimerInterval = null;
+  }
+  const timerEl = document.querySelector(".session-timer");
+  if (timerEl) timerEl.style.display = "none";
+}
+
 function handleSessionStart() {
-  const bar = document.getElementById("nickname-bar");
-  const el = document.getElementById("nickname");
-  if (bar) bar.style.display = "flex";
-  if (el) el.textContent = "CHALLENGER";
+  // Stop idle pop-ins during animation
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (container) container.innerHTML = "";
+
+  // Show "ROUND 1" slam-in animation
+  const announce = document.createElement("div");
+  announce.className = "round-announce slam-in";
+  announce.textContent = "ROUND 1";
+  if (container) container.appendChild(announce);
+
+  // After 2s hold, fade out the announcement
+  setTimeout(() => {
+    announce.classList.add("fade-out");
+  }, 2000);
+
+  // After 3s total, transition to active session mode
+  setTimeout(() => {
+    if (container) container.innerHTML = "";
+    isShowingCard = false;
+
+    // Show nickname bar with CHALLENGER
+    const bar = document.getElementById("nickname-bar");
+    const el = document.getElementById("nickname");
+    if (bar) bar.style.display = "flex";
+    if (el) el.textContent = "CHALLENGER";
+
+    // Start session timer and resume idle pop-ins
+    startSessionTimer();
+    startIdlePopIns();
+  }, 3000);
 }
 
 function handleSessionEnd(data) {
-  // Session ended — report card will arrive as a separate message
+  // Session ended — stop timer, report card will arrive as a separate message
+  stopSessionTimer();
   stopIdlePopIns();
   isShowingCard = true;
 }

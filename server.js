@@ -6,7 +6,7 @@ const { WebSocketServer } = require('ws');
 const { analyzeTranscript } = require('./llm');
 const { trackTranscript, getRecentKeywords } = require('./repetition');
 const { flashLight } = require('./shelly');
-const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname } = require('./session');
+const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname, saveSessionLog } = require('./session');
 const { generateNickname } = require('./nickname');
 const { detectMomJoke, generatePileOn } = require('./momjoke');
 
@@ -197,8 +197,24 @@ wss.on('connection', (ws) => {
               },
             });
             console.log('[ReportCard] Sent to clients');
+
+            // Save session log with report card data
+            try {
+              const logFilename = saveSessionLog(sessionData, llmResult);
+              console.log(`[Session] Log saved to logs/${logFilename}`);
+            } catch (err) {
+              console.error('[Session] Failed to save log:', err.message);
+            }
           }).catch((err) => {
             console.error('[ReportCard] Failed:', err.message);
+
+            // Still save session log even if report card fails
+            try {
+              const logFilename = saveSessionLog(sessionData);
+              console.log(`[Session] Log saved to logs/${logFilename}`);
+            } catch (logErr) {
+              console.error('[Session] Failed to save log:', logErr.message);
+            }
           });
         }
 
