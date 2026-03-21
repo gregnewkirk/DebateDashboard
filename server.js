@@ -7,7 +7,14 @@ const { analyzeTranscript } = require('./llm');
 const { trackTranscript } = require('./repetition');
 const { flashLight } = require('./shelly');
 
-const PORT = 8080;
+const CONFIG = {
+  PORT: process.env.PORT || 8080,
+  CARD_DISPLAY_SECONDS: 18,
+  LOOP_THRESHOLD: 3,
+  LOOP_WINDOW_SECONDS: 120,
+};
+
+const PORT = CONFIG.PORT;
 const recentTopics = [];
 
 const MIME_TYPES = {

@@ -308,26 +308,22 @@ function startSpeechRecognition() {
     }
   });
 
+  let micBlocked = false;
+
   recognition.addEventListener("error", (event) => {
     console.error("[Speech] Error:", event.error);
     if (indicator) indicator.classList.remove("active");
-    // Attempt restart on recoverable errors
-    if (event.error !== "not-allowed" && event.error !== "service-not-allowed") {
-      setTimeout(() => {
-        try {
-          recognition.start();
-        } catch (e) {
-          console.error("[Speech] Restart after error failed:", e);
-        }
-      }, 1000);
+    if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+      micBlocked = true;
+      console.warn("[Speech] Mic access denied. Speech recognition disabled. Grant mic permission and reload.");
     }
   });
 
   recognition.addEventListener("end", () => {
-    console.log("[Speech] Recognition ended — restarting");
     if (indicator) indicator.classList.remove("active");
-    // Flush any remaining text before restart
     flushBuffer();
+    if (micBlocked) return;
+    console.log("[Speech] Recognition ended — restarting");
     setTimeout(() => {
       try {
         recognition.start();
