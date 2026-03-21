@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 26 — Rosie Upgraded</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --blue:#1c4587;--red:#e31b23;--yellow:#ffc107;--cream:#fff8e7;
+    --dark:#1a1a2e;--rivet:#8a8a8a;
+  }
+  body{
+    width:1080px;height:1920px;overflow:hidden;
+    background:var(--cream);
+    font-family:'Oswald',sans-serif;
+    position:relative;
+  }
+  .bangers{font-family:'Bangers',cursive;}
+
+  /* ========== CORNER STARS ========== */
+  .corner-star{
+    position:absolute;width:60px;height:60px;z-index:50;
+    pointer-events:none;
+  }
+  .corner-star svg{width:100%;height:100%;}
+  .corner-star.tl{top:18px;left:18px;}
+  .corner-star.tr{top:18px;right:18px;}
+  .corner-star.bl{bottom:18px;left:18px;}
+  .corner-star.br{bottom:18px;right:18px;}
+  @keyframes starPulse{
+    0%,100%{transform:scale(1);opacity:.85;}
+    50%{transform:scale(1.35);opacity:1;}
+  }
+  .corner-star svg{animation:starPulse 1.6s ease-in-out infinite;}
+  .corner-star.tr svg{animation-delay:.4s;}
+  .corner-star.bl svg{animation-delay:.8s;}
+  .corner-star.br svg{animation-delay:1.2s;}
+
+  /* ========== RIVETED PANEL ========== */
+  .panel{
+    position:relative;
+    border:4px solid var(--dark);
+    border-radius:10px;
+    margin:0 28px;
+    padding:0;
+    background:var(--cream);
+    box-shadow:4px 4px 0 rgba(0,0,0,.25);
+  }
+  .panel::before,
+  .panel::after{
+    content:'';position:absolute;width:16px;height:16px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;z-index:10;
+  }
+  .panel::before{top:-8px;left:20px;}
+  .panel::after{top:-8px;right:20px;}
+  .panel .rivet-bl,.panel .rivet-br{
+    position:absolute;width:16px;height:16px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;z-index:10;
+  }
+  .panel .rivet-bl{bottom:-8px;left:20px;}
+  .panel .rivet-br{bottom:-8px;right:20px;}
+
+  /* ========== POLKA DOT DIVIDER ========== */
+  .polka-divider{
+    height:28px;margin:0 28px;position:relative;overflow:hidden;
+  }
+  .polka-divider::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle 6px,var(--red) 55%,transparent 56%) 0 0/24px 24px,
+               radial-gradient(circle 6px,var(--red) 55%,transparent 56%) 12px 12px/24px 24px;
+    opacity:.45;
+  }
+
+  /* ========== HEADER — THE GREAT BOARD OF SCIENCE ========== */
+  .header-section{
+    background:var(--blue);
+    margin:0 28px;margin-top:20px;
+    border:4px solid var(--dark);
+    border-radius:12px;
+    padding:22px 30px 18px;
+    display:flex;align-items:center;justify-content:center;
+    gap:20px;
+    position:relative;
+    box-shadow:4px 4px 0 rgba(0,0,0,.3);
+  }
+  .header-section::before,.header-section::after{
+    content:'';position:absolute;width:16px;height:16px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;z-index:10;
+  }
+  .header-section::before{top:-8px;left:20px;}
+  .header-section::after{top:-8px;right:20px;}
+  .header-title{
+    font-family:'Bangers',cursive;
+    font-size:76px;
+    color:var(--yellow);
+    text-shadow:3px 3px 0 var(--dark),6px 6px 0 rgba(0,0,0,.2);
+    line-height:1;
+    text-align:center;
+    letter-spacing:3px;
+  }
+  @keyframes spinBurst{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+  .starburst-wrap{
+    flex-shrink:0;width:70px;height:70px;
+    animation:spinBurst 8s linear infinite;
+  }
+  .starburst-wrap svg{width:100%;height:100%;}
+
+  /* ========== RALLY CRY ========== */
+  .rally-section{
+    margin:10px 28px 0;
+    padding:12px 20px;
+    text-align:center;
+    background:var(--cream);
+    border:4px solid var(--dark);
+    border-radius:10px;
+    box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    position:relative;
+  }
+  .rally-section::before,.rally-section::after{
+    content:'';position:absolute;width:14px;height:14px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;
+  }
+  .rally-section::before{top:-7px;left:18px;}
+  .rally-section::after{top:-7px;right:18px;}
+  .rally-text{
+    font-family:'Bangers',cursive;
+    font-size:58px;
+    color:var(--red);
+    text-shadow:2px 2px 0 rgba(0,0,0,.15);
+    letter-spacing:2px;
+    line-height:1.1;
+  }
+
+  /* ========== ENEMY ========== */
+  .enemy-section{
+    margin:10px 28px 0;
+    padding:14px 24px;
+    background:var(--dark);
+    border:4px solid var(--red);
+    border-radius:10px;
+    text-align:center;
+    box-shadow:3px 3px 0 rgba(0,0,0,.3);
+    position:relative;
+  }
+  .enemy-section::before,.enemy-section::after{
+    content:'';position:absolute;width:14px;height:14px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;
+  }
+  .enemy-section::before{top:-7px;left:18px;}
+  .enemy-section::after{top:-7px;right:18px;}
+  .enemy-label{
+    font-family:'Bangers',cursive;
+    font-size:36px;color:var(--red);
+    letter-spacing:4px;text-transform:uppercase;
+    line-height:1;
+  }
+  .enemy-name{
+    font-family:'Bangers',cursive;
+    font-size:48px;color:#fff;
+    text-shadow:2px 2px 0 var(--red);
+    letter-spacing:3px;
+    line-height:1.15;
+    margin-top:2px;
+  }
+
+  /* ========== FACT CHECK AREA ========== */
+  .fact-area{
+    margin:12px 28px 0;
+    display:flex;flex-direction:column;gap:10px;
+  }
+
+  /* CLAIM */
+  .claim-panel{
+    background:var(--cream);
+    border:4px solid var(--dark);
+    border-left:14px solid var(--red);
+    border-radius:10px;
+    padding:16px 22px;
+    box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    position:relative;
+  }
+  .claim-panel::before,.claim-panel::after{
+    content:'';position:absolute;width:14px;height:14px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;
+  }
+  .claim-panel::before{top:-7px;right:20px;}
+  .claim-panel::after{bottom:-7px;right:20px;}
+  .claim-label{
+    font-family:'Bangers',cursive;font-size:30px;
+    color:var(--red);letter-spacing:3px;line-height:1;margin-bottom:4px;
+  }
+  .claim-text{
+    font-family:'Oswald',sans-serif;font-weight:700;
+    font-size:46px;color:var(--dark);line-height:1.15;
+  }
+
+  /* VERDICT */
+  .verdict-panel{
+    background:var(--cream);
+    border:4px solid var(--dark);
+    border-radius:10px;
+    padding:18px 20px;
+    text-align:center;
+    box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    position:relative;
+    overflow:hidden;
+  }
+  .verdict-panel::before,.verdict-panel::after{
+    content:'';position:absolute;width:14px;height:14px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;z-index:5;
+  }
+  .verdict-panel::before{top:-7px;left:18px;}
+  .verdict-panel::after{top:-7px;right:18px;}
+  .verdict-starburst{
+    position:relative;display:inline-block;
+  }
+  .verdict-starburst svg{
+    position:absolute;top:50%;left:50%;
+    width:260px;height:260px;
+    transform:translate(-50%,-50%);
+    z-index:0;
+  }
+  .verdict-text{
+    position:relative;z-index:2;
+    font-family:'Bangers',cursive;
+    font-size:108px;
+    color:var(--red);
+    text-shadow:3px 3px 0 var(--dark),0 0 20px rgba(227,27,35,.3);
+    letter-spacing:5px;
+    line-height:1;
+  }
+
+  /* FACT / HUMOR / SOURCE rows */
+  .info-row{
+    background:var(--cream);
+    border:4px solid var(--dark);
+    border-radius:10px;
+    padding:14px 20px;
+    box-shadow:3px 3px 0 rgba(0,0,0,.2);
+    position:relative;
+  }
+  .info-row::before,.info-row::after{
+    content:'';position:absolute;width:12px;height:12px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;
+  }
+  .info-row::before{top:-6px;left:16px;}
+  .info-row::after{top:-6px;right:16px;}
+  .info-row.fact-row{border-left:12px solid var(--blue);}
+  .info-row.humor-row{border-left:12px solid var(--yellow);}
+  .info-row.source-row{border-left:12px solid var(--red);}
+  .info-label{
+    font-family:'Bangers',cursive;font-size:28px;
+    letter-spacing:3px;line-height:1;margin-bottom:3px;
+  }
+  .fact-row .info-label{color:var(--blue);}
+  .humor-row .info-label{color:#b8860b;}
+  .source-row .info-label{color:var(--red);}
+  .info-content{
+    font-family:'Oswald',sans-serif;font-weight:600;
+    color:var(--dark);line-height:1.2;
+  }
+  .fact-row .info-content{font-size:38px;}
+  .humor-row .info-content{font-size:34px;}
+  .source-row .info-content{font-size:30px;}
+
+  /* ========== BOTTOM BANNER ========== */
+  .bottom-banner{
+    margin:12px 28px 0;
+    padding:16px 24px;
+    background:var(--yellow);
+    border:4px solid var(--dark);
+    border-radius:10px;
+    text-align:center;
+    box-shadow:3px 3px 0 rgba(0,0,0,.25);
+    position:relative;
+  }
+  .bottom-banner::before,.bottom-banner::after{
+    content:'';position:absolute;width:14px;height:14px;
+    border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);
+    border:2px solid #555;
+  }
+  .bottom-banner::before{top:-7px;left:18px;}
+  .bottom-banner::after{top:-7px;right:18px;}
+  .bottom-text{
+    font-family:'Bangers',cursive;
+    font-size:52px;
+    color:var(--blue);
+    text-shadow:2px 2px 0 rgba(0,0,0,.1);
+    letter-spacing:3px;
+    line-height:1.1;
+  }
+  .bottom-stars{
+    margin-top:4px;font-size:36px;letter-spacing:8px;
+    color:var(--blue);
+  }
+
+  /* ========== PULSING MARGIN STARS (extra) ========== */
+  .margin-star{
+    position:absolute;pointer-events:none;z-index:40;
+    opacity:.7;
+  }
+  .margin-star svg{animation:starPulse 2s ease-in-out infinite;}
+  .ms1{top:340px;left:6px;width:40px;height:40px;}
+  .ms1 svg{animation-delay:.3s;}
+  .ms2{top:700px;right:6px;width:36px;height:36px;}
+  .ms2 svg{animation-delay:.7s;}
+  .ms3{top:1100px;left:8px;width:34px;height:34px;}
+  .ms3 svg{animation-delay:1.1s;}
+  .ms4{top:1500px;right:8px;width:38px;height:38px;}
+  .ms4 svg{animation-delay:1.5s;}
+</style>
+</head>
+<body>
+
+<!-- CORNER STARS -->
+<div class="corner-star tl"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffc107" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+<div class="corner-star tr"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffc107" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+<div class="corner-star bl"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffc107" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+<div class="corner-star br"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffc107" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+
+<!-- MARGIN STARS -->
+<div class="margin-star ms1"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#e31b23" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+<div class="margin-star ms2"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffc107" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+<div class="margin-star ms3"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#1c4587" stroke="#ffc107" stroke-width="2"/></svg></div>
+<div class="margin-star ms4"><svg viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#e31b23" stroke="#1a1a2e" stroke-width="2"/></svg></div>
+
+<!-- 1. HEADER -->
+<div class="header-section">
+  <div class="starburst-wrap">
+    <svg viewBox="0 0 120 120">
+      <polygon points="60,0 69,42 110,20 78,54 120,60 78,66 110,100 69,78 60,120 51,78 10,100 42,66 0,60 42,54 10,20 51,42" fill="#ffc107" stroke="#1a1a2e" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <div class="header-title">THE GREAT BOARD<br>OF SCIENCE</div>
+  <div class="starburst-wrap" style="animation-direction:reverse;">
+    <svg viewBox="0 0 120 120">
+      <polygon points="60,0 69,42 110,20 78,54 120,60 78,66 110,100 69,78 60,120 51,78 10,100 42,66 0,60 42,54 10,20 51,42" fill="#ffc107" stroke="#1a1a2e" stroke-width="1.5"/>
+    </svg>
+  </div>
+</div>
+
+<!-- 2. RALLY CRY -->
+<div class="rally-section">
+  <div class="rally-text">WE CAN DEBUNK IT!</div>
+</div>
+
+<!-- POLKA DIVIDER -->
+<div class="polka-divider"></div>
+
+<!-- 3. ENEMY -->
+<div class="enemy-section">
+  <div class="enemy-label">ENEMY OF TRUTH</div>
+  <div class="enemy-name">YOUTUBE GUY</div>
+</div>
+
+<!-- POLKA DIVIDER -->
+<div class="polka-divider" style="margin-top:10px;"></div>
+
+<!-- 4. FACT CHECK PANELS -->
+<div class="fact-area">
+
+  <!-- CLAIM -->
+  <div class="claim-panel">
+    <div class="claim-label">CLAIM</div>
+    <div class="claim-text">"Vaccines cause autism"</div>
+    <span class="rivet-br" style="position:absolute;bottom:-7px;right:20px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ccc,#777);border:2px solid #555;"></span>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict-panel">
+    <div class="verdict-starburst">
+      <svg viewBox="0 0 120 120">
+        <polygon points="60,0 69,42 110,20 78,54 120,60 78,66 110,100 69,78 60,120 51,78 10,100 42,66 0,60 42,54 10,20 51,42" fill="#ffc107" opacity=".35" stroke="none"/>
+      </svg>
+      <div class="verdict-text">DEBUNKED</div>
+    </div>
+  </div>
+
+  <!-- FACT -->
+  <div class="info-row fact-row">
+    <div class="info-label">FACT</div>
+    <div class="info-content">The 1998 Wakefield study was retracted for fraud. 1.2 million children studied since confirm zero link.</div>
+  </div>
+
+  <!-- HUMOR -->
+  <div class="info-row humor-row">
+    <div class="info-label">HUMOR</div>
+    <div class="info-content">His source is a paper so fraudulent the journal set it on fire and salted the earth.</div>
+  </div>
+
+  <!-- SOURCE -->
+  <div class="info-row source-row">
+    <div class="info-label">SOURCE</div>
+    <div class="info-content">Taylor et al., Vaccine 2014; Lancet retraction 2010; CDC MMWR 2023</div>
+  </div>
+
+</div>
+
+<!-- POLKA DIVIDER -->
+<div class="polka-divider" style="margin-top:12px;"></div>
+
+<!-- 5. BOTTOM BANNER -->
+<div class="bottom-banner">
+  <div class="bottom-text">PATRIOTISM REQUIRES VACCINES</div>
+  <div class="bottom-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+</div>
+
+</body>
+</html>

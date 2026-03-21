@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 40 - Victory Rally</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #1a2a4a;
+    font-family: 'Oswald', sans-serif;
+    position: relative;
+  }
+
+  .frame {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* === CONFETTI DOTS — margins only === */
+  .confetti-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .confetti-dot {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    animation: confettiFade 3s ease-in-out infinite;
+  }
+
+  @keyframes confettiFade {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+    50% { opacity: 0.7; transform: translateY(-15px) scale(1); }
+  }
+
+  /* === PULSING STAR === */
+  .star {
+    display: inline-block;
+    color: #ffd700;
+    font-size: 40px;
+    animation: pulseStar 1.5s ease-in-out infinite;
+    margin-right: 16px;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  }
+
+  @keyframes pulseStar {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.3); opacity: 1; }
+  }
+
+  /* === SECTION 1: HEADER — Navy === */
+  .header-section {
+    background: #1a2a4a;
+    padding: 50px 60px 30px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 70px;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    line-height: 1.05;
+    text-shadow: 2px 3px 6px rgba(0,0,0,0.4);
+  }
+
+  /* === ANGLED DIVIDERS === */
+  .divider-gold {
+    width: 100%;
+    height: 40px;
+    background: #ffd700;
+    clip-path: polygon(0 0, 100% 30%, 100% 100%, 0 70%);
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+
+  .divider-red {
+    width: 100%;
+    height: 40px;
+    background: #cc0000;
+    clip-path: polygon(0 30%, 100% 0, 100% 70%, 0 100%);
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+
+  .divider-gold-reverse {
+    width: 100%;
+    height: 40px;
+    background: #ffd700;
+    clip-path: polygon(0 30%, 100% 0, 100% 70%, 0 100%);
+    position: relative;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+
+  /* === SECTION 2: VS CHALLENGER — Red === */
+  .vs-section {
+    background: #cc0000;
+    padding: 28px 60px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .vs-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 46px;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 8px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+
+  /* === SECTION 3: CLAIM — Cream === */
+  .claim-section {
+    background: #fff8e7;
+    padding: 44px 70px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .claim-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: #cc0000;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+  }
+
+  .claim-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    color: #1a2a4a;
+    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  /* === SECTION 4: VERDICT — Navy, hero moment === */
+  .verdict-section {
+    background: #1a2a4a;
+    padding: 60px 60px 55px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .verdict-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 110px;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 12px;
+    line-height: 1;
+    text-shadow: 3px 4px 8px rgba(0,0,0,0.5), 0 0 40px rgba(255,215,0,0.3);
+  }
+
+  .verdict-line {
+    width: 300px;
+    height: 4px;
+    background: #ffd700;
+    margin: 18px auto 0;
+    opacity: 0.6;
+  }
+
+  /* === SECTION 5: FACT + HUMOR — White === */
+  .facts-section {
+    background: #ffffff;
+    padding: 36px 60px 36px 60px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .fact-block {
+    border-left: 6px solid #cc0000;
+    padding: 0 0 0 24px;
+    margin-bottom: 28px;
+  }
+
+  .fact-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: #cc0000;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+
+  .fact-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: #1a2a4a;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .humor-block {
+    border-left: 6px solid #ffd700;
+    padding: 0 0 0 24px;
+  }
+
+  .humor-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: #b8960c;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+
+  .humor-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #333;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  /* === SECTION 6: SOURCE — Red === */
+  .source-section {
+    background: #cc0000;
+    padding: 24px 60px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .source-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .source-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: #ffffff;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  /* === SECTION 7: TAGLINE — Gold === */
+  .tagline-section {
+    background: #ffd700;
+    padding: 30px 60px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tagline-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: #1a2a4a;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    line-height: 1.1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- CONFETTI DOTS — left and right margins only -->
+  <div class="confetti-container" id="confetti"></div>
+
+  <!-- 1. HEADER — Navy -->
+  <div class="header-section">
+    <div>
+      <span class="star">&#9733;</span>
+      <span class="header-title">THE GREAT BOARD<br>OF SCIENCE</span>
+      <span class="star">&#9733;</span>
+    </div>
+  </div>
+
+  <!-- Angled gold divider -->
+  <div class="divider-gold"></div>
+
+  <!-- 2. VS CHALLENGER — Red -->
+  <div class="vs-section">
+    <div class="vs-text">VS CHALLENGER</div>
+  </div>
+
+  <!-- Angled gold divider -->
+  <div class="divider-gold-reverse"></div>
+
+  <!-- 3. CLAIM — Cream -->
+  <div class="claim-section">
+    <div class="claim-label">CHALLENGER CLAIMS</div>
+    <div class="claim-text">"VACCINES CAUSE MORE HARM THAN THE DISEASES THEY PREVENT"</div>
+  </div>
+
+  <!-- Angled red divider -->
+  <div class="divider-red"></div>
+
+  <!-- 4. VERDICT — Navy, hero moment -->
+  <div class="verdict-section">
+    <div class="verdict-text">DEBUNKED</div>
+    <div class="verdict-line"></div>
+  </div>
+
+  <!-- Angled gold divider -->
+  <div class="divider-gold"></div>
+
+  <!-- 5. FACT + HUMOR — White -->
+  <div class="facts-section">
+    <div class="fact-block">
+      <div class="fact-label">THE FACTS</div>
+      <div class="fact-text">VACCINES PREVENT 4.4 MILLION DEATHS PER YEAR. SIDE EFFECTS ARE RARE AND MILD COMPARED TO DISEASE OUTCOMES.</div>
+    </div>
+    <div class="humor-block">
+      <div class="humor-label">REALITY CHECK</div>
+      <div class="humor-text">SAYING VACCINES ARE WORSE THAN DISEASES IS LIKE SAYING SEATBELTS ARE WORSE THAN WINDSHIELDS.</div>
+    </div>
+  </div>
+
+  <!-- 6. SOURCE — Red -->
+  <div class="source-section">
+    <div class="source-label">SOURCE</div>
+    <div class="source-text">WHO GLOBAL VACCINE ACTION PLAN, 2024 &bull; THE LANCET VOL 399</div>
+  </div>
+
+  <!-- 7. TAGLINE — Gold -->
+  <div class="tagline-section">
+    <div class="tagline-text">PATRIOTISM REQUIRES VACCINES</div>
+  </div>
+
+</div>
+
+<script>
+  // Generate confetti dots in LEFT and RIGHT margins only (0-60px and 1020-1080px)
+  const container = document.getElementById('confetti');
+  const colors = ['#ffd700', '#ffec80', '#fff0b3', '#cc0000', '#ffffff'];
+
+  for (let i = 0; i < 60; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'confetti-dot';
+    const size = 6 + Math.random() * 12;
+    const isLeft = Math.random() < 0.5;
+    const x = isLeft ? Math.random() * 55 : 1025 + Math.random() * 50;
+    const y = Math.random() * 1920;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const delay = Math.random() * 3;
+    const duration = 2 + Math.random() * 2;
+
+    dot.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      top: ${y}px;
+      background: ${color};
+      animation-delay: ${delay}s;
+      animation-duration: ${duration}s;
+    `;
+    container.appendChild(dot);
+  }
+</script>
+</body>
+</html>

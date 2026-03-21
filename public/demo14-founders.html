@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>The Great Board of Science — A Constitutional Decree</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --parchment: #e8d5a3;
+    --parchment-light: #f2e6c9;
+    --parchment-dark: #d4bf8a;
+    --ink: #2c1810;
+    --ink-light: #4a3628;
+    --red: #8b2500;
+    --red-dark: #6b1d00;
+    --navy: #1a2744;
+    --navy-light: #263a5e;
+    --gold: #c9a84c;
+    --gold-light: #dcc06a;
+    --gold-dark: #a08030;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'EB Garamond', Georgia, serif;
+    color: var(--ink);
+    position: relative;
+  }
+
+  /* Parchment background with texture */
+  .parchment-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      /* Aged spots */
+      radial-gradient(ellipse at 15% 25%, rgba(160,120,60,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(140,100,40,0.12) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 85%, rgba(150,110,50,0.1) 0%, transparent 40%),
+      /* Grain texture simulation */
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(180,150,90,0.03) 2px, rgba(180,150,90,0.03) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(160,130,70,0.02) 3px, rgba(160,130,70,0.02) 6px),
+      /* Base parchment gradient */
+      radial-gradient(ellipse at center, var(--parchment-light) 0%, var(--parchment) 60%, var(--parchment-dark) 100%);
+    background-color: var(--parchment);
+  }
+
+  /* Burned/aged edges */
+  .aged-edges {
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset 0 0 120px rgba(44,24,16,0.35),
+      inset 0 0 60px rgba(44,24,16,0.15);
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  /* Decorative border */
+  .colonial-border {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    right: 18px;
+    bottom: 18px;
+    border: 4px solid var(--ink);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .colonial-border::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 2px solid var(--gold-dark);
+  }
+  .colonial-border::after {
+    content: '';
+    position: absolute;
+    top: 14px; left: 14px; right: 14px; bottom: 14px;
+    border: 1px solid rgba(44,24,16,0.3);
+  }
+
+  .content {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 50px 55px 40px;
+  }
+
+  /* Colonial stars row */
+  .stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 10px;
+  }
+  .star {
+    color: var(--gold);
+    font-size: 36px;
+    text-shadow: 1px 1px 2px rgba(44,24,16,0.4);
+  }
+
+  /* Quill divider */
+  .quill-divider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 10px 0;
+  }
+  .quill-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ink) 20%, var(--ink) 80%, transparent);
+  }
+  .quill-icon {
+    font-size: 32px;
+    color: var(--ink-light);
+  }
+
+  /* Main header */
+  .main-header {
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .main-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 68px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1.05;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0px rgba(44,24,16,0.15);
+  }
+  .main-header .the-word {
+    font-size: 42px;
+    letter-spacing: 14px;
+    display: block;
+    margin-bottom: -4px;
+  }
+
+  /* Subtitle decree */
+  .decree-sub {
+    text-align: center;
+    font-family: 'EB Garamond', serif;
+    font-size: 34px;
+    font-style: italic;
+    color: var(--red);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  /* Year / session line */
+  .session-line {
+    text-align: center;
+    font-size: 28px;
+    color: var(--ink-light);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  /* Accused section */
+  .accused-section {
+    width: 100%;
+    background: var(--navy);
+    border: 4px solid var(--gold);
+    padding: 22px 30px;
+    text-align: center;
+    margin: 10px 0;
+    position: relative;
+  }
+  .accused-section::before,
+  .accused-section::after {
+    content: '\2605';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 34px;
+    color: var(--gold);
+  }
+  .accused-section::before { left: 16px; }
+  .accused-section::after { right: 16px; }
+
+  .accused-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .accused-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+  }
+
+  /* Decree / Fact check section */
+  .decree-section {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 12px 0;
+    position: relative;
+  }
+
+  /* Claim */
+  .claim-block {
+    background: rgba(44,24,16,0.06);
+    border: 3px solid var(--ink);
+    border-bottom: none;
+    padding: 22px 28px 18px;
+    position: relative;
+  }
+  .claim-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .claim-text {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.2;
+    font-style: italic;
+  }
+  .claim-text::before { content: '\201C'; }
+  .claim-text::after { content: '\201D'; }
+
+  /* Verdict */
+  .verdict-block {
+    background: var(--red);
+    border: 4px solid var(--red-dark);
+    padding: 18px 28px;
+    text-align: center;
+    position: relative;
+    overflow: visible;
+  }
+  .verdict-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--parchment-light);
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+    line-height: 1;
+  }
+
+  /* Wax seal */
+  .wax-seal {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%,
+      #d44a2a 0%, #b33218 30%, #8b2500 60%, #6b1d00 100%);
+    box-shadow:
+      inset 0 -4px 8px rgba(0,0,0,0.3),
+      inset 0 4px 6px rgba(255,150,100,0.2),
+      3px 4px 12px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
+  .wax-seal::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,200,150,0.25);
+  }
+  .seal-inner {
+    color: rgba(255,220,180,0.7);
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Fact and humor */
+  .evidence-block {
+    border: 3px solid var(--ink);
+    border-top: none;
+    padding: 20px 28px;
+    background: rgba(44,24,16,0.04);
+  }
+  .evidence-row {
+    margin-bottom: 14px;
+  }
+  .evidence-row:last-child {
+    margin-bottom: 0;
+  }
+  .evidence-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 2px;
+  }
+  .evidence-fact {
+    font-size: 34px;
+    line-height: 1.25;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .evidence-humor {
+    font-size: 30px;
+    line-height: 1.25;
+    color: var(--ink-light);
+    font-style: italic;
+  }
+  .evidence-source {
+    font-size: 28px;
+    color: var(--gold-dark);
+    font-weight: 600;
+  }
+
+  /* Bottom motto section */
+  .motto-section {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .motto-banner {
+    background: var(--navy);
+    border: 4px solid var(--gold);
+    padding: 20px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .motto-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    line-height: 1.15;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+  }
+
+  /* Quote */
+  .founder-quote {
+    text-align: center;
+    margin-top: 12px;
+    padding: 0 20px;
+  }
+  .founder-quote p {
+    font-size: 30px;
+    font-style: italic;
+    color: var(--ink-light);
+    line-height: 1.25;
+  }
+  .founder-quote .attribution {
+    font-size: 28px;
+    color: var(--red);
+    font-style: normal;
+    font-weight: 700;
+    margin-top: 4px;
+    letter-spacing: 2px;
+  }
+
+  /* Bottom stars */
+  .bottom-stars {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .bottom-stars .star {
+    font-size: 28px;
+  }
+
+  /* Subtle animation for wax seal */
+  @keyframes sealPress {
+    0% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-50%) scale(1.03); }
+    100% { transform: translateY(-50%) scale(1); }
+  }
+  .wax-seal {
+    animation: sealPress 4s ease-in-out infinite;
+  }
+
+  /* Flicker for parchment feel */
+  @keyframes parchmentAge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.97; }
+  }
+  .parchment-bg {
+    animation: parchmentAge 8s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="parchment-bg"></div>
+<div class="aged-edges"></div>
+<div class="colonial-border"></div>
+
+<div class="content">
+
+  <!-- Colonial stars -->
+  <div class="stars-row">
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+  </div>
+
+  <!-- Quill divider -->
+  <div class="quill-divider">
+    <div class="quill-line"></div>
+    <span class="quill-icon">&#9998;</span>
+    <div class="quill-line"></div>
+  </div>
+
+  <!-- Main header -->
+  <div class="main-header">
+    <h1>
+      <span class="the-word">The Great</span>
+      Board of Science
+    </h1>
+  </div>
+
+  <!-- Decree subtitle -->
+  <div class="decree-sub">By Order of Reason</div>
+
+  <!-- Session line -->
+  <div class="session-line">&#8212; Convened in the Year of Our Evidence, MMXXVI &#8212;</div>
+
+  <!-- Quill divider -->
+  <div class="quill-divider">
+    <div class="quill-line"></div>
+    <span class="quill-icon">&#9998;</span>
+    <div class="quill-line"></div>
+  </div>
+
+  <!-- The Accused -->
+  <div class="accused-section">
+    <div class="accused-label">The Accused</div>
+    <div class="accused-name">Dr. YouTube</div>
+  </div>
+
+  <!-- Decree / Fact Check -->
+  <div class="decree-section">
+
+    <!-- Claim -->
+    <div class="claim-block">
+      <div class="claim-label">&#167; Claim Presented &#167;</div>
+      <div class="claim-text">Vaccines cause autism</div>
+    </div>
+
+    <!-- Verdict -->
+    <div class="verdict-block">
+      <div class="verdict-text">DEBUNKED</div>
+      <div class="wax-seal">
+        <div class="seal-inner">Sealed<br>&amp;<br>Final</div>
+      </div>
+    </div>
+
+    <!-- Evidence -->
+    <div class="evidence-block">
+      <div class="evidence-row">
+        <div class="evidence-label">&#9758; The Evidence</div>
+        <div class="evidence-fact">The original 1998 Wakefield study was retracted for fraud. Over 1.2 million children studied since &mdash; no link found.</div>
+      </div>
+      <div class="evidence-row">
+        <div class="evidence-label">&#9758; Colonial Roast</div>
+        <div class="evidence-humor">The Founding Fathers survived smallpox inoculation so you could post conspiracy theories on a phone. They would be disappointed.</div>
+      </div>
+      <div class="evidence-row">
+        <div class="evidence-label">&#9758; Source</div>
+        <div class="evidence-source">The Lancet Retraction, 2010 &bull; CDC &bull; WHO</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Motto banner -->
+  <div class="motto-section">
+    <div class="motto-banner">
+      <div class="motto-text">Patriotism Requires<br>Vaccines</div>
+    </div>
+  </div>
+
+  <!-- Founder quote -->
+  <div class="founder-quote">
+    <p>&ldquo;We hold these truths to be self-evident &mdash; that vaccines work, the Earth is round, and science does not care about your feelings.&rdquo;</p>
+    <div class="attribution">&mdash; The Founding Fathers, Probably</div>
+  </div>
+
+  <!-- Bottom stars -->
+  <div class="bottom-stars">
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>EMERGENCY SCIENCE BROADCAST</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --alert-red: #cc0000;
+    --amber: #ff8c00;
+    --black: #0a0a0a;
+    --white: #ffffff;
+    --emergency-blue: #003399;
+    --dark-panel: #111111;
+    --stripe-yellow: #ffd700;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: var(--black);
+    font-family: 'Oswald', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* PULSING RED BORDER */
+  .border-pulse {
+    position: absolute;
+    inset: 0;
+    border: 6px solid var(--alert-red);
+    pointer-events: none;
+    z-index: 100;
+    animation: borderPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes borderPulse {
+    0%, 100% { border-color: var(--alert-red); box-shadow: inset 0 0 30px rgba(204,0,0,0.3); }
+    50% { border-color: #ff2222; box-shadow: inset 0 0 60px rgba(255,34,34,0.5); }
+  }
+
+  .board {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TOP ALERT BAR ── */
+  .alert-bar {
+    background: var(--alert-red);
+    padding: 10px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .alert-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+    animation: scanline 2s linear infinite;
+  }
+  @keyframes scanline {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  .alert-bar-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--white);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    animation: alertFlash 0.8s step-end infinite;
+  }
+  @keyframes alertFlash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── EMERGENCY SCIENCE BROADCAST ── */
+  .emergency-header {
+    background: var(--black);
+    border: 3px solid var(--alert-red);
+    padding: 18px 16px 14px;
+    text-align: center;
+    margin-top: 14px;
+    position: relative;
+  }
+  .emergency-header::before,
+  .emergency-header::after {
+    content: '!!';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    color: var(--alert-red);
+    animation: alertFlash 0.8s step-end infinite;
+  }
+  .emergency-header::before { left: 18px; }
+  .emergency-header::after { right: 18px; }
+
+  .emergency-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    color: var(--alert-red);
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(204,0,0,0.6);
+    animation: textPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes textPulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(204,0,0,0.6); }
+    50% { text-shadow: 0 0 40px rgba(204,0,0,0.9), 0 0 80px rgba(204,0,0,0.4); }
+  }
+
+  /* ── THE GREAT BOARD OF SCIENCE ── */
+  .title-block {
+    background: var(--black);
+    text-align: center;
+    padding: 20px 16px 16px;
+    border-left: 4px solid var(--emergency-blue);
+    border-right: 4px solid var(--emergency-blue);
+  }
+  .title-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: var(--white);
+    letter-spacing: 6px;
+    line-height: 1;
+    text-shadow: 0 2px 10px rgba(0,51,153,0.5);
+  }
+  .title-sub {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--emergency-blue);
+    letter-spacing: 10px;
+    margin-top: 4px;
+  }
+
+  /* ── WARNING STRIPE DIVIDER ── */
+  .warning-stripe {
+    height: 28px;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--stripe-yellow) 0px,
+      var(--stripe-yellow) 18px,
+      var(--black) 18px,
+      var(--black) 36px
+    );
+    flex-shrink: 0;
+  }
+  .warning-stripe-thin {
+    height: 16px;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--stripe-yellow) 0px,
+      var(--stripe-yellow) 12px,
+      var(--black) 12px,
+      var(--black) 24px
+    );
+    flex-shrink: 0;
+  }
+
+  /* ── SUBJECT LINE ── */
+  .subject-bar {
+    background: linear-gradient(180deg, #1a1a1a, var(--black));
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 2px solid var(--amber);
+  }
+  .subject-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    color: var(--amber);
+    letter-spacing: 3px;
+    white-space: nowrap;
+  }
+  .subject-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--white);
+    letter-spacing: 2px;
+  }
+
+  /* ── BULLETIN / FACT CHECK ── */
+  .bulletin {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px 0;
+    min-height: 0;
+  }
+
+  .bulletin-header {
+    background: var(--dark-panel);
+    border-left: 5px solid var(--alert-red);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .bulletin-tag {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--alert-red);
+    letter-spacing: 4px;
+    animation: alertFlash 1.2s step-end infinite;
+  }
+  .bulletin-timestamp {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 28px;
+    color: #888;
+    margin-left: auto;
+  }
+
+  /* CLAIM */
+  .claim-section {
+    background: #181818;
+    padding: 20px 24px;
+    border-left: 5px solid var(--amber);
+  }
+  .claim-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px;
+    color: var(--amber);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+  }
+  .claim-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 44px;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  /* VERDICT */
+  .verdict-section {
+    background: var(--black);
+    padding: 22px 24px;
+    text-align: center;
+    border: 3px solid var(--alert-red);
+    position: relative;
+  }
+  .verdict-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 104px;
+    color: var(--alert-red);
+    letter-spacing: 10px;
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(204,0,0,0.7), 0 0 60px rgba(204,0,0,0.4);
+    animation: verdictPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes verdictPulse {
+    0%, 100% { text-shadow: 0 0 30px rgba(204,0,0,0.7), 0 0 60px rgba(204,0,0,0.4); }
+    50% { text-shadow: 0 0 50px rgba(255,0,0,0.9), 0 0 100px rgba(255,0,0,0.6), 0 0 150px rgba(255,0,0,0.3); }
+  }
+
+  /* FACT ROW */
+  .info-row {
+    background: var(--dark-panel);
+    padding: 14px 24px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .info-row:last-of-type {
+    border-bottom: none;
+  }
+  .info-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--emergency-blue);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+  .info-fact {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    color: var(--white);
+    line-height: 1.25;
+  }
+  .info-humor {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--amber);
+    line-height: 1.25;
+  }
+  .info-source {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 28px;
+    color: #aaa;
+    line-height: 1.25;
+  }
+
+  /* ── PATRIOTISM FOOTER ── */
+  .patriot-bar {
+    background: var(--black);
+    border: 3px solid var(--amber);
+    padding: 18px 24px;
+    text-align: center;
+  }
+  .patriot-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 50px;
+    color: var(--amber);
+    letter-spacing: 4px;
+    line-height: 1.1;
+    text-shadow: 0 0 15px rgba(255,140,0,0.4);
+  }
+
+  /* ── BOTTOM CRAWL ── */
+  .crawl-bar {
+    background: var(--alert-red);
+    padding: 8px 0;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .crawl-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--white);
+    white-space: nowrap;
+    animation: crawl 20s linear infinite;
+  }
+  @keyframes crawl {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-200%); }
+  }
+
+  /* ── CORNER MARKERS ── */
+  .corner {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--alert-red);
+    border-style: solid;
+    z-index: 50;
+  }
+  .corner-tl { top: 20px; left: 20px; border-width: 4px 0 0 4px; }
+  .corner-tr { top: 20px; right: 20px; border-width: 4px 4px 0 0; }
+  .corner-bl { bottom: 20px; left: 20px; border-width: 0 0 4px 4px; }
+  .corner-br { bottom: 20px; right: 20px; border-width: 0 4px 4px 0; }
+
+  /* ── STATIC / NOISE OVERLAY ── */
+  .noise-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 90;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px;
+  }
+
+  /* ── SIDE MARGIN PULSE LINES ── */
+  .margin-line-left, .margin-line-right {
+    position: absolute;
+    top: 100px;
+    bottom: 100px;
+    width: 3px;
+    z-index: 50;
+    animation: marginPulse 2s ease-in-out infinite;
+  }
+  .margin-line-left { left: 10px; background: var(--alert-red); }
+  .margin-line-right { right: 10px; background: var(--alert-red); animation-delay: 1s; }
+  @keyframes marginPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+</style>
+</head>
+<body>
+
+<div class="border-pulse"></div>
+<div class="noise-overlay"></div>
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+<div class="margin-line-left"></div>
+<div class="margin-line-right"></div>
+
+<div class="board">
+
+  <!-- TOP ALERT BAR -->
+  <div class="alert-bar">
+    <div class="alert-bar-text">/// EMERGENCY ALERT /// EMERGENCY ALERT /// EMERGENCY ALERT ///</div>
+  </div>
+
+  <!-- EMERGENCY SCIENCE BROADCAST -->
+  <div class="emergency-header">
+    <div class="emergency-text">EMERGENCY SCIENCE BROADCAST</div>
+  </div>
+
+  <!-- THE GREAT BOARD OF SCIENCE -->
+  <div class="title-block">
+    <div class="title-main">THE GREAT BOARD OF SCIENCE</div>
+    <div class="title-sub">WE INTERRUPT THIS BROADCAST</div>
+  </div>
+
+  <!-- WARNING STRIPE -->
+  <div class="warning-stripe"></div>
+
+  <!-- SUBJECT -->
+  <div class="subject-bar">
+    <span class="subject-label">SUBJECT:</span>
+    <span class="subject-name">YOUTUBE GUY</span>
+  </div>
+
+  <!-- WARNING STRIPE THIN -->
+  <div class="warning-stripe-thin"></div>
+
+  <!-- FACT CHECK BULLETIN -->
+  <div class="bulletin">
+
+    <div class="bulletin-header">
+      <span class="bulletin-tag">URGENT BULLETIN</span>
+      <span class="bulletin-timestamp">LIVE</span>
+    </div>
+
+    <!-- CLAIM -->
+    <div class="claim-section">
+      <div class="claim-label">CLAIM DETECTED:</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <div class="warning-stripe-thin"></div>
+
+    <!-- VERDICT -->
+    <div class="verdict-section">
+      <div class="verdict-text">DEBUNKED</div>
+    </div>
+
+    <div class="warning-stripe-thin"></div>
+
+    <!-- FACT -->
+    <div class="info-row">
+      <div class="info-label">VERIFIED FACT</div>
+      <div class="info-fact">The original 1998 Wakefield study was retracted for fraud. Over 1.2 million children studied since then show zero link between vaccines and autism.</div>
+    </div>
+
+    <!-- HUMOR -->
+    <div class="info-row">
+      <div class="info-label">REALITY CHECK</div>
+      <div class="info-humor">Imagine trusting a debunked fraudster over every major health organization on the planet. That's not research, that's a conspiracy hobby.</div>
+    </div>
+
+    <!-- SOURCE -->
+    <div class="info-row">
+      <div class="info-label">SOURCE</div>
+      <div class="info-source">The Lancet (retraction), CDC, WHO, Hviid et al. 2019 — Annals of Internal Medicine (657,461 children)</div>
+    </div>
+
+  </div>
+
+  <!-- WARNING STRIPE -->
+  <div class="warning-stripe"></div>
+
+  <!-- PATRIOTISM FOOTER -->
+  <div class="patriot-bar">
+    <div class="patriot-text">PATRIOTISM REQUIRES VACCINES</div>
+  </div>
+
+  <!-- BOTTOM CRAWL -->
+  <div class="crawl-bar">
+    <div class="crawl-text">THIS HAS BEEN AN EMERGENCY BROADCAST OF THE TRUTH /// SCIENCE IS NOT OPTIONAL /// PROTECT YOUR COMMUNITY /// FACTS DON'T CARE ABOUT YOUR YOUTUBE ALGORITHM /// THIS HAS BEEN AN EMERGENCY BROADCAST OF THE TRUTH</div>
+  </div>
+
+</div>
+
+</body>
+</html>

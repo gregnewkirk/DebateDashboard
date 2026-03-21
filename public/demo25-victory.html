@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>SCIENCE WINS AGAIN - Victory Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #1a2a4a;
+    font-family: 'Oswald', sans-serif;
+    position: relative;
+  }
+
+  /* === CONFETTI DOTS IN MARGINS === */
+  .confetti-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .confetti-dot {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: confettiFall linear infinite;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { transform: translateY(1940px) rotate(720deg); opacity: 0.3; }
+  }
+
+  /* === MAIN CONTENT STACK === */
+  .poster {
+    position: relative;
+    z-index: 2;
+    width: 1080px;
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* === STARBURST HEADER AREA === */
+  .header-zone {
+    position: relative;
+    width: 100%;
+    padding: 60px 40px 30px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .starburst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 900px;
+    height: 900px;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+  }
+
+  .starburst-ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 450px;
+    height: 40px;
+    transform-origin: 0 50%;
+    background: linear-gradient(90deg, rgba(255,215,0,0.5), rgba(255,215,0,0));
+    border-radius: 0 20px 20px 0;
+    animation: starburstPulse 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes starburstPulse {
+    0% { opacity: 0.4; }
+    100% { opacity: 0.8; }
+  }
+
+  .header-text {
+    position: relative;
+    z-index: 1;
+  }
+
+  .pre-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 36px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 10px;
+    margin-bottom: 8px;
+  }
+
+  .main-title {
+    font-family: 'Bangers', cursive;
+    font-size: 80px;
+    color: #ffd700;
+    text-shadow:
+      3px 3px 0 #000,
+      -1px -1px 0 #000,
+      0 0 30px rgba(255,215,0,0.6),
+      0 0 60px rgba(255,215,0,0.3);
+    line-height: 1.0;
+    letter-spacing: 3px;
+    animation: goldGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes goldGlow {
+    0% { text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 0 0 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.2); }
+    100% { text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 0 0 50px rgba(255,215,0,0.8), 0 0 100px rgba(255,215,0,0.4); }
+  }
+
+  /* === BOARD NAME === */
+  .board-name {
+    width: 100%;
+    text-align: center;
+    padding: 0 40px;
+    margin-top: 0;
+  }
+
+  .board-name h2 {
+    font-family: 'Bangers', cursive;
+    font-size: 68px;
+    color: #ffd700;
+    background: #1a2a4a;
+    display: inline-block;
+    padding: 10px 30px;
+    border: 4px solid #ffd700;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #000;
+    line-height: 1.1;
+  }
+
+  /* === VS BAR === */
+  .vs-bar {
+    width: 92%;
+    margin: 20px auto 10px;
+    background: linear-gradient(135deg, #cc0000, #990000);
+    padding: 16px 30px;
+    text-align: center;
+    border-radius: 8px;
+    border: 3px solid #ffd700;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vs-bar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(255,255,255,0.03) 20px,
+      rgba(255,255,255,0.03) 40px
+    );
+  }
+
+  .vs-bar h3 {
+    font-family: 'Bangers', cursive;
+    font-size: 52px;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .vs-bar h3 span.gold { color: #ffd700; }
+
+  /* === VICTORY CARD === */
+  .victory-card {
+    width: 92%;
+    margin: 18px auto 0;
+    background: rgba(10, 18, 35, 0.95);
+    border: 3px solid #ffd700;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(90deg, #cc0000, #aa0000);
+    padding: 14px 30px;
+    text-align: center;
+    border-bottom: 3px solid #ffd700;
+  }
+
+  .card-header h4 {
+    font-family: 'Bangers', cursive;
+    font-size: 42px;
+    color: #fff;
+    letter-spacing: 6px;
+    text-shadow: 2px 2px 0 #000;
+  }
+
+  /* Claim row */
+  .claim-row {
+    padding: 22px 30px;
+    border-bottom: 2px solid rgba(255,215,0,0.2);
+  }
+
+  .claim-label {
+    font-family: 'Bangers', cursive;
+    font-size: 34px;
+    color: #ffd700;
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+  }
+
+  .claim-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  /* === DEBUNKED MEDAL === */
+  .medal-zone {
+    padding: 28px 30px;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(255,215,0,0.1), transparent 70%);
+    border-bottom: 2px solid rgba(255,215,0,0.2);
+    position: relative;
+  }
+
+  .medal {
+    display: inline-block;
+    position: relative;
+    padding: 18px 60px;
+    background: linear-gradient(145deg, #ffd700, #daa520, #ffd700);
+    border-radius: 20px;
+    border: 5px solid #cc0000;
+    box-shadow:
+      0 0 40px rgba(255,215,0,0.5),
+      inset 0 2px 4px rgba(255,255,255,0.4),
+      0 8px 20px rgba(0,0,0,0.5);
+    animation: medalPulse 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes medalPulse {
+    0% { box-shadow: 0 0 30px rgba(255,215,0,0.4), inset 0 2px 4px rgba(255,255,255,0.4), 0 8px 20px rgba(0,0,0,0.5); }
+    100% { box-shadow: 0 0 60px rgba(255,215,0,0.8), inset 0 2px 4px rgba(255,255,255,0.4), 0 8px 30px rgba(0,0,0,0.5); }
+  }
+
+  .medal-ribbon-left, .medal-ribbon-right {
+    position: absolute;
+    bottom: -18px;
+    width: 40px;
+    height: 40px;
+    background: #cc0000;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+  .medal-ribbon-left { left: 30px; transform: rotate(-15deg); }
+  .medal-ribbon-right { right: 30px; transform: rotate(15deg); }
+
+  .medal-text {
+    font-family: 'Bangers', cursive;
+    font-size: 100px;
+    color: #cc0000;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    letter-spacing: 6px;
+    line-height: 1.0;
+  }
+
+  .medal-sub {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a2a4a;
+    letter-spacing: 4px;
+    margin-top: 2px;
+  }
+
+  /* === FACT / HUMOR / SOURCE ROWS === */
+  .info-row {
+    padding: 18px 30px;
+    border-bottom: 2px solid rgba(255,215,0,0.15);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-border {
+    width: 6px;
+    min-height: 100%;
+    border-radius: 3px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  .border-green { background: #22c55e; }
+  .border-amber { background: #f59e0b; }
+  .border-blue { background: #3b82f6; }
+
+  .info-content { flex: 1; }
+
+  .info-label {
+    font-family: 'Bangers', cursive;
+    font-size: 30px;
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .label-green { color: #22c55e; }
+  .label-amber { color: #f59e0b; }
+  .label-blue { color: #3b82f6; }
+
+  .info-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 34px;
+    font-weight: 400;
+    color: #e5e5e5;
+    line-height: 1.3;
+  }
+
+  .info-text-sm {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: #d4d4d4;
+    line-height: 1.3;
+  }
+
+  .info-text-source {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #93c5fd;
+    line-height: 1.3;
+  }
+
+  /* === BOTTOM BANNER === */
+  .bottom-banner {
+    width: 92%;
+    margin: 20px auto 0;
+    background: linear-gradient(135deg, #ffd700, #daa520);
+    padding: 20px 30px;
+    text-align: center;
+    border-radius: 10px;
+    border: 3px solid #cc0000;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bottom-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 15px,
+      rgba(204,0,0,0.08) 15px,
+      rgba(204,0,0,0.08) 30px
+    );
+  }
+
+  .bottom-banner h2 {
+    font-family: 'Bangers', cursive;
+    font-size: 52px;
+    color: #1a2a4a;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 1;
+    line-height: 1.15;
+  }
+
+  /* === TAGLINE === */
+  .tagline {
+    width: 100%;
+    text-align: center;
+    margin-top: 18px;
+    padding: 0 40px;
+  }
+
+  .tagline p {
+    font-family: 'Bangers', cursive;
+    font-size: 44px;
+    color: #ffd700;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 4px;
+    animation: goldGlow 2s ease-in-out infinite alternate;
+  }
+
+  /* === STAR DECORATIONS IN MARGINS === */
+  .star {
+    position: absolute;
+    z-index: 1;
+    color: #ffd700;
+    font-size: 36px;
+    opacity: 0.6;
+    animation: starTwinkle 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes starTwinkle {
+    0% { opacity: 0.3; transform: scale(0.8); }
+    100% { opacity: 0.9; transform: scale(1.1); }
+  }
+</style>
+</head>
+<body>
+
+<!-- CONFETTI DOTS -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- MARGIN STARS -->
+<div class="star" style="top:200px;left:20px;animation-delay:0s;">&#9733;</div>
+<div class="star" style="top:500px;right:25px;animation-delay:0.5s;">&#9733;</div>
+<div class="star" style="top:850px;left:15px;animation-delay:1s;">&#9733;</div>
+<div class="star" style="top:1100px;right:18px;animation-delay:1.5s;">&#9733;</div>
+<div class="star" style="top:1400px;left:22px;animation-delay:0.8s;">&#9733;</div>
+<div class="star" style="top:1650px;right:20px;animation-delay:0.3s;">&#9733;</div>
+<div class="star" style="top:350px;right:15px;animation-delay:1.2s;">&#9733;</div>
+<div class="star" style="top:1750px;left:18px;animation-delay:0.7s;">&#9733;</div>
+
+<div class="poster">
+
+  <!-- === STARBURST HEADER === -->
+  <div class="header-zone">
+    <div class="starburst" id="starburst"></div>
+    <div class="header-text">
+      <div class="pre-title">&#9733; &#9733; &#9733; CERTIFIED VICTORY &#9733; &#9733; &#9733;</div>
+      <h1 class="main-title">SCIENCE WINS<br>AGAIN!</h1>
+    </div>
+  </div>
+
+  <!-- === BOARD NAME === -->
+  <div class="board-name">
+    <h2>THE GREAT BOARD<br>OF SCIENCE</h2>
+  </div>
+
+  <!-- === VS BAR === -->
+  <div class="vs-bar">
+    <h3>SCIENCE <span class="gold">VS</span> YOUTUBE GUY</h3>
+  </div>
+
+  <!-- === VICTORY FACT CHECK CARD === -->
+  <div class="victory-card">
+    <div class="card-header">
+      <h4>&#9733; VICTORY ANNOUNCEMENT &#9733;</h4>
+    </div>
+
+    <!-- Claim -->
+    <div class="claim-row">
+      <div class="claim-label">CLAIM:</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <!-- DEBUNKED Medal -->
+    <div class="medal-zone">
+      <div class="medal">
+        <div class="medal-ribbon-left"></div>
+        <div class="medal-ribbon-right"></div>
+        <div class="medal-text">DEBUNKED</div>
+        <div class="medal-sub">THOROUGHLY DESTROYED</div>
+      </div>
+    </div>
+
+    <!-- Fact -->
+    <div class="info-row">
+      <div class="info-border border-green"></div>
+      <div class="info-content">
+        <div class="info-label label-green">FACT</div>
+        <div class="info-text">The original 1998 Wakefield study was retracted for fraud. Over 1.2 million children studied since then show zero link between vaccines and autism.</div>
+      </div>
+    </div>
+
+    <!-- Humor -->
+    <div class="info-row">
+      <div class="info-border border-amber"></div>
+      <div class="info-content">
+        <div class="info-label label-amber">HUMOR</div>
+        <div class="info-text-sm">Imagine losing your medical license AND still being wrong. That's commitment to the bit.</div>
+      </div>
+    </div>
+
+    <!-- Source -->
+    <div class="info-row">
+      <div class="info-border border-blue"></div>
+      <div class="info-content">
+        <div class="info-label label-blue">SOURCE</div>
+        <div class="info-text-source">The Lancet retraction (2010); Jain et al., JAMA 2015; Taylor et al., Vaccine 2014</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === BOTTOM BANNER === -->
+  <div class="bottom-banner">
+    <h2>PATRIOTISM REQUIRES<br>VACCINES</h2>
+  </div>
+
+  <!-- === TAGLINE === -->
+  <div class="tagline">
+    <p>ANOTHER ONE BITES THE DUST.</p>
+  </div>
+
+</div>
+
+<script>
+  // Generate starburst rays
+  (function() {
+    const sb = document.getElementById('starburst');
+    const rayCount = 24;
+    for (let i = 0; i < rayCount; i++) {
+      const ray = document.createElement('div');
+      ray.className = 'starburst-ray';
+      ray.style.transform = 'rotate(' + (i * (360 / rayCount)) + 'deg)';
+      ray.style.animationDelay = (i * 0.12) + 's';
+      sb.appendChild(ray);
+    }
+  })();
+
+  // Generate confetti dots in margins only (left 60px and right 60px)
+  (function() {
+    const container = document.getElementById('confetti');
+    const colors = ['#ffd700', '#daa520', '#fff5b1', '#cc0000', '#ffffff'];
+    for (let i = 0; i < 50; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'confetti-dot';
+      const size = 6 + Math.random() * 12;
+      const isLeft = Math.random() < 0.5;
+      const x = isLeft ? Math.random() * 55 : 1020 + Math.random() * 55;
+      dot.style.width = size + 'px';
+      dot.style.height = size + 'px';
+      dot.style.left = x + 'px';
+      dot.style.top = (-20 - Math.random() * 200) + 'px';
+      dot.style.background = colors[Math.floor(Math.random() * colors.length)];
+      dot.style.animationDuration = (4 + Math.random() * 6) + 's';
+      dot.style.animationDelay = (Math.random() * 8) + 's';
+      container.appendChild(dot);
+    }
+  })();
+</script>
+
+</body>
+</html>

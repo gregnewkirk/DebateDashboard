@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>THE GREAT BOARD OF SCIENCE — Design Picker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      padding: 30px;
+    }
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      text-align: center;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+      color: #ffd700;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #151515;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: #fff;
+      display: block;
+    }
+    .card:hover {
+      border-color: #ffd700;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(255, 215, 0, 0.15);
+    }
+    .card .num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      color: #ffd700;
+      line-height: 1;
+    }
+    .card .name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      letter-spacing: 2px;
+      margin: 8px 0;
+    }
+    .card .desc {
+      font-size: 14px;
+      color: #999;
+      line-height: 1.5;
+    }
+    .card .status {
+      margin-top: 12px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .ready { background: #1a3a1a; color: #4eff4e; }
+    .building { background: #3a3a1a; color: #ffff4e; }
+  </style>
+</head>
+<body>
+  <h1>THE GREAT BOARD OF SCIENCE</h1>
+  <p class="subtitle">PICK YOUR AESTHETIC &mdash; CLICK TO VIEW</p>
+
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#888;letter-spacing:3px;margin-bottom:20px;border-bottom:2px solid #333;padding-bottom:10px;">ROUND 1 &mdash; MIXED THEMES</h2>
+  <div class="grid">
+    <a class="card" href="demo1-warroom.html">
+      <div class="num">01</div>
+      <div class="name">WAR ROOM COMMAND CENTER</div>
+      <div class="desc">Military tactical ops. Pentagon basement. Scan lines, tactical grid, angular panels.</div>
+    </a>
+    <a class="card" href="demo2-shield.html">
+      <div class="num">02</div>
+      <div class="name">ANCIENT SHIELD & SCROLL</div>
+      <div class="desc">Medieval knight's enchanted shield. Torches, wax seal verdicts, gold dust, parchment scrolls.</div>
+    </a>
+    <a class="card" href="demo3-boxing.html">
+      <div class="num">03</div>
+      <div class="name">BOXING RING JUMBOTRON</div>
+      <div class="desc">UFC/boxing arena scoreboard. Spotlights, round cards, KO flash, fight stats.</div>
+    </a>
+    <a class="card" href="demo4-samurai.html">
+      <div class="num">04</div>
+      <div class="name">SAMURAI DOJO</div>
+      <div class="desc">Japanese martial arts. Katana slash, cherry blossoms, ink brush strokes.</div>
+    </a>
+    <a class="card" href="demo5-arcade.html">
+      <div class="num">05</div>
+      <div class="name">RETRO ARCADE BOSS FIGHT</div>
+      <div class="desc">16-bit video game HUD. Boss health bar, combo counter, pixel font. "FINISH HIM!"</div>
+    </a>
+    <a class="card" href="demo6-forge.html">
+      <div class="num">06</div>
+      <div class="name">FORGE OF TRUTH</div>
+      <div class="desc">Blacksmith's forge. Rising embers, molten borders, anvil-strike effects.</div>
+    </a>
+    <a class="card" href="demo7-propaganda.html">
+      <div class="num">07</div>
+      <div class="name">SOVIET PROPAGANDA</div>
+      <div class="desc">Revolutionary constructivist art. Geometric rays, red stamps, bold decrees.</div>
+    </a>
+    <a class="card" href="demo8-gladiator.html">
+      <div class="num">08</div>
+      <div class="name">GLADIATOR COLOSSEUM</div>
+      <div class="desc">Ancient Rome arena. Marble textures, laurel wreaths, thumbs down verdicts.</div>
+    </a>
+    <a class="card" href="demo9-cyberpunk.html">
+      <div class="num">09</div>
+      <div class="name">CYBERPUNK HACKER TERMINAL</div>
+      <div class="desc">Blade Runner meets Mr. Robot. Matrix rain, neon glow, holographic edges.</div>
+    </a>
+    <a class="card" href="demo10-wrestling.html">
+      <div class="num">10</div>
+      <div class="name">WRESTLING PAY-PER-VIEW</div>
+      <div class="desc">WWE event graphics. Pyrotechnics, entrance reveals, championship belts.</div>
+    </a>
+  </div>
+
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#cc0000;letter-spacing:3px;margin:40px 0 20px;border-bottom:2px solid #cc0000;padding-bottom:10px;">ROUND 2 &mdash; PROPAGANDA &amp; PATRIOTIC</h2>
+  <div class="grid">
+    <a class="card" href="demo11-unclesam.html" style="border-color:#002868;">
+      <div class="num" style="color:#BF0A30;">11</div>
+      <div class="name">UNCLE SAM RECRUITMENT</div>
+      <div class="desc">"I WANT YOU... TO BELIEVE IN SCIENCE." WW2 recruitment poster energy. Science = duty.</div>
+    </a>
+    <a class="card" href="demo12-atomicage.html" style="border-color:#ff8c00;">
+      <div class="num" style="color:#ffd700;">12</div>
+      <div class="name">COLD WAR ATOMIC AGE</div>
+      <div class="desc">1950s civil defense meets propaganda. Radiation symbols, warning stripes. Duck and cover from bullshit.</div>
+    </a>
+    <a class="card" href="demo13-nasa.html" style="border-color:#0B3D91;">
+      <div class="num" style="color:#FC3D21;">13</div>
+      <div class="name">NASA SPACE RACE</div>
+      <div class="desc">Apollo-era patriotic science pride. "We put a man on the moon with SCIENCE, not YouTube videos."</div>
+    </a>
+    <a class="card" href="demo14-founders.html" style="border-color:#8b2500;">
+      <div class="num" style="color:#c9a84c;">14</div>
+      <div class="name">FOUNDING FATHERS</div>
+      <div class="desc">Declaration of Independence. Parchment, wax seals. "We hold these truths to be self-evident..."</div>
+    </a>
+    <a class="card" href="demo15-soviet.html" style="border-color:#cc0000;">
+      <div class="num" style="color:#cc0000;">15</div>
+      <div class="name">PURE CONSTRUCTIVIST</div>
+      <div class="desc">Authentic 1920s El Lissitzky. Hard diagonals, geometric shapes, flat color. Maximum graphic power.</div>
+    </a>
+    <a class="card" href="demo16-rosie.html" style="border-color:#1c4587;">
+      <div class="num" style="color:#ffc107;">16</div>
+      <div class="name">"WE CAN DEBUNK IT!"</div>
+      <div class="desc">Rosie the Riveter / WW2 home front. Victory stars, riveted panels. Rally the troops for science.</div>
+    </a>
+    <a class="card" href="demo17-eagle.html" style="border-color:#556b2f;">
+      <div class="num" style="color:#d4af37;">17</div>
+      <div class="name">AMERICAN EAGLE MILITARY</div>
+      <div class="desc">Bald eagle patriotism meets military recruitment. Chevrons, dog tags, eagle wings. "SCIENCE: IT'S YOUR DUTY."</div>
+    </a>
+    <a class="card" href="demo18-presidential.html" style="border-color:#002f6c;">
+      <div class="num" style="color:#c5a55a;">18</div>
+      <div class="name">PRESIDENTIAL ADDRESS</div>
+      <div class="desc">White House press briefing. Executive orders, presidential seal, gold trim. Official government authority.</div>
+    </a>
+    <a class="card" href="demo19-revolution.html" style="border-color:#b22234;">
+      <div class="num" style="color:#fff;">19</div>
+      <div class="name">RED WHITE & BLUE CONSTRUCTIVIST</div>
+      <div class="desc">Soviet bold geometry + American patriotic colors. The best of both worlds. THE SCIENCE REVOLUTION.</div>
+    </a>
+    <a class="card" href="demo20-warbonds.html" style="border-color:#4b5320;">
+      <div class="num" style="color:#cc2936;">20</div>
+      <div class="name">WAR BONDS / LOOSE LIPS</div>
+      <div class="desc">"LOOSE CLAIMS SINK BRAINS." WW2 war bonds energy. Misinformation = the enemy. "DO YOUR PART."</div>
+    </a>
+  </div>
+
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#ffd700;letter-spacing:3px;margin:40px 0 20px;border-bottom:2px solid #ffd700;padding-bottom:10px;">ROUND 3 &mdash; REFINED PICKS (based on your feedback)</h2>
+  <div class="grid">
+    <a class="card" href="demo21-liberty.html" style="border-color:#002868;">
+      <div class="num" style="color:#BF0A30;">21</div>
+      <div class="name">LIBERTY BELL</div>
+      <div class="desc">Uncle Sam readability + Rosie motion. Clean, bold, stars in margins only. "LIBERTY DEMANDS TRUTH."</div>
+    </a>
+    <a class="card" href="demo22-flagstripes.html" style="border-color:#B22234;">
+      <div class="num" style="color:#3C3B6E;">22</div>
+      <div class="name">BOLD FLAG STRIPES</div>
+      <div class="desc">Each section on its own colored stripe. Red, white, blue bands. Flag as information design.</div>
+    </a>
+    <a class="card" href="demo23-neonpatriot.html" style="border-color:#ff1744;">
+      <div class="num" style="color:#2979ff;">23</div>
+      <div class="name">NEON PATRIOT</div>
+      <div class="desc">Patriotic colors but ELECTRIC. Neon glow text on black. Times Square meets Fourth of July.</div>
+    </a>
+    <a class="card" href="demo24-constructclean.html" style="border-color:#b22234;">
+      <div class="num" style="color:#ffd700;">24</div>
+      <div class="name">CONSTRUCTIVIST CLEAN</div>
+      <div class="desc">Demo 19 fixed — bigger text, star NOT behind text, rays in header only. Same energy, way more readable.</div>
+    </a>
+    <a class="card" href="demo25-victory.html" style="border-color:#ffd700;">
+      <div class="num" style="color:#cc0000;">25</div>
+      <div class="name">VICTORY POSTER</div>
+      <div class="desc">Triumph energy. "SCIENCE WINS AGAIN." Gold confetti, trophy verdict. We already won.</div>
+    </a>
+    <a class="card" href="demo26-rosie2.html" style="border-color:#1c4587;">
+      <div class="num" style="color:#ffc107;">26</div>
+      <div class="name">ROSIE UPGRADED</div>
+      <div class="desc">Demo 16 but BETTER — even bigger text, cleaner separation, same fun riveted energy.</div>
+    </a>
+    <a class="card" href="demo27-shield.html" style="border-color:#2c3e8c;">
+      <div class="num" style="color:#c0392b;">27</div>
+      <div class="name">SHIELD OF FREEDOM</div>
+      <div class="desc">Captain America shield energy. Concentric rings, heroic star, bold clean panels.</div>
+    </a>
+    <a class="card" href="demo28-radio.html" style="border-color:#cc0000;">
+      <div class="num" style="color:#ff8c00;">28</div>
+      <div class="name">EMERGENCY BROADCAST</div>
+      <div class="desc">"WE INTERRUPT THIS BROADCAST..." Emergency alert energy. Warning stripes, pulsing red border.</div>
+    </a>
+    <a class="card" href="demo29-stamps.html" style="border-color:#002868;">
+      <div class="num" style="color:#c9a84c;">29</div>
+      <div class="name">PATRIOTIC STAMPS</div>
+      <div class="desc">US postage stamp aesthetic. Perforated edges, official seals. "CERTIFIED DEBUNKED."</div>
+    </a>
+    <a class="card" href="demo30-minimal.html" style="border-color:#3C3B6E;">
+      <div class="num" style="color:#FFD700;">30</div>
+      <div class="name">RED WHITE BLUE MINIMAL</div>
+      <div class="desc">Maximum readability. Bold color bands, one font, zero noise. Every word hits like a truck.</div>
+    </a>
+  </div>
+
+  <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:#39ff14;letter-spacing:3px;margin:40px 0 20px;border-bottom:2px solid #39ff14;padding-bottom:10px;">ROUND 4 &mdash; FINAL REFINEMENTS (demo 21 vibes, layout variety)</h2>
+  <div class="grid">
+    <a class="card" href="demo31-liberty2.html" style="border-color:#002868;">
+      <div class="num" style="color:#BF0A30;">31</div>
+      <div class="name">LIBERTY REFINED</div>
+      <div class="desc">Demo 21 with angled dividers, varied widths, content weighted to middle third.</div>
+    </a>
+    <a class="card" href="demo32-diamond.html" style="border-color:#BF0A30;">
+      <div class="num" style="color:#ffd700;">32</div>
+      <div class="name">DIAMOND PATRIOT</div>
+      <div class="desc">Chevron/arrow-shaped sections creating diamond flow. No flat horizontal bars.</div>
+    </a>
+    <a class="card" href="demo33-split.html" style="border-color:#002868;">
+      <div class="num" style="color:#fff;">33</div>
+      <div class="name">SPLIT COLUMN</div>
+      <div class="desc">Mix of full-width hero moments and split-column info sections. Asymmetric layout.</div>
+    </a>
+    <a class="card" href="demo34-centered.html" style="border-color:#ffd700;">
+      <div class="num" style="color:#BF0A30;">34</div>
+      <div class="name">CENTERED FOCUS</div>
+      <div class="desc">DEBUNKED is the sun at dead center. Everything radiates outward. Bigger = closer to center.</div>
+    </a>
+    <a class="card" href="demo35-sidebar.html" style="border-color:#BF0A30;">
+      <div class="num" style="color:#002868;">35</div>
+      <div class="name">SIDEBAR ACCENT</div>
+      <div class="desc">Bold red sidebar running full height on the left. Main content on the right. Breaks full-width monotony.</div>
+    </a>
+    <a class="card" href="demo36-cards.html" style="border-color:#002868;">
+      <div class="num" style="color:#ffd700;">36</div>
+      <div class="name">PATRIOTIC CARDS</div>
+      <div class="desc">Overlapping card stack with depth. Varied widths, slight tilts, drop shadows. Like playing cards.</div>
+    </a>
+    <a class="card" href="demo37-ribbon.html" style="border-color:#BF0A30;">
+      <div class="num" style="color:#fff;">37</div>
+      <div class="name">RIBBON FLOW</div>
+      <div class="desc">Sections as folding ribbon/banner flowing down. Color changes at each fold. Gold star pins.</div>
+    </a>
+    <a class="card" href="demo38-spotlight.html" style="border-color:#0a1628;">
+      <div class="num" style="color:#ffd700;">38</div>
+      <div class="name">SPOTLIGHT STAGE</div>
+      <div class="desc">Dark background, each section spotlit. Dark gaps = natural separation. Verdict = brightest spotlight.</div>
+    </a>
+    <a class="card" href="demo39-offset.html" style="border-color:#002868;">
+      <div class="num" style="color:#BF0A30;">39</div>
+      <div class="name">OFFSET BLOCKS</div>
+      <div class="desc">Sections zigzag left-right-left. Same clean readability as 21, way more visual rhythm.</div>
+    </a>
+    <a class="card" href="demo40-rally.html" style="border-color:#ffd700;">
+      <div class="num" style="color:#cc0000;">40</div>
+      <div class="name">VICTORY RALLY CLEAN</div>
+      <div class="desc">Demo 21 readability + demo 25 colors. Angled gold dividers, celebration energy, clean layout.</div>
+    </a>
+  </div>
+</body>
+</html>

@@ -1,6 +1,6 @@
 // ===========================================
-//  DEBATE DASHBOARD — App JS
-//  WebSocket client + UI stubs + idle ticker
+//  THE GREAT BOARD OF SCIENCE — App JS
+//  WebSocket client + Liberty Refined UI
 // ===========================================
 
 const SCIENCE_FACTS = [
@@ -16,48 +16,14 @@ const SCIENCE_FACTS = [
   "A day on Venus is longer than a year on Venus",
 ];
 
-const FUN_STATS = [
-  "Days since flat earth was proven: \u221E",
-  "Vaccines save 4\u20135 million lives per year",
-  "Your DNA is 99.9% identical to every other human",
-  "Sharks existed before trees",
-  "The scientific method: it just works\u2122",
-  "Peer review > YouTube review",
-  "97% of climate scientists agree",
-  "Correlation \u2260 causation",
-  "Evolution: 3.5 billion years of QA testing",
-  "mRNA degrades in 48 hours. Your DNA is fine.",
-  "Organic food is also made of chemicals",
-  "The dose makes the poison \u2014 Paracelsus",
-  "Water is a chemical. You drink chemicals daily.",
-  "Earth is 4.5 billion years old. Not 6,000.",
-  "There are more trees on Earth than stars in the Milky Way",
-  "GPS satellites correct for relativity every day",
-  "Antibiotics don\u2019t work on viruses. Pass it on.",
-  "The placebo effect is real. Irony is also real.",
-  "One lightning bolt could toast 100,000 slices of bread",
-  "Astronauts grow up to 2 inches taller in space",
-  "Gut bacteria outnumber your own cells 10:1",
-  "The human brain uses 20% of the body\u2019s energy",
-  "Double-blind studies: because we don\u2019t trust ourselves",
-  "Sunscreen works. Sunburn doesn\u2019t build immunity.",
-  "A photon takes 100,000 years to cross the Milky Way",
-  "Consensus isn\u2019t opinion. It\u2019s evidence agreeing.",
-  "Atoms are 99.9999% empty space. You\u2019re mostly nothing.",
-  "Gravity: still technically \u201Cjust a theory.\u201D",
-  "Fun fact: \u201Cnatural\u201D doesn\u2019t mean safe. Arsenic is natural.",
-  "There are more bacteria in your mouth than people on Earth",
-  "Microwaves don\u2019t make food radioactive. Relax.",
-  "Pluto was demoted by data, not feelings",
-  "Your nose can detect over 1 trillion scents",
-  "Science doesn\u2019t care about your beliefs",
-  "The MMR vaccine has been given 500M+ times safely",
-  "Steel beams melt at 1510\u00B0C. Jet fuel burns at 1000\u00B0C. Steel weakens at 600\u00B0C.",
-  "Fluoride in water: safe since 1945",
-  "5G uses non-ionizing radiation. Like a radio.",
-  "The universe is 93 billion light-years across",
-  "Sample size of 1 is not a study. It\u2019s an anecdote.",
+const DEBATE_PROMPTS = [
+  "Patriotism requires vaccines.",
+  "GMOs feed the world.",
+  "Trump is anti-science.",
+  "Climate change is real.",
+  "Evolution produced humans.",
 ];
+let debatePromptIndex = 0;
 
 // --- Idle Pop-in State ---
 let idleTimer = null;
@@ -127,16 +93,13 @@ function connectWebSocket() {
 // --- Nickname Display ---
 
 function updateNicknameDisplay(nickname) {
-  const bar = document.getElementById("nickname-bar");
-  const el = document.getElementById("nickname");
-  if (!bar || !el) return;
+  const el = document.getElementById("challenger-name");
+  if (!el) return;
 
-  bar.style.display = "flex";
   el.textContent = nickname;
 
   // Slam-in animation
   el.classList.remove("slam-in");
-  // Force reflow to restart animation
   void el.offsetWidth;
   el.classList.add("slam-in");
 }
@@ -147,7 +110,6 @@ function startSessionTimer() {
   stopSessionTimer();
   sessionStartTime = Date.now();
 
-  // Create or show timer element
   let timerEl = document.querySelector(".session-timer");
   if (!timerEl) {
     timerEl = document.createElement("div");
@@ -174,21 +136,21 @@ function stopSessionTimer() {
   if (timerEl) timerEl.style.display = "none";
 }
 
+function clearContainer(container) {
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+}
+
 function handleSessionStart() {
-  // Clear ad screen if showing
   dismissAdScreen();
-  // Restore banner and ticker
-  const topBanner = document.querySelector(".top-banner");
-  const bottomTicker = document.querySelector(".bottom-ticker");
-  if (topBanner) topBanner.style.display = "flex";
-  if (bottomTicker) bottomTicker.style.display = "flex";
 
   // Stop idle pop-ins during animation
   stopIdlePopIns();
   isShowingCard = true;
 
   const container = document.getElementById("main-content");
-  if (container) container.innerHTML = "";
+  if (container) clearContainer(container);
 
   // Show "ROUND 1" slam-in animation
   const announce = document.createElement("div");
@@ -196,30 +158,26 @@ function handleSessionStart() {
   announce.textContent = "ROUND 1";
   if (container) container.appendChild(announce);
 
-  // After 2s hold, fade out the announcement
+  // After 2s hold, fade out
   setTimeout(() => {
     announce.classList.add("fade-out");
   }, 2000);
 
-  // After 3s total, transition to active session mode
+  // After 3s total, transition to active session
   setTimeout(() => {
-    if (container) container.innerHTML = "";
+    if (container) clearContainer(container);
     isShowingCard = false;
 
-    // Show nickname bar with CHALLENGER
-    const bar = document.getElementById("nickname-bar");
-    const el = document.getElementById("nickname");
-    if (bar) bar.style.display = "flex";
+    // Show challenger name
+    const el = document.getElementById("challenger-name");
     if (el) el.textContent = "CHALLENGER";
 
-    // Start session timer and resume idle pop-ins
     startSessionTimer();
     startIdlePopIns();
   }, 3000);
 }
 
 function handleSessionEnd(data) {
-  // Session ended — stop timer, report card will arrive as a separate message
   stopSessionTimer();
   stopIdlePopIns();
   isShowingCard = true;
@@ -247,13 +205,7 @@ function showReportCard(data) {
 
   const container = document.getElementById("main-content");
   if (!container) return;
-  container.innerHTML = "";
-
-  // Hide nickname bar and bottom ticker
-  const nicknameBar = document.getElementById("nickname-bar");
-  const bottomTicker = document.querySelector(".bottom-ticker");
-  if (nicknameBar) nicknameBar.style.display = "none";
-  if (bottomTicker) bottomTicker.style.display = "none";
+  clearContainer(container);
 
   // Create report card container
   const card = document.createElement("div");
@@ -322,7 +274,7 @@ function showReportCard(data) {
     });
   }, 8000);
 
-  // t=14s: Superlatives bounce in one at a time (2s each)
+  // t=14s: Superlatives bounce in (2s each)
   const superlatives = data.superlatives || [];
   superlatives.forEach((text, i) => {
     rcTimeout(() => {
@@ -341,19 +293,18 @@ function showReportCard(data) {
     card.appendChild(closer);
   }, 22000);
 
-  // t=26s: Hold for 8 seconds (screenshot moment)
-  // t=34s: Fade out
+  // t=34s: Fade out → ad screen
   rcTimeout(() => {
     card.classList.add("fade-out");
     rcTimeout(() => {
-      container.innerHTML = "";
+      clearContainer(container);
       isShowingCard = false;
       showAdScreen();
     }, 1000);
   }, 34000);
 }
 
-// --- Stub Functions (implemented in later tasks) ---
+// --- Fact Card — Liberty Styled Blocks ---
 
 function showFactCard(data) {
   stopIdlePopIns();
@@ -361,164 +312,226 @@ function showFactCard(data) {
 
   const container = document.getElementById("main-content");
   if (!container) return;
+  clearContainer(container);
 
-  // Clear any existing card or idle stat
-  container.innerHTML = "";
+  // Claim block — asymmetric left
+  const claimBlock = document.createElement("div");
+  claimBlock.className = "claim-block slide-in";
+  const claimLabel = document.createElement("div");
+  claimLabel.className = "claim-label";
+  claimLabel.textContent = "\u2733 CLAIM";
+  const claimText = document.createElement("div");
+  claimText.className = "claim-text";
+  claimText.textContent = data.claim || "";
+  claimBlock.appendChild(claimLabel);
+  claimBlock.appendChild(claimText);
+  container.appendChild(claimBlock);
 
-  // Create card
-  const card = document.createElement("div");
-  card.className = "fact-card";
+  // Verdict block — centered, massive
+  const verdictBlock = document.createElement("div");
+  verdictBlock.className = "verdict-block";
+  verdictBlock.style.opacity = "0";
+  const verdictText = document.createElement("div");
+  verdictText.className = "verdict-text";
+  verdictText.textContent = data.verdict || "";
+  verdictBlock.appendChild(verdictText);
+  container.appendChild(verdictBlock);
 
-  const claimEl = document.createElement("div");
-  claimEl.className = "claim";
-  claimEl.textContent = data.claim || "";
+  // Fact block — asymmetric right
+  const factBlock = document.createElement("div");
+  factBlock.className = "fact-block";
+  factBlock.style.opacity = "0";
+  const factLabel = document.createElement("div");
+  factLabel.className = "fact-label";
+  factLabel.textContent = "\u25B6 FACT";
+  const factValue = document.createElement("div");
+  factValue.className = "fact-value";
+  factValue.textContent = data.fact || "";
+  factBlock.appendChild(factLabel);
+  factBlock.appendChild(factValue);
+  container.appendChild(factBlock);
 
-  const verdictEl = document.createElement("div");
-  verdictEl.className = "verdict";
-  verdictEl.textContent = data.verdict || "";
-  verdictEl.style.opacity = "0";
+  // Humor block
+  const humorWrap = document.createElement("div");
+  humorWrap.style.opacity = "0";
+  humorWrap.style.padding = "8px 0";
+  const humorBlock = document.createElement("div");
+  humorBlock.className = "humor-block";
+  const humorLabel = document.createElement("div");
+  humorLabel.className = "humor-label";
+  humorLabel.textContent = "\u2733 HUMOR";
+  const humorValue = document.createElement("div");
+  humorValue.className = "humor-value";
+  humorValue.textContent = data.humor || "";
+  humorBlock.appendChild(humorLabel);
+  humorBlock.appendChild(humorValue);
+  humorWrap.appendChild(humorBlock);
+  container.appendChild(humorWrap);
 
-  const factEl = document.createElement("div");
-  factEl.className = "fact-text";
-  factEl.textContent = data.fact || "";
-  factEl.style.opacity = "0";
-
-  const humorEl = document.createElement("div");
-  humorEl.className = "humor";
-  humorEl.textContent = data.humor || "";
-  humorEl.style.opacity = "0";
-
-  const sourceEl = document.createElement("div");
-  sourceEl.className = "source";
-  sourceEl.textContent = data.source ? `SOURCE: ${data.source}` : "";
-  sourceEl.style.opacity = "0";
-
-  card.appendChild(claimEl);
-  card.appendChild(verdictEl);
-  card.appendChild(factEl);
-  card.appendChild(humorEl);
-  card.appendChild(sourceEl);
-
-  // Add card with slide-in
-  card.classList.add("slide-in");
-  container.appendChild(card);
+  // Source block — narrow centered
+  const sourceBlock = document.createElement("div");
+  sourceBlock.className = "source-block";
+  sourceBlock.style.opacity = "0";
+  const sourceLabel = document.createElement("div");
+  sourceLabel.className = "source-label";
+  sourceLabel.textContent = "SOURCE";
+  const sourceValue = document.createElement("div");
+  sourceValue.className = "source-value";
+  sourceValue.textContent = data.source || "";
+  sourceBlock.appendChild(sourceLabel);
+  sourceBlock.appendChild(sourceValue);
+  container.appendChild(sourceBlock);
 
   // Staggered animations
   setTimeout(() => {
-    verdictEl.style.opacity = "";
-    verdictEl.classList.add("slam-in");
+    verdictBlock.style.opacity = "";
+    verdictBlock.classList.add("slam-in");
   }, 300);
 
   setTimeout(() => {
-    factEl.style.opacity = "";
-    factEl.classList.add("bounce-in");
+    factBlock.style.opacity = "";
+    factBlock.classList.add("bounce-in");
   }, 600);
 
   setTimeout(() => {
-    humorEl.style.opacity = "";
-    humorEl.classList.add("bounce-in");
+    humorWrap.style.opacity = "";
+    humorWrap.classList.add("bounce-in");
   }, 900);
 
   setTimeout(() => {
-    sourceEl.style.opacity = "";
-    sourceEl.classList.add("bounce-in");
+    sourceBlock.style.opacity = "";
+    sourceBlock.classList.add("bounce-in");
   }, 1200);
 
   // Fade out after 18 seconds
   setTimeout(() => {
-    card.classList.add("fade-out");
-    // Remove from DOM after fade-out completes (1s)
+    container.querySelectorAll(".claim-block, .verdict-block, .fact-block, .humor-block, .source-block").forEach(el => {
+      el.classList.add("fade-out");
+    });
+    humorWrap.classList.add("fade-out");
     setTimeout(() => {
-      if (card.parentNode) {
-        card.parentNode.removeChild(card);
-      }
+      clearContainer(container);
       isShowingCard = false;
       startIdlePopIns();
     }, 1000);
   }, 18000);
 }
 
+// --- Loop Breaker — Threat Alert ---
+
 function showLoopBreaker(data) {
   stopIdlePopIns();
   isShowingCard = true;
   const container = document.getElementById("main-content");
   if (!container) return;
+  clearContainer(container);
 
-  // Clear any existing card
-  container.innerHTML = "";
+  // Alert header
+  const alertHeader = document.createElement("div");
+  alertHeader.className = "loop-alert-header shake";
+  const headerText = document.createElement("div");
+  headerText.className = "loop-header-text";
+  headerText.textContent = "\uD83D\uDD01 BROKEN RECORD ALERT";
+  alertHeader.appendChild(headerText);
+  container.appendChild(alertHeader);
 
-  // Create card
-  const card = document.createElement("div");
-  card.className = "loop-breaker";
+  // Claim block — red-bordered variant
+  const claimBlock = document.createElement("div");
+  claimBlock.className = "claim-block loop-claim slide-in";
+  const claimLabel = document.createElement("div");
+  claimLabel.className = "claim-label";
+  claimLabel.textContent = "\u2733 REPEATED CLAIM";
+  const claimText = document.createElement("div");
+  claimText.className = "claim-text";
+  claimText.textContent = data.claim || "";
+  claimBlock.appendChild(claimLabel);
+  claimBlock.appendChild(claimText);
+  container.appendChild(claimBlock);
 
-  const headerEl = document.createElement("div");
-  headerEl.className = "loop-header";
-  headerEl.textContent = "\uD83D\uDD01 BROKEN RECORD ALERT";
+  // Verdict
+  const verdictBlock = document.createElement("div");
+  verdictBlock.className = "verdict-block";
+  verdictBlock.style.opacity = "0";
+  const verdictText = document.createElement("div");
+  verdictText.className = "verdict-text";
+  verdictText.textContent = data.verdict || "";
+  verdictBlock.appendChild(verdictText);
+  container.appendChild(verdictBlock);
 
-  const claimEl = document.createElement("div");
-  claimEl.className = "claim";
-  claimEl.textContent = data.claim || "";
+  // Fact
+  const factBlock = document.createElement("div");
+  factBlock.className = "fact-block";
+  factBlock.style.opacity = "0";
+  const factLabel = document.createElement("div");
+  factLabel.className = "fact-label";
+  factLabel.textContent = "\u25B6 FACT";
+  const factValue = document.createElement("div");
+  factValue.className = "fact-value";
+  factValue.textContent = data.fact || "";
+  factBlock.appendChild(factLabel);
+  factBlock.appendChild(factValue);
+  container.appendChild(factBlock);
 
-  const verdictEl = document.createElement("div");
-  verdictEl.className = "verdict";
-  verdictEl.textContent = data.verdict || "";
-  verdictEl.style.opacity = "0";
+  // Humor
+  const humorWrap = document.createElement("div");
+  humorWrap.style.opacity = "0";
+  humorWrap.style.padding = "8px 0";
+  const humorBlock = document.createElement("div");
+  humorBlock.className = "humor-block";
+  const humorLabel = document.createElement("div");
+  humorLabel.className = "humor-label";
+  humorLabel.textContent = "\u2733 HUMOR";
+  const humorValue = document.createElement("div");
+  humorValue.className = "humor-value";
+  humorValue.textContent = data.humor || "";
+  humorBlock.appendChild(humorLabel);
+  humorBlock.appendChild(humorValue);
+  humorWrap.appendChild(humorBlock);
+  container.appendChild(humorWrap);
 
-  const factEl = document.createElement("div");
-  factEl.className = "fact-text";
-  factEl.textContent = data.fact || "";
-  factEl.style.opacity = "0";
-
-  const humorEl = document.createElement("div");
-  humorEl.className = "humor";
-  humorEl.textContent = data.humor || "";
-  humorEl.style.opacity = "0";
-
-  const sourceEl = document.createElement("div");
-  sourceEl.className = "source";
-  sourceEl.textContent = data.source ? `SOURCE: ${data.source}` : "";
-  sourceEl.style.opacity = "0";
-
-  card.appendChild(headerEl);
-  card.appendChild(claimEl);
-  card.appendChild(verdictEl);
-  card.appendChild(factEl);
-  card.appendChild(humorEl);
-  card.appendChild(sourceEl);
-
-  // Add card with slide-in and shake
-  card.classList.add("slide-in", "shake");
-  container.appendChild(card);
+  // Source
+  const sourceBlock = document.createElement("div");
+  sourceBlock.className = "source-block";
+  sourceBlock.style.opacity = "0";
+  const sourceLabel = document.createElement("div");
+  sourceLabel.className = "source-label";
+  sourceLabel.textContent = "SOURCE";
+  const sourceValue = document.createElement("div");
+  sourceValue.className = "source-value";
+  sourceValue.textContent = data.source || "";
+  sourceBlock.appendChild(sourceLabel);
+  sourceBlock.appendChild(sourceValue);
+  container.appendChild(sourceBlock);
 
   // Staggered animations
   setTimeout(() => {
-    verdictEl.style.opacity = "";
-    verdictEl.classList.add("slam-in");
+    verdictBlock.style.opacity = "";
+    verdictBlock.classList.add("slam-in");
   }, 300);
 
   setTimeout(() => {
-    factEl.style.opacity = "";
-    factEl.classList.add("bounce-in");
+    factBlock.style.opacity = "";
+    factBlock.classList.add("bounce-in");
   }, 600);
 
   setTimeout(() => {
-    humorEl.style.opacity = "";
-    humorEl.classList.add("bounce-in");
+    humorWrap.style.opacity = "";
+    humorWrap.classList.add("bounce-in");
   }, 900);
 
   setTimeout(() => {
-    sourceEl.style.opacity = "";
-    sourceEl.classList.add("bounce-in");
+    sourceBlock.style.opacity = "";
+    sourceBlock.classList.add("bounce-in");
   }, 1200);
 
   // Fade out after 22 seconds
   setTimeout(() => {
-    card.classList.add("fade-out");
-    // Remove from DOM after fade-out completes (1s)
+    container.querySelectorAll(".loop-alert-header, .claim-block, .verdict-block, .fact-block, .humor-block, .source-block").forEach(el => {
+      el.classList.add("fade-out");
+    });
+    humorWrap.classList.add("fade-out");
     setTimeout(() => {
-      if (card.parentNode) {
-        card.parentNode.removeChild(card);
-      }
+      clearContainer(container);
       isShowingCard = false;
       startIdlePopIns();
     }, 1000);
@@ -619,48 +632,23 @@ function startSpeechRecognition() {
   }
 }
 
-// --- Idle Ticker ---
-// NOTE: Uses innerHTML with hardcoded content only (no user input) — safe from XSS.
+// --- Idle Debate Prompts ---
 
-function startIdleTicker() {
-  const track = document.querySelector(".ticker-track");
-  if (!track) return;
-
-  // Build ticker items using safe DOM methods
-  for (let copy = 0; copy < 2; copy++) {
-    SCIENCE_FACTS.forEach((fact) => {
-      const span = document.createElement("span");
-      span.textContent = fact;
-      track.appendChild(span);
-    });
-  }
-
-  // Apply the scrolling animation class
-  track.classList.add("ticker-scroll");
-}
-
-// --- Idle Fun Stats Pop-ins ---
-
-function getRandomIdleInterval() {
-  // Random interval between 30-45 seconds
-  return 30000 + Math.random() * 15000;
-}
-
-function showIdleStat() {
+function showDebatePrompt() {
   if (isShowingCard) return;
 
   const container = document.getElementById("main-content");
   if (!container) return;
 
-  // Pick a random fun stat
-  const stat = FUN_STATS[Math.floor(Math.random() * FUN_STATS.length)];
+  const prompt = DEBATE_PROMPTS[debatePromptIndex];
+  debatePromptIndex = (debatePromptIndex + 1) % DEBATE_PROMPTS.length;
 
   const el = document.createElement("div");
-  el.className = "idle-stat bounce-in";
-  el.textContent = stat;
+  el.className = "debate-prompt bounce-in";
+  el.textContent = prompt;
   container.appendChild(el);
 
-  // Display for 8 seconds, then fade out and remove
+  // Display for 12 seconds, then fade out
   setTimeout(() => {
     el.classList.add("fade-out");
     setTimeout(() => {
@@ -668,15 +656,14 @@ function showIdleStat() {
         el.parentNode.removeChild(el);
       }
     }, 1000);
-  }, 8000);
+  }, 12000);
 
-  // Schedule next pop-in
-  idleTimer = setTimeout(showIdleStat, getRandomIdleInterval());
+  idleTimer = setTimeout(showDebatePrompt, 14000);
 }
 
 function startIdlePopIns() {
   stopIdlePopIns();
-  idleTimer = setTimeout(showIdleStat, getRandomIdleInterval());
+  idleTimer = setTimeout(showDebatePrompt, 2000);
 }
 
 function stopIdlePopIns() {
@@ -684,10 +671,9 @@ function stopIdlePopIns() {
     clearTimeout(idleTimer);
     idleTimer = null;
   }
-  // Remove any existing idle stat from the DOM
   const container = document.getElementById("main-content");
   if (container) {
-    const existing = container.querySelectorAll(".idle-stat");
+    const existing = container.querySelectorAll(".debate-prompt");
     existing.forEach((el) => el.remove());
   }
 }
@@ -701,8 +687,7 @@ function showMomJokePileOn(data) {
 
   const container = document.getElementById("main-content");
   if (!container) return;
-
-  container.innerHTML = "";
+  clearContainer(container);
 
   const alert = document.createElement("div");
   alert.className = "mom-joke-alert";
@@ -710,7 +695,7 @@ function showMomJokePileOn(data) {
 
   // t=0: Show header
   const header = document.createElement("div");
-  header.className = "alert-header shake glow-red";
+  header.className = "alert-header shake";
   header.textContent = "MOM JOKE DETECTED";
   alert.appendChild(header);
 
@@ -726,18 +711,18 @@ function showMomJokePileOn(data) {
     alert.appendChild(joke1);
   }, 2000);
 
-  // t=5s: Second joke (larger)
+  // t=5s: Second joke
   setTimeout(() => {
     const existing = alert.querySelector(".pile-on");
     if (existing) existing.remove();
     const joke2 = document.createElement("div");
     joke2.className = "pile-on slam-in";
-    joke2.style.fontSize = "clamp(1.6rem, 3.8vw, 3rem)";
+    joke2.style.fontSize = "46px";
     joke2.textContent = jokes[1] || "";
     alert.appendChild(joke2);
   }, 5000);
 
-  // t=8s: Third joke (largest, gold)
+  // t=8s: Third joke (gold, largest)
   setTimeout(() => {
     const existing = alert.querySelector(".pile-on");
     if (existing) existing.remove();
@@ -747,7 +732,7 @@ function showMomJokePileOn(data) {
     alert.appendChild(joke3);
   }, 8000);
 
-  // t=11s: Mom joke count badge
+  // t=11s: Counter badge
   setTimeout(() => {
     const badge = document.createElement("div");
     badge.className = "mom-counter bounce-in";
@@ -755,7 +740,7 @@ function showMomJokePileOn(data) {
     alert.appendChild(badge);
   }, 11000);
 
-  // t=15s: Fade out and clean up
+  // t=15s: Fade out
   setTimeout(() => {
     alert.classList.add("fade-out");
     setTimeout(() => {
@@ -771,23 +756,12 @@ function showMomJokePileOn(data) {
 // --- Ad Screen ---
 
 function showAdScreen() {
-  // Clear main content
   const container = document.getElementById("main-content");
-  if (container) container.innerHTML = "";
+  if (container) clearContainer(container);
 
-  // Hide nickname bar, bottom ticker, and top banner
-  const nicknameBar = document.getElementById("nickname-bar");
-  const bottomTicker = document.querySelector(".bottom-ticker");
-  const topBanner = document.querySelector(".top-banner");
-  if (nicknameBar) nicknameBar.style.display = "none";
-  if (bottomTicker) bottomTicker.style.display = "none";
-  if (topBanner) topBanner.style.display = "none";
-
-  // Stop idle pop-ins
   stopIdlePopIns();
   isShowingCard = true;
 
-  // Create full-screen overlay
   const overlay = document.createElement("div");
   overlay.className = "ad-screen";
   overlay.id = "ad-screen";
@@ -811,29 +785,17 @@ function dismissAdScreen() {
 }
 
 function returnToStandby() {
-  // Dismiss ad screen if showing
   dismissAdScreen();
 
-  // Clear main content
   const container = document.getElementById("main-content");
-  if (container) container.innerHTML = "";
+  if (container) clearContainer(container);
 
-  // Restore top banner
-  const topBanner = document.querySelector(".top-banner");
-  if (topBanner) topBanner.style.display = "flex";
+  // Reset challenger name
+  const el = document.getElementById("challenger-name");
+  if (el) el.textContent = "AWAITING TARGET";
 
-  // Restore bottom ticker
-  const bottomTicker = document.querySelector(".bottom-ticker");
-  if (bottomTicker) bottomTicker.style.display = "flex";
-
-  // Hide nickname bar (standby = no active session)
-  const nicknameBar = document.getElementById("nickname-bar");
-  if (nicknameBar) nicknameBar.style.display = "none";
-
-  // Stop session timer
   stopSessionTimer();
 
-  // Resume idle pop-ins
   isShowingCard = false;
   startIdlePopIns();
 }
@@ -841,22 +803,18 @@ function returnToStandby() {
 // --- Payment Alert ---
 
 function showPaymentAlert(data) {
-  // Full-page takeover that interrupts whatever is showing
-  // data = { type: 'payment', source: 'stripe'|'patreon', name: 'John', amount: '$5.00', message: 'Great stream!' }
-
-  // 1. Full-screen white flash overlay (200ms, fades quickly)
+  // Gold flash overlay
   const flashOverlay = document.createElement("div");
   flashOverlay.className = "payment-overlay";
   document.body.appendChild(flashOverlay);
 
-  // Remove flash overlay after animation completes
   setTimeout(() => {
     if (flashOverlay.parentNode) flashOverlay.remove();
   }, 500);
 
-  // 2. Create the payment alert card
-  const alert = document.createElement("div");
-  alert.className = "payment-alert bounce-in";
+  // Payment alert card
+  const alertEl = document.createElement("div");
+  alertEl.className = "payment-alert bounce-in";
 
   const sourceEl = document.createElement("div");
   sourceEl.className = "payment-source";
@@ -870,24 +828,24 @@ function showPaymentAlert(data) {
   amountEl.className = "payment-amount";
   amountEl.textContent = data.amount || "";
 
-  alert.appendChild(sourceEl);
-  alert.appendChild(nameEl);
-  alert.appendChild(amountEl);
+  alertEl.appendChild(sourceEl);
+  alertEl.appendChild(nameEl);
+  alertEl.appendChild(amountEl);
 
   if (data.message) {
     const msgEl = document.createElement("div");
     msgEl.className = "payment-message";
     msgEl.textContent = data.message;
-    alert.appendChild(msgEl);
+    alertEl.appendChild(msgEl);
   }
 
-  document.body.appendChild(alert);
+  document.body.appendChild(alertEl);
 
-  // 3. Hold for 8 seconds, then fade out and remove
+  // Hold 8s, then fade out
   setTimeout(() => {
-    alert.classList.add("fade-out");
+    alertEl.classList.add("fade-out");
     setTimeout(() => {
-      if (alert.parentNode) alert.remove();
+      if (alertEl.parentNode) alertEl.remove();
     }, 1000);
   }, 8000);
 }
@@ -897,25 +855,23 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "d" || e.key === "D") {
     showFactCard({
       claim: "VACCINES CAUSE AUTISM",
-      verdict: "FALSE. EXPOSED.",
-      fact: "1.2M kids studied. Zero link found.",
-      humor: "Correlation \u2260 causation. Unless you\u2019re a Facebook researcher.",
-      humor_style: "sarcastic",
-      source: "Lancet, 2014 (RETRACTED)"
+      verdict: "DEBUNKED",
+      fact: "THE ORIGINAL 1998 WAKEFIELD STUDY WAS RETRACTED FOR FRAUD. DOZENS OF STUDIES WITH MILLIONS OF CHILDREN FOUND ZERO LINK.",
+      humor: "IMAGINE TRUSTING SOMEONE WHO LOST THEIR MEDICAL LICENSE OVER THOUSANDS OF ACTUAL SCIENTISTS.",
+      source: "LANCET RETRACTION (2010); TAYLOR ET AL., VACCINE, 2014"
     });
   }
   if (e.key === "r" || e.key === "R") {
     showReportCard({
-      nickname: "DR. YOUTUBE",
-      nicknameHistory: ["CHALLENGER", "THE GOOGLER", "DR. YOUTUBE"],
+      nickname: "CAPTAIN ANECDOTE",
       grade: "F-",
-      gradeJoke: "Lower than snake belly in a wagon rut",
+      gradeJoke: "LOWER THAN SNAKE BELLY IN A WAGON RUT",
       superlatives: [
-        "Most Creative Misuse of Statistics",
-        "Lifetime Achievement in Ignoring Peer Review",
-        "Gold Medal in Moving the Goalposts"
+        "MOST CREATIVE MISUSE OF STATISTICS",
+        "LIFETIME ACHIEVEMENT IN IGNORING PEER REVIEW",
+        "GOLD MEDAL IN MOVING THE GOALPOSTS"
       ],
-      closer: "Today's debate brought to you by: Confirmation Bias",
+      closer: "TODAY'S DEBATE BROUGHT TO YOU BY: CONFIRMATION BIAS",
       stats: { claimCount: 14, debunkedCount: 11, misleadingCount: 3, loopBreakerCount: 4, momJokeCount: 3 }
     });
   }
@@ -929,20 +885,18 @@ document.addEventListener("keydown", (e) => {
     showPaymentAlert({
       type: "payment",
       source: "stripe",
-      name: "John",
+      name: "JOHN",
       amount: "$5.00",
-      message: "Love the stream!"
+      message: "LOVE THE STREAM!"
     });
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
       claim: "NATURAL IMMUNITY",
       verdict: "MISLEADING",
-      fact: "Vaccines train immunity without the risk.",
-      humor: "BOSS DEFEATED: \u2018just get sick\u2019 strategy \uD83D\uDCA5 K.O.",
-      humor_style: "boss_battle",
-      source: "NEJM, 2022",
-      loopKeyword: "natural immunity"
+      fact: "VACCINES TRAIN IMMUNITY WITHOUT THE RISK OF SEVERE DISEASE OR DEATH.",
+      humor: "THE 'JUST GET SICK' STRATEGY — BROUGHT TO YOU BY PEOPLE WHO NEVER TOOK STATISTICS.",
+      source: "NEJM, 2022"
     });
   }
 });
@@ -950,7 +904,6 @@ document.addEventListener("keydown", (e) => {
 // --- Init ---
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
-  startIdleTicker();
   startIdlePopIns();
   startSpeechRecognition();
 });

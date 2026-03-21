@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, initial-scale=1.0">
+<title>THE GREAT BOARD OF SCIENCE — Patriotic Stamps</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #002868;
+    --red: #BF0A30;
+    --white: #ffffff;
+    --cream: #f5f0e0;
+    --gold: #c9a84c;
+    --dark-cream: #e8dfc8;
+    --dark-blue: #001a40;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: var(--cream);
+    color: var(--blue);
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  /* Cream parchment texture via gradient */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 30%, rgba(0,40,104,0.04) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, rgba(191,10,48,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 1080px;
+    height: 1920px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 32px;
+  }
+
+  /* ============ PERFORATED BORDER MIXIN ============ */
+  .perforated {
+    border: 4px dashed var(--blue);
+    border-spacing: 8px;
+  }
+
+  .stamp-frame {
+    border: 6px solid var(--blue);
+    outline: 3px solid var(--blue);
+    outline-offset: 6px;
+    position: relative;
+  }
+
+  /* ============ CIRCULAR SEAL ============ */
+  .seal {
+    width: 140px;
+    height: 140px;
+    position: absolute;
+    z-index: 5;
+  }
+
+  .seal svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .seal-tl { top: -10px; left: -10px; }
+  .seal-tr { top: -10px; right: -10px; }
+  .seal-br { bottom: -10px; right: -10px; }
+  .seal-corner { top: 10px; right: 40px; }
+
+  /* ============ HEADER ============ */
+  .header-wrap {
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  .header-outer {
+    border: 5px dashed var(--blue);
+    padding: 6px;
+    background: var(--cream);
+  }
+
+  .header-inner {
+    border: 6px solid var(--blue);
+    outline: 3px solid var(--gold);
+    outline-offset: 4px;
+    background: var(--blue);
+    padding: 20px 24px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-inner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0px, var(--gold) 14px, transparent 14px, transparent 20px);
+  }
+
+  .header-inner::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--gold) 0px, var(--gold) 14px, transparent 14px, transparent 20px);
+  }
+
+  .header-stars {
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 12px;
+    margin-bottom: 4px;
+  }
+
+  .header-title {
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.0;
+    letter-spacing: 4px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  }
+
+  .header-subtitle {
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 8px;
+    margin-top: 6px;
+  }
+
+  /* ============ SEAL DECORATION (standalone) ============ */
+  .seal-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0 12px;
+    position: relative;
+  }
+
+  .seal-standalone {
+    width: 160px;
+    height: 160px;
+  }
+
+  .seal-standalone svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.15));
+  }
+
+  .seal-lines {
+    flex: 1;
+    height: 4px;
+    margin: 0 16px;
+    border-top: 3px dashed var(--blue);
+    border-bottom: 3px dashed var(--blue);
+    padding: 4px 0;
+    opacity: 0.5;
+  }
+
+  /* ============ SUBJECT LINE ============ */
+  .subject-wrap {
+    margin-bottom: 14px;
+  }
+
+  .subject-outer {
+    border: 4px dashed var(--red);
+    padding: 5px;
+    background: var(--cream);
+  }
+
+  .subject-inner {
+    background: var(--red);
+    padding: 14px 24px;
+    text-align: center;
+    border: 3px solid var(--dark-cream);
+    position: relative;
+  }
+
+  .subject-label {
+    font-size: 30px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 6px;
+  }
+
+  .subject-name {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    line-height: 1.1;
+  }
+
+  /* ============ FACT CHECK STAMP CARD ============ */
+  .stamp-card-wrap {
+    flex: 1;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .stamp-card-perf {
+    border: 5px dashed var(--blue);
+    padding: 7px;
+    background: var(--cream);
+    height: 100%;
+  }
+
+  .stamp-card {
+    border: 6px solid var(--blue);
+    outline: 3px solid var(--gold);
+    outline-offset: 4px;
+    background: var(--white);
+    padding: 22px 28px 18px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Corner ornaments */
+  .stamp-card::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px;
+    width: 50px; height: 50px;
+    border-top: 4px solid var(--gold);
+    border-left: 4px solid var(--gold);
+  }
+
+  .stamp-card::after {
+    content: '';
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 50px; height: 50px;
+    border-top: 4px solid var(--gold);
+    border-right: 4px solid var(--gold);
+  }
+
+  .stamp-denomination {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 10px;
+    margin-bottom: 10px;
+  }
+
+  /* Claim */
+  .claim-section {
+    background: var(--cream);
+    border: 3px solid var(--blue);
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    text-align: center;
+    position: relative;
+  }
+
+  .claim-label {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--blue);
+    letter-spacing: 6px;
+    opacity: 0.6;
+  }
+
+  .claim-text {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--blue);
+    line-height: 1.15;
+    margin-top: 4px;
+  }
+
+  /* DEBUNKED stamp */
+  .debunked-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    position: relative;
+  }
+
+  .debunked-stamp {
+    font-size: 100px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 8px;
+    transform: rotate(-6deg);
+    border: 8px solid var(--red);
+    padding: 4px 36px;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(191,10,48,0.2);
+    box-shadow: inset 0 0 20px rgba(191,10,48,0.1);
+    position: relative;
+    background: rgba(255,255,255,0.85);
+  }
+
+  .debunked-stamp::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 4px dashed var(--red);
+    opacity: 0.4;
+  }
+
+  /* Perforated divider */
+  .perf-divider {
+    border: none;
+    border-top: 4px dashed var(--blue);
+    margin: 12px 0;
+    opacity: 0.35;
+  }
+
+  /* Fact / Humor / Source */
+  .detail-row {
+    margin-bottom: 10px;
+  }
+
+  .detail-label {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 4px;
+    display: inline;
+  }
+
+  .detail-text {
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--blue);
+    line-height: 1.2;
+    margin-top: 2px;
+  }
+
+  .detail-text.humor {
+    font-size: 32px;
+    color: var(--dark-blue);
+  }
+
+  .detail-text.source {
+    font-size: 28px;
+    color: #555;
+    font-weight: 500;
+  }
+
+  /* Bottom corners of stamp card */
+  .stamp-card-bottom-corners {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    height: 50px;
+    pointer-events: none;
+  }
+
+  .stamp-card-bottom-corners::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 50px; height: 50px;
+    border-bottom: 4px solid var(--gold);
+    border-left: 4px solid var(--gold);
+  }
+
+  .stamp-card-bottom-corners::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 50px; height: 50px;
+    border-bottom: 4px solid var(--gold);
+    border-right: 4px solid var(--gold);
+  }
+
+  /* ============ BOTTOM BANNER ============ */
+  .bottom-banner-wrap {
+    margin-top: auto;
+  }
+
+  .bottom-perf {
+    border: 4px dashed var(--blue);
+    padding: 5px;
+  }
+
+  .bottom-banner {
+    background: var(--blue);
+    border: 3px solid var(--gold);
+    padding: 18px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .bottom-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: repeating-linear-gradient(90deg, var(--red) 0px, var(--red) 30px, var(--white) 30px, var(--white) 60px);
+  }
+
+  .bottom-text {
+    font-size: 50px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 3px;
+    line-height: 1.15;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+
+  .bottom-seal-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 6px;
+  }
+
+  .mini-seal {
+    width: 36px;
+    height: 36px;
+  }
+
+  .mini-seal svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .bottom-sub {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: 6px;
+    margin-top: 4px;
+  }
+
+  /* ============ ANIMATIONS ============ */
+  @keyframes sealSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes stampSlam {
+    0% { transform: rotate(-6deg) scale(1); }
+    50% { transform: rotate(-6deg) scale(1.04); }
+    100% { transform: rotate(-6deg) scale(1); }
+  }
+
+  @keyframes perfShimmer {
+    0% { border-color: var(--blue); }
+    50% { border-color: var(--gold); }
+    100% { border-color: var(--blue); }
+  }
+
+  @keyframes starPulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .seal-standalone svg {
+    animation: sealSpin 20s linear infinite;
+  }
+
+  .debunked-stamp {
+    animation: stampSlam 3s ease-in-out infinite;
+  }
+
+  .header-outer {
+    animation: perfShimmer 4s ease-in-out infinite;
+  }
+
+  .header-stars {
+    animation: starPulse 2s ease-in-out infinite;
+  }
+
+  /* Corner seal rotation */
+  .corner-seal-wrap {
+    position: absolute;
+    z-index: 10;
+  }
+
+  .corner-seal-wrap svg {
+    animation: sealSpin 30s linear infinite;
+  }
+
+  .corner-tl {
+    top: 6px;
+    left: 6px;
+    width: 90px;
+    height: 90px;
+  }
+
+  .corner-br {
+    bottom: 6px;
+    right: 6px;
+    width: 90px;
+    height: 90px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Corner seal decorations on the body -->
+<div class="corner-seal-wrap corner-tl">
+  <svg viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44" fill="none" stroke="#c9a84c" stroke-width="2"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#002868" stroke-width="2"/>
+    <polygon points="50,18 53,40 74,30 58,46 80,50 58,54 74,70 53,60 50,82 47,60 26,70 42,54 20,50 42,46 26,30 47,40" fill="#c9a84c" opacity="0.3"/>
+    <text x="50" y="53" text-anchor="middle" font-family="Oswald,sans-serif" font-size="9" font-weight="700" fill="#002868">USA</text>
+  </svg>
+</div>
+
+<div class="corner-seal-wrap corner-br">
+  <svg viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="44" fill="none" stroke="#c9a84c" stroke-width="2"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#c9a84c" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#002868" stroke-width="2"/>
+    <polygon points="50,18 53,40 74,30 58,46 80,50 58,54 74,70 53,60 50,82 47,60 26,70 42,54 20,50 42,46 26,30 47,40" fill="#c9a84c" opacity="0.3"/>
+    <text x="50" y="53" text-anchor="middle" font-family="Oswald,sans-serif" font-size="9" font-weight="700" fill="#002868">USA</text>
+  </svg>
+</div>
+
+<div class="container">
+
+  <!-- ============ 1. HEADER ============ -->
+  <div class="header-wrap">
+    <div class="header-outer">
+      <div class="header-inner">
+        <div class="header-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+        <div class="header-title">THE GREAT BOARD<br>OF SCIENCE</div>
+        <div class="header-subtitle">&#9670; OFFICIAL PROCEEDINGS &#9670;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 2. CIRCULAR SEAL ============ -->
+  <div class="seal-section">
+    <div class="seal-lines"></div>
+    <div class="seal-standalone">
+      <svg viewBox="0 0 200 200">
+        <!-- Outer ring -->
+        <circle cx="100" cy="100" r="95" fill="none" stroke="#002868" stroke-width="4"/>
+        <circle cx="100" cy="100" r="88" fill="none" stroke="#c9a84c" stroke-width="2"/>
+        <!-- Serrated edge -->
+        <circle cx="100" cy="100" r="82" fill="none" stroke="#002868" stroke-width="2" stroke-dasharray="6 4"/>
+        <!-- Inner circle -->
+        <circle cx="100" cy="100" r="60" fill="#002868"/>
+        <circle cx="100" cy="100" r="55" fill="none" stroke="#c9a84c" stroke-width="2"/>
+        <!-- Star -->
+        <polygon points="100,52 108,78 136,78 114,94 122,120 100,104 78,120 86,94 64,78 92,78" fill="#c9a84c"/>
+        <!-- Circular text -->
+        <defs>
+          <path id="topArc" d="M 30,100 a 70,70 0 0,1 140,0"/>
+          <path id="bottomArc" d="M 170,100 a 70,70 0 0,1 -140,0"/>
+        </defs>
+        <text font-family="Oswald,sans-serif" font-size="13" font-weight="700" fill="#002868" letter-spacing="3">
+          <textPath href="#topArc" startOffset="50%" text-anchor="middle">UNITED STATES OF</textPath>
+        </text>
+        <text font-family="Oswald,sans-serif" font-size="13" font-weight="700" fill="#002868" letter-spacing="5">
+          <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">&#9733; SCIENCE &#9733;</textPath>
+        </text>
+        <!-- Inner text -->
+        <text x="100" y="140" text-anchor="middle" font-family="Oswald,sans-serif" font-size="10" font-weight="600" fill="#c9a84c" letter-spacing="2">CERTIFIED</text>
+      </svg>
+    </div>
+    <div class="seal-lines"></div>
+  </div>
+
+  <!-- ============ 3. SUBJECT LINE ============ -->
+  <div class="subject-wrap">
+    <div class="subject-outer">
+      <div class="subject-inner">
+        <div class="subject-label">&#9670; SUBJECT &#9670;</div>
+        <div class="subject-name">YOUTUBE GUY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 4. FACT CHECK STAMP CARD ============ -->
+  <div class="stamp-card-wrap">
+    <div class="stamp-card-perf">
+      <div class="stamp-card">
+        <div class="stamp-denomination">&#9733; OFFICIAL FACT CHECK &#8212; FIRST CLASS &#9733;</div>
+
+        <!-- CLAIM -->
+        <div class="claim-section">
+          <div class="claim-label">&#9670; CLAIM &#9670;</div>
+          <div class="claim-text">"VACCINES CAUSE AUTISM"</div>
+        </div>
+
+        <!-- DEBUNKED -->
+        <div class="debunked-section">
+          <div class="debunked-stamp">DEBUNKED</div>
+        </div>
+
+        <hr class="perf-divider">
+
+        <!-- FACT -->
+        <div class="detail-row">
+          <div class="detail-label">FACT: </div>
+          <div class="detail-text">THE 1998 WAKEFIELD STUDY WAS RETRACTED FOR FRAUD. OVER 1.2 MILLION CHILDREN STUDIED SINCE SHOW ZERO LINK BETWEEN VACCINES AND AUTISM.</div>
+        </div>
+
+        <hr class="perf-divider">
+
+        <!-- HUMOR -->
+        <div class="detail-row">
+          <div class="detail-label">HUMOR: </div>
+          <div class="detail-text humor">IMAGINE LOSING YOUR MEDICAL LICENSE AND STILL HAVING FANS. THAT IS SOME INFLUENCER ENERGY.</div>
+        </div>
+
+        <hr class="perf-divider">
+
+        <!-- SOURCE -->
+        <div class="detail-row">
+          <div class="detail-label">SOURCE: </div>
+          <div class="detail-text source">THE LANCET RETRACTION (2010), CDC IMMUNIZATION SAFETY REVIEW, JAMA PEDIATRICS META-ANALYSIS (2019)</div>
+        </div>
+
+        <div class="stamp-card-bottom-corners"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 5. BOTTOM BANNER ============ -->
+  <div class="bottom-banner-wrap">
+    <div class="bottom-perf">
+      <div class="bottom-banner">
+        <div class="bottom-text">PATRIOTISM REQUIRES<br>VACCINES</div>
+        <div class="bottom-seal-row">
+          <div class="mini-seal">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="18" fill="none" stroke="#c9a84c" stroke-width="2"/>
+              <circle cx="20" cy="20" r="14" fill="#c9a84c" opacity="0.2"/>
+              <polygon points="20,8 22,16 30,16 24,20 26,28 20,24 14,28 16,20 10,16 18,16" fill="#c9a84c"/>
+            </svg>
+          </div>
+          <div class="mini-seal">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="18" fill="none" stroke="#c9a84c" stroke-width="2"/>
+              <circle cx="20" cy="20" r="14" fill="#c9a84c" opacity="0.2"/>
+              <polygon points="20,8 22,16 30,16 24,20 26,28 20,24 14,28 16,20 10,16 18,16" fill="#c9a84c"/>
+            </svg>
+          </div>
+          <div class="mini-seal">
+            <svg viewBox="0 0 40 40">
+              <circle cx="20" cy="20" r="18" fill="none" stroke="#c9a84c" stroke-width="2"/>
+              <circle cx="20" cy="20" r="14" fill="#c9a84c" opacity="0.2"/>
+              <polygon points="20,8 22,16 30,16 24,20 26,28 20,24 14,28 16,20 10,16 18,16" fill="#c9a84c"/>
+            </svg>
+          </div>
+        </div>
+        <div class="bottom-sub">&#9670; CERTIFIED &#8226; SEALED &#8226; DELIVERED &#9670;</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

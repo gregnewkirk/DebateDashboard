@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Patriotic Cards - Debate Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #0a1628;
+    font-family: 'Oswald', sans-serif;
+    position: relative;
+  }
+
+  /* Subtle stars in margins */
+  .bg-star {
+    position: absolute;
+    color: rgba(255, 215, 0, 0.08);
+    font-size: 80px;
+    z-index: 0;
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+  .bg-star:nth-child(1) { top: 60px; left: 20px; animation-delay: 0s; }
+  .bg-star:nth-child(2) { top: 350px; right: 15px; animation-delay: 1.2s; }
+  .bg-star:nth-child(3) { top: 780px; left: 10px; animation-delay: 0.6s; }
+  .bg-star:nth-child(4) { top: 1150px; right: 25px; animation-delay: 2s; }
+  .bg-star:nth-child(5) { top: 1550px; left: 30px; animation-delay: 0.3s; }
+  .bg-star:nth-child(6) { top: 1750px; right: 10px; animation-delay: 1.8s; }
+
+  @keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.15); }
+  }
+
+  /* Margin stripe accents — motion */
+  .margin-stripe {
+    position: absolute;
+    width: 8px;
+    background: repeating-linear-gradient(
+      0deg,
+      #BF0A30 0px, #BF0A30 30px,
+      transparent 30px, transparent 60px,
+      #002868 60px, #002868 90px,
+      transparent 90px, transparent 120px
+    );
+    height: 1920px;
+    top: 0;
+    z-index: 0;
+    animation: stripeScroll 12s linear infinite;
+  }
+  .margin-stripe.left { left: 6px; }
+  .margin-stripe.right { right: 6px; animation-direction: reverse; }
+
+  @keyframes stripeScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 240px; }
+  }
+
+  /* Card stack container */
+  .card-stack {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0 30px 0;
+    gap: 0;
+  }
+
+  /* Base card style */
+  .card {
+    position: relative;
+    border-radius: 14px;
+    padding: 30px 36px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1.15;
+    margin-top: -18px;
+    z-index: 1;
+  }
+  .card:first-child { margin-top: 0; }
+
+  /* Gold star accents on cards */
+  .card::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+  .star-accent::after {
+    content: '\2605';
+    position: absolute;
+    color: #ffd700;
+    font-size: 38px;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+
+  /* 1. HEADER CARD */
+  .card-header {
+    width: 95%;
+    background: #002868;
+    color: #fff;
+    text-align: center;
+    font-size: 68px;
+    padding: 44px 36px;
+    transform: rotate(-0.8deg);
+    box-shadow:
+      0 8px 30px rgba(0,0,0,0.6),
+      0 2px 8px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 3px solid #ffd700;
+    z-index: 8;
+    line-height: 1.05;
+  }
+  .card-header .sub {
+    font-size: 32px;
+    color: #ffd700;
+    letter-spacing: 8px;
+    margin-top: 6px;
+  }
+  .card-header::after {
+    content: '\2605';
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-size: 48px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
+  }
+
+  /* 2. CHALLENGER CARD */
+  .card-challenger {
+    width: 85%;
+    background: #BF0A30;
+    color: #fff;
+    text-align: center;
+    font-size: 44px;
+    padding: 28px 30px;
+    transform: rotate(1.2deg);
+    align-self: flex-end;
+    margin-right: 40px;
+    box-shadow:
+      0 10px 35px rgba(0,0,0,0.55),
+      -4px 6px 15px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.25);
+    z-index: 7;
+  }
+  .card-challenger .topic {
+    font-size: 34px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+    letter-spacing: 4px;
+  }
+  .card-challenger::after {
+    content: '\2605';
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    color: #ffd700;
+    font-size: 34px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  }
+
+  /* 3. CLAIM CARD */
+  .card-claim {
+    width: 90%;
+    background: #fff;
+    color: #002868;
+    text-align: center;
+    font-size: 42px;
+    padding: 36px 40px;
+    transform: rotate(-0.5deg);
+    border: 4px solid #002868;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.5),
+      0 4px 12px rgba(0,0,0,0.3);
+    z-index: 6;
+  }
+  .card-claim .label {
+    font-size: 30px;
+    color: #BF0A30;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+  }
+  .card-claim::after {
+    content: '\2605  \2605';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-size: 28px;
+    letter-spacing: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  }
+
+  /* 4. VERDICT CARD — THE BIG ONE */
+  .card-verdict {
+    width: 95%;
+    background: linear-gradient(135deg, #BF0A30 0%, #8a0722 100%);
+    color: #fff;
+    text-align: center;
+    font-size: 108px;
+    padding: 50px 36px;
+    transform: rotate(0deg);
+    box-shadow:
+      0 16px 50px rgba(191,10,48,0.6),
+      0 6px 20px rgba(0,0,0,0.5),
+      inset 0 2px 0 rgba(255,255,255,0.15);
+    border: 4px solid #ffd700;
+    z-index: 10;
+    animation: verdictPulse 3s ease-in-out infinite;
+  }
+  .card-verdict .line {
+    height: 4px;
+    background: #ffd700;
+    width: 60%;
+    margin: 10px auto;
+    border-radius: 2px;
+  }
+  .card-verdict .confidence {
+    font-size: 36px;
+    color: #ffd700;
+    letter-spacing: 6px;
+    margin-top: 4px;
+  }
+  .card-verdict::before {
+    content: '\2605';
+    position: absolute;
+    top: -20px;
+    left: 30px;
+    color: #ffd700;
+    font-size: 44px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
+  }
+  .card-verdict::after {
+    content: '\2605';
+    position: absolute;
+    top: -20px;
+    right: 30px;
+    color: #ffd700;
+    font-size: 44px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
+  }
+
+  @keyframes verdictPulse {
+    0%, 100% { box-shadow: 0 16px 50px rgba(191,10,48,0.6), 0 6px 20px rgba(0,0,0,0.5); }
+    50% { box-shadow: 0 16px 60px rgba(191,10,48,0.8), 0 6px 30px rgba(0,0,0,0.6), 0 0 40px rgba(255,215,0,0.15); }
+  }
+
+  /* 5. FACT CARD */
+  .card-fact {
+    width: 88%;
+    background: #002868;
+    color: #fff;
+    font-size: 34px;
+    padding: 32px 36px;
+    transform: rotate(0.7deg);
+    align-self: flex-start;
+    margin-left: 36px;
+    box-shadow:
+      0 10px 35px rgba(0,0,0,0.5),
+      4px 6px 15px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,215,0,0.3);
+    z-index: 5;
+  }
+  .card-fact .label {
+    font-size: 28px;
+    color: #ffd700;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+  }
+  .card-fact::after {
+    content: '\2605';
+    position: absolute;
+    bottom: -10px;
+    left: 24px;
+    color: #ffd700;
+    font-size: 30px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  }
+
+  /* 6. HUMOR CARD */
+  .card-humor {
+    width: 82%;
+    background: #fff;
+    color: #002868;
+    font-size: 30px;
+    padding: 26px 32px;
+    transform: rotate(-1.3deg);
+    align-self: flex-end;
+    margin-right: 50px;
+    box-shadow:
+      0 8px 30px rgba(0,0,0,0.45),
+      -3px 5px 12px rgba(0,0,0,0.25);
+    border: 3px solid #BF0A30;
+    z-index: 4;
+    font-style: normal;
+  }
+  .card-humor .label {
+    font-size: 28px;
+    color: #BF0A30;
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+  }
+
+  /* 7. SOURCE CARD */
+  .card-source {
+    width: 80%;
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    font-size: 28px;
+    padding: 22px 28px;
+    transform: rotate(0.9deg);
+    box-shadow:
+      0 6px 25px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,215,0,0.2);
+    z-index: 3;
+    text-align: center;
+  }
+  .card-source .label {
+    font-size: 28px;
+    color: #ffd700;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+  }
+
+  /* 8. MOTTO CARD */
+  .card-motto {
+    width: 95%;
+    background: #002868;
+    color: #ffd700;
+    text-align: center;
+    font-size: 48px;
+    padding: 38px 36px;
+    transform: rotate(-0.4deg);
+    box-shadow:
+      0 12px 40px rgba(0,0,0,0.55),
+      0 4px 14px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    border: 3px solid #ffd700;
+    z-index: 9;
+    line-height: 1.1;
+  }
+  .card-motto .stars {
+    font-size: 36px;
+    letter-spacing: 14px;
+    margin-bottom: 6px;
+  }
+  .card-motto .bar {
+    height: 3px;
+    background: #BF0A30;
+    width: 70%;
+    margin: 10px auto 0;
+    border-radius: 2px;
+  }
+
+  /* WEBCAM pip */
+  .webcam {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: #111;
+    border: 4px solid #ffd700;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.3);
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .webcam::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    background: #BF0A30;
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Margin motion elements -->
+<div class="margin-stripe left"></div>
+<div class="margin-stripe right"></div>
+
+<!-- Background stars -->
+<div class="bg-star">&#9733;</div>
+<div class="bg-star">&#9733;</div>
+<div class="bg-star">&#9733;</div>
+<div class="bg-star">&#9733;</div>
+<div class="bg-star">&#9733;</div>
+<div class="bg-star">&#9733;</div>
+
+<!-- Card Stack -->
+<div class="card-stack">
+
+  <!-- 1. Header -->
+  <div class="card card-header">
+    THE GREAT BOARD<br>OF SCIENCE
+    <div class="sub">&#9733; LIVE FACT CHECK &#9733;</div>
+  </div>
+
+  <!-- 2. Challenger -->
+  <div class="card card-challenger">
+    CHALLENGER
+    <div class="topic">VS VACCINES</div>
+  </div>
+
+  <!-- 3. Claim -->
+  <div class="card card-claim">
+    <div class="label">THEIR CLAIM</div>
+    &ldquo;VACCINES CONTAIN TOXIC LEVELS OF MERCURY THAT CAUSE BRAIN DAMAGE&rdquo;
+  </div>
+
+  <!-- 4. Verdict -->
+  <div class="card card-verdict">
+    <div class="line"></div>
+    DEBUNKED
+    <div class="line"></div>
+    <div class="confidence">CONFIDENCE: 98%</div>
+  </div>
+
+  <!-- 5. Fact -->
+  <div class="card card-fact">
+    <div class="label">&#9733; THE FACTS</div>
+    THIMEROSAL (ETHYLMERCURY) IS CLEARED FROM THE BODY IN DAYS, NOT MONTHS. IT WAS REMOVED FROM CHILDHOOD VACCINES IN 2001 AS A PRECAUTION &mdash; NOT BECAUSE OF HARM.
+  </div>
+
+  <!-- 6. Humor -->
+  <div class="card card-humor">
+    <div class="label">REALITY CHECK</div>
+    YOU GET MORE MERCURY FROM A TUNA SANDWICH THAN A VACCINE. BAN LUNCH, NOT SCIENCE.
+  </div>
+
+  <!-- 7. Source -->
+  <div class="card card-source">
+    <div class="label">SOURCE</div>
+    CDC VACCINE SAFETY &bull; WHO GLOBAL ADVISORY &bull; LANCET 2014
+  </div>
+
+  <!-- 8. Motto -->
+  <div class="card card-motto">
+    <div class="stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+    PATRIOTISM REQUIRES VACCINES
+    <div class="bar"></div>
+  </div>
+
+</div>
+
+<!-- Webcam -->
+<div class="webcam">WEBCAM</div>
+
+</body>
+</html>

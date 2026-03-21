@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Centered Focus — The Great Board of Science</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: #002868;
+    color: #fff;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  /* === STAR FIELD === */
+  .star {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #ffd700;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    opacity: 0;
+    animation: starTwinkle 3s ease-in-out infinite;
+  }
+  @keyframes starTwinkle {
+    0%, 100% { opacity: 0.15; transform: scale(0.8); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  /* === RADIATING LINES FROM CENTER === */
+  .radiate-container {
+    position: absolute;
+    top: 960px;
+    left: 540px;
+    width: 0;
+    height: 0;
+    z-index: 1;
+  }
+  .radiate-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 900px;
+    background: linear-gradient(to bottom, rgba(255,215,0,0.7), rgba(255,215,0,0.05) 60%, transparent);
+    transform-origin: 0 0;
+    animation: radiatePulse 4s ease-in-out infinite;
+  }
+  @keyframes radiatePulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+  }
+
+  /* === MAIN CONTENT COLUMN === */
+  .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* === TOP AREA — compact header === */
+  .top-area {
+    position: absolute;
+    top: 60px;
+    width: 100%;
+    text-align: center;
+  }
+  .board-title {
+    font-size: 68px;
+    font-weight: 700;
+    color: #ffd700;
+    letter-spacing: 6px;
+    text-shadow: 0 0 30px rgba(255,215,0,0.4), 3px 3px 0 #001a44;
+    line-height: 1.1;
+  }
+  .challenger-name {
+    font-size: 44px;
+    font-weight: 700;
+    color: #BF0A30;
+    letter-spacing: 4px;
+    margin-top: 16px;
+    text-shadow: 2px 2px 0 #001a44;
+  }
+  .webcam-badge {
+    display: inline-block;
+    font-size: 28px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 3px;
+    margin-top: 8px;
+  }
+
+  /* === CLAIM — approaches center, bigger text === */
+  .claim-section {
+    position: absolute;
+    top: 520px;
+    width: 920px;
+    text-align: center;
+  }
+  .claim-label {
+    font-size: 30px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 8px;
+    margin-bottom: 14px;
+  }
+  .claim-text {
+    font-size: 52px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    text-shadow: 2px 2px 0 #001a44;
+    padding: 20px 30px;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    background: rgba(0,20,60,0.6);
+  }
+
+  /* === DEAD CENTER — THE SUN — VERDICT === */
+  .verdict-section {
+    position: absolute;
+    top: 790px;
+    width: 100%;
+    text-align: center;
+    z-index: 20;
+  }
+  .verdict-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 700px;
+    height: 300px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(255,215,0,0.25) 0%, rgba(191,10,48,0.1) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 3s ease-in-out infinite;
+    z-index: -1;
+  }
+  @keyframes glowPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+  .verdict-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 580px;
+    height: 220px;
+    transform: translate(-50%, -50%);
+    border: 4px solid rgba(255,215,0,0.3);
+    border-radius: 20px;
+    animation: ringPulse 3s ease-in-out infinite 0.5s;
+    z-index: -1;
+  }
+  @keyframes ringPulse {
+    0%, 100% { border-color: rgba(255,215,0,0.15); transform: translate(-50%, -50%) scale(1); }
+    50% { border-color: rgba(255,215,0,0.5); transform: translate(-50%, -50%) scale(1.05); }
+  }
+  .verdict-text {
+    font-size: 130px;
+    font-weight: 700;
+    color: #BF0A30;
+    letter-spacing: 14px;
+    text-shadow:
+      0 0 40px rgba(191,10,48,0.6),
+      0 0 80px rgba(191,10,48,0.3),
+      4px 4px 0 #001a44,
+      -2px -2px 0 rgba(255,215,0,0.3);
+    animation: verdictPulse 2.5s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+    line-height: 1;
+    padding: 30px 0;
+  }
+  @keyframes verdictPulse {
+    0%, 100% { transform: scale(1); text-shadow: 0 0 40px rgba(191,10,48,0.6), 0 0 80px rgba(191,10,48,0.3), 4px 4px 0 #001a44, -2px -2px 0 rgba(255,215,0,0.3); }
+    50% { transform: scale(1.04); text-shadow: 0 0 60px rgba(191,10,48,0.8), 0 0 120px rgba(191,10,48,0.4), 4px 4px 0 #001a44, -2px -2px 0 rgba(255,215,0,0.5); }
+  }
+  .verdict-underline {
+    width: 500px;
+    height: 5px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    margin: 0 auto;
+    border-radius: 3px;
+  }
+
+  /* === FACT — radiating below center === */
+  .fact-section {
+    position: absolute;
+    top: 1100px;
+    width: 900px;
+    text-align: center;
+  }
+  .fact-label {
+    font-size: 28px;
+    color: #ffd700;
+    letter-spacing: 6px;
+    margin-bottom: 12px;
+  }
+  .fact-text {
+    font-size: 38px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+    text-shadow: 2px 2px 0 #001a44;
+    padding: 22px 28px;
+    background: rgba(0,20,60,0.5);
+    border-left: 5px solid #ffd700;
+    border-right: 5px solid #ffd700;
+    border-radius: 6px;
+  }
+
+  /* === HUMOR — slightly smaller === */
+  .humor-section {
+    position: absolute;
+    top: 1380px;
+    width: 860px;
+    text-align: center;
+  }
+  .humor-text {
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffd700;
+    letter-spacing: 2px;
+    line-height: 1.3;
+    text-shadow: 2px 2px 0 #001a44;
+    font-style: normal;
+  }
+
+  /* === BOTTOM — source + slogan === */
+  .bottom-area {
+    position: absolute;
+    bottom: 80px;
+    width: 100%;
+    text-align: center;
+  }
+  .source-text {
+    font-size: 28px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 3px;
+    margin-bottom: 30px;
+  }
+  .source-text span {
+    color: rgba(255,215,0,0.7);
+  }
+  .slogan {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 5px;
+    text-shadow: 0 0 20px rgba(191,10,48,0.5), 3px 3px 0 #001a44;
+    padding: 18px 40px;
+    border-top: 4px solid #BF0A30;
+    border-bottom: 4px solid #BF0A30;
+    display: inline-block;
+  }
+
+  /* === MARGIN MOTION — border accents === */
+  .edge-line-left, .edge-line-right {
+    position: absolute;
+    top: 0;
+    width: 4px;
+    height: 1920px;
+    z-index: 5;
+  }
+  .edge-line-left { left: 20px; }
+  .edge-line-right { right: 20px; }
+  .edge-line-left .segment, .edge-line-right .segment {
+    position: absolute;
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(180deg, transparent, #ffd700, transparent);
+    animation: edgeSlide 8s linear infinite;
+  }
+  .edge-line-right .segment { animation-delay: -4s; }
+  @keyframes edgeSlide {
+    0% { top: -200px; opacity: 0.4; }
+    50% { opacity: 0.8; }
+    100% { top: 1920px; opacity: 0.4; }
+  }
+
+  /* Corner accents */
+  .corner {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-color: #ffd700;
+    border-style: solid;
+    border-width: 0;
+    opacity: 0.4;
+    z-index: 5;
+  }
+  .corner.tl { top: 30px; left: 30px; border-top-width: 3px; border-left-width: 3px; }
+  .corner.tr { top: 30px; right: 30px; border-top-width: 3px; border-right-width: 3px; }
+  .corner.bl { bottom: 30px; left: 30px; border-bottom-width: 3px; border-left-width: 3px; }
+  .corner.br { bottom: 30px; right: 30px; border-bottom-width: 3px; border-right-width: 3px; }
+</style>
+</head>
+<body>
+
+<!-- RADIATING LINES FROM CENTER (THE SUN) -->
+<div class="radiate-container" id="radiateContainer"></div>
+
+<!-- STAR FIELD -->
+<div id="starField"></div>
+
+<!-- EDGE MOTION -->
+<div class="edge-line-left"><div class="segment"></div></div>
+<div class="edge-line-right"><div class="segment"></div></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- TOP AREA -->
+  <div class="top-area">
+    <div class="board-title">THE GREAT BOARD<br>OF SCIENCE</div>
+    <div class="challenger-name">CHALLENGER</div>
+    <div class="webcam-badge">WEBCAM</div>
+  </div>
+
+  <!-- CLAIM — approaching center -->
+  <div class="claim-section">
+    <div class="claim-label">CLAIM MADE</div>
+    <div class="claim-text">"VACCINES CAUSE AUTISM"</div>
+  </div>
+
+  <!-- DEAD CENTER — THE VERDICT SUN -->
+  <div class="verdict-section">
+    <div class="verdict-glow"></div>
+    <div class="verdict-ring"></div>
+    <div class="verdict-text">DEBUNKED</div>
+    <div class="verdict-underline"></div>
+  </div>
+
+  <!-- FACT — radiating below -->
+  <div class="fact-section">
+    <div class="fact-label">THE SCIENCE</div>
+    <div class="fact-text">THE ORIGINAL 1998 STUDY WAS RETRACTED FOR FRAUD. OVER 1.2 MILLION CHILDREN STUDIED SINCE — ZERO LINK FOUND.</div>
+  </div>
+
+  <!-- HUMOR -->
+  <div class="humor-section">
+    <div class="humor-text">"THE ONLY THING THAT STUDY INFECTED WAS THE INTERNET WITH BAD TAKES"</div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-area">
+    <div class="source-text">SOURCE: <span>THE LANCET RETRACTION 2010 &bull; CDC &bull; WHO</span></div>
+    <div class="slogan">PATRIOTISM REQUIRES VACCINES</div>
+  </div>
+
+</div>
+
+<script>
+// Generate radiating lines from center
+(function() {
+  const container = document.getElementById('radiateContainer');
+  const lineCount = 36;
+  for (let i = 0; i < lineCount; i++) {
+    const line = document.createElement('div');
+    line.className = 'radiate-line';
+    const angle = (360 / lineCount) * i;
+    line.style.transform = 'rotate(' + angle + 'deg)';
+    line.style.animationDelay = (i * 0.12) + 's';
+    container.appendChild(line);
+  }
+})();
+
+// Generate scattered stars
+(function() {
+  const field = document.getElementById('starField');
+  const positions = [
+    // Outer edges and corners — stars radiate from center outward
+    [80, 120], [950, 80], [120, 1800], [900, 1850],
+    [60, 500], [1000, 450], [40, 1400], [1020, 1500],
+    [180, 300], [880, 280], [200, 1650], [860, 1700],
+    [100, 750], [970, 800], [90, 1100], [980, 1150],
+    [300, 60], [750, 50], [540, 30],
+    [280, 1880], [780, 1870], [500, 1900],
+    [50, 960], [1030, 960],
+    [150, 600], [920, 650], [160, 1300], [910, 1350],
+    [350, 200], [700, 180], [400, 1780], [680, 1760],
+    [70, 350], [1010, 380], [55, 1550], [1015, 1600],
+  ];
+  positions.forEach(function(pos, i) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = pos[0] + 'px';
+    star.style.top = pos[1] + 'px';
+    const size = 6 + Math.random() * 10;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.animationDelay = (i * 0.25) + 's';
+    star.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+    field.appendChild(star);
+  });
+})();
+</script>
+</body>
+</html>

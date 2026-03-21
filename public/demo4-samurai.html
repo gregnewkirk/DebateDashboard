@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samurai Dojo — Debate Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;700;900&family=Zen+Dots&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0d0d0d;
+  --blood: #8b0000;
+  --blood-glow: #c41e1e;
+  --parchment: #f5f5f0;
+  --gold: #b8860b;
+  --gold-light: #daa520;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  font-family: 'Noto Serif', serif;
+  color: var(--parchment);
+}
+
+/* === PAPER TEXTURE OVERLAY === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(245,245,240,0.008) 3px,
+      rgba(245,245,240,0.008) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 5px,
+      rgba(245,245,240,0.005) 5px,
+      rgba(245,245,240,0.005) 6px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === INK BRUSH CORNER ACCENTS === */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background:
+    radial-gradient(ellipse at top left, rgba(139,0,0,0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at bottom right, rgba(139,0,0,0.1) 0%, transparent 40%),
+    radial-gradient(ellipse at top right, rgba(184,134,11,0.05) 0%, transparent 30%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* === MAIN LAYOUT (9:16 PORTRAIT) === */
+.dojo {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 24px;
+  gap: 28px;
+  z-index: 2;
+}
+
+/* === HEADER: THE GREAT BOARD OF SCIENCE === */
+.board-title {
+  text-align: center;
+  width: 100%;
+  position: relative;
+  padding: 20px 0 16px;
+}
+
+.board-title .jp-accent {
+  font-size: 30px;
+  color: var(--gold);
+  letter-spacing: 18px;
+  display: block;
+  margin-bottom: 4px;
+  opacity: 0.7;
+}
+
+.board-title h1 {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 64px;
+  line-height: 1.1;
+  color: var(--parchment);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-shadow:
+    0 0 40px rgba(139,0,0,0.4),
+    0 2px 0 rgba(0,0,0,0.8);
+}
+
+.board-title .brush-line {
+  display: block;
+  width: 80%;
+  height: 4px;
+  margin: 12px auto 0;
+  background: linear-gradient(90deg, transparent, var(--blood), var(--gold), var(--blood), transparent);
+  border-radius: 2px;
+}
+
+/* === DEBATER NAME === */
+.debater-block {
+  width: 100%;
+  text-align: center;
+  position: relative;
+  padding: 12px 0;
+}
+
+.debater-name {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 52px;
+  color: var(--gold-light);
+  text-shadow: 0 0 30px rgba(184,134,11,0.5);
+  display: inline-block;
+  position: relative;
+}
+
+/* KATANA SLASH across debater name */
+.debater-name::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 120%;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--blood-glow) 15%,
+    var(--parchment) 45%,
+    var(--parchment) 55%,
+    var(--blood-glow) 85%,
+    transparent 100%
+  );
+  transform: rotate(-3deg);
+  animation: slashReveal 1.5s ease-out forwards;
+  box-shadow: 0 0 12px var(--blood-glow), 0 0 24px rgba(196,30,30,0.3);
+}
+
+@keyframes slashReveal {
+  0% { width: 0; left: 50%; opacity: 0; }
+  20% { opacity: 1; }
+  100% { width: 120%; left: -10%; opacity: 1; }
+}
+
+.debater-subtitle {
+  font-size: 28px;
+  color: var(--parchment);
+  opacity: 0.5;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* === FACT CHECK CARD === */
+.fact-card {
+  width: 100%;
+  background: linear-gradient(170deg, rgba(20,20,18,0.95), rgba(13,13,13,0.98));
+  border: 4px solid var(--blood);
+  border-radius: 6px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow:
+    0 0 40px rgba(139,0,0,0.2),
+    inset 0 0 60px rgba(0,0,0,0.4);
+}
+
+/* Corner brush marks */
+.fact-card::before,
+.fact-card::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.5;
+}
+.fact-card::before {
+  top: 8px; left: 8px;
+  border-width: 4px 0 0 4px;
+}
+.fact-card::after {
+  bottom: 8px; right: 8px;
+  border-width: 0 4px 4px 0;
+}
+
+/* CLAIM section */
+.claim-section {
+  padding: 12px 0;
+}
+
+.claim-label {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 32px;
+  color: var(--gold);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.claim-text {
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--parchment);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  border-left: 5px solid var(--gold);
+  padding-left: 20px;
+}
+
+/* VERDICT: DEBUNKED */
+.verdict-section {
+  text-align: center;
+  padding: 20px 0;
+  position: relative;
+}
+
+.verdict-kanji {
+  font-size: 48px;
+  color: var(--blood-glow);
+  display: block;
+  margin-bottom: 4px;
+  text-shadow: 0 0 20px rgba(196,30,30,0.6);
+}
+
+.verdict-text {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 96px;
+  font-weight: 900;
+  color: var(--blood-glow);
+  text-transform: uppercase;
+  letter-spacing: 8px;
+  text-shadow:
+    0 0 60px rgba(196,30,30,0.5),
+    0 0 120px rgba(139,0,0,0.3),
+    0 4px 0 rgba(0,0,0,0.8);
+  position: relative;
+  display: inline-block;
+  animation: verdictPulse 3s ease-in-out infinite;
+}
+
+@keyframes verdictPulse {
+  0%, 100% { text-shadow: 0 0 60px rgba(196,30,30,0.5), 0 0 120px rgba(139,0,0,0.3), 0 4px 0 rgba(0,0,0,0.8); }
+  50% { text-shadow: 0 0 80px rgba(196,30,30,0.7), 0 0 160px rgba(139,0,0,0.5), 0 4px 0 rgba(0,0,0,0.8); }
+}
+
+/* Slash mark through verdict */
+.verdict-slash {
+  position: absolute;
+  top: 50%;
+  left: -5%;
+  width: 110%;
+  height: 5px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(245,245,240,0.7) 20%,
+    var(--parchment) 50%,
+    rgba(245,245,240,0.7) 80%,
+    transparent
+  );
+  transform: rotate(-5deg) translateY(-50%);
+  animation: slashStrike 0.6s ease-out 0.8s both;
+  box-shadow: 0 0 16px var(--blood-glow), 0 0 40px rgba(196,30,30,0.4);
+}
+
+@keyframes slashStrike {
+  0% { transform: rotate(-5deg) translateY(-50%) scaleX(0); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: rotate(-5deg) translateY(-50%) scaleX(1); opacity: 1; }
+}
+
+/* Fact + Humor + Source */
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 2px solid rgba(184,134,11,0.2);
+}
+
+.detail-row {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+}
+
+.detail-label {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 28px;
+  color: var(--gold);
+  white-space: nowrap;
+  min-width: 140px;
+  letter-spacing: 2px;
+}
+
+.detail-value {
+  font-size: 32px;
+  line-height: 1.35;
+  color: var(--parchment);
+  opacity: 0.9;
+}
+
+.detail-value.humor {
+  font-size: 28px;
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.detail-value.source {
+  font-size: 28px;
+  color: var(--gold-light);
+  opacity: 0.7;
+}
+
+/* === TIMER === */
+.timer-block {
+  width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+.timer-value {
+  font-family: 'Zen Dots', sans-serif;
+  font-size: 56px;
+  color: var(--parchment);
+  letter-spacing: 12px;
+  text-shadow: 0 0 30px rgba(245,245,240,0.15);
+  padding: 10px 40px;
+  border: 3px solid rgba(184,134,11,0.3);
+  display: inline-block;
+  position: relative;
+}
+
+.timer-value::before,
+.timer-value::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
+.timer-value::before {
+  top: -3px; left: -3px;
+  border-top: 4px solid var(--gold);
+  border-left: 4px solid var(--gold);
+}
+.timer-value::after {
+  bottom: -3px; right: -3px;
+  border-bottom: 4px solid var(--gold);
+  border-right: 4px solid var(--gold);
+}
+
+.timer-label {
+  font-size: 28px;
+  color: var(--gold);
+  opacity: 0.5;
+  margin-top: 6px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+}
+
+/* === CHERRY BLOSSOM PARTICLES === */
+.blossom {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  animation: blossomFall linear infinite;
+}
+
+.blossom::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 30% 30%,
+    rgba(255,182,193,0.9),
+    rgba(219,112,147,0.6) 50%,
+    rgba(199,81,120,0.3)
+  );
+  border-radius: 50% 0 50% 0;
+  transform: rotate(45deg);
+}
+
+.blossom:nth-child(1)  { left: 5%;  animation-duration: 11s; animation-delay: 0s;   width: 12px; height: 12px; }
+.blossom:nth-child(2)  { left: 15%; animation-duration: 14s; animation-delay: 2s;   width: 10px; height: 10px; }
+.blossom:nth-child(3)  { left: 28%; animation-duration: 12s; animation-delay: 4s;   width: 16px; height: 16px; }
+.blossom:nth-child(4)  { left: 40%; animation-duration: 15s; animation-delay: 1s;   width: 11px; height: 11px; }
+.blossom:nth-child(5)  { left: 55%; animation-duration: 10s; animation-delay: 3s;   width: 13px; height: 13px; }
+.blossom:nth-child(6)  { left: 68%; animation-duration: 13s; animation-delay: 5s;   width: 9px;  height: 9px;  }
+.blossom:nth-child(7)  { left: 78%; animation-duration: 16s; animation-delay: 0.5s; width: 15px; height: 15px; }
+.blossom:nth-child(8)  { left: 88%; animation-duration: 11s; animation-delay: 3.5s; width: 12px; height: 12px; }
+.blossom:nth-child(9)  { left: 35%; animation-duration: 14s; animation-delay: 6s;   width: 10px; height: 10px; }
+.blossom:nth-child(10) { left: 60%; animation-duration: 12s; animation-delay: 7s;   width: 14px; height: 14px; }
+.blossom:nth-child(11) { left: 92%; animation-duration: 13s; animation-delay: 1.5s; width: 11px; height: 11px; }
+.blossom:nth-child(12) { left: 48%; animation-duration: 15s; animation-delay: 4.5s; width: 13px; height: 13px; }
+
+@keyframes blossomFall {
+  0%   { transform: translateY(-30px) rotate(0deg) translateX(0px); opacity: 0; }
+  10%  { opacity: 0.7; }
+  50%  { opacity: 0.5; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(105vh) rotate(540deg) translateX(80px); opacity: 0; }
+}
+
+/* === INK DRIP AMBIENT — left edge === */
+.ink-drip {
+  position: fixed;
+  left: 0;
+  top: 15%;
+  width: 3px;
+  height: 0;
+  background: linear-gradient(to bottom, var(--blood), transparent);
+  animation: dripDown 8s ease-in infinite;
+  opacity: 0.3;
+  z-index: 1;
+}
+
+.ink-drip:nth-of-type(2) {
+  left: auto;
+  right: 0;
+  top: 35%;
+  animation-delay: 4s;
+}
+
+@keyframes dripDown {
+  0%   { height: 0; opacity: 0; }
+  20%  { opacity: 0.3; }
+  80%  { opacity: 0.2; }
+  100% { height: 200px; opacity: 0; }
+}
+
+/* === LARGE SCREEN TWEAKS === */
+@media (min-height: 1400px) {
+  .board-title h1 { font-size: 80px; }
+  .debater-name { font-size: 60px; }
+  .claim-text { font-size: 48px; }
+  .verdict-text { font-size: 100px; }
+  .detail-value { font-size: 36px; }
+  .timer-value { font-size: 64px; }
+}
+
+/* === SMALLER PORTRAIT SCREENS === */
+@media (max-height: 800px) {
+  .dojo { padding: 16px 16px; gap: 16px; }
+  .board-title h1 { font-size: 48px; }
+  .debater-name { font-size: 40px; }
+  .claim-text { font-size: 36px; }
+  .verdict-text { font-size: 72px; }
+  .timer-value { font-size: 48px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CHERRY BLOSSOM PARTICLES -->
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+<div class="blossom"></div>
+
+<!-- INK DRIPS -->
+<div class="ink-drip"></div>
+<div class="ink-drip"></div>
+
+<!-- MAIN DOJO LAYOUT -->
+<div class="dojo">
+
+  <!-- 1. HEADER -->
+  <div class="board-title">
+    <span class="jp-accent">科 学 の 道</span>
+    <h1>The Great Board<br>of Science</h1>
+    <span class="brush-line"></span>
+  </div>
+
+  <!-- 2. DEBATER NAME -->
+  <div class="debater-block">
+    <div class="debater-name">Dr. YouTube</div>
+    <div class="debater-subtitle">faces the blade of truth</div>
+  </div>
+
+  <!-- 3. FACT CHECK CARD -->
+  <div class="fact-card">
+
+    <div class="claim-section">
+      <div class="claim-label">Claim</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <div class="verdict-section">
+      <span class="verdict-kanji">斬</span>
+      <div class="verdict-text">
+        DEBUNKED
+        <div class="verdict-slash"></div>
+      </div>
+    </div>
+
+    <div class="details-section">
+      <div class="detail-row">
+        <span class="detail-label">Fact</span>
+        <span class="detail-value">Exposed by 20+ studies involving millions of children. The original Wakefield paper was retracted for fraud.</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Humor</span>
+        <span class="detail-value humor">"This claim has been cut down more times than a training dummy."</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Source</span>
+        <span class="detail-value source">Lancet Retraction, 2010 &mdash; CDC MMWR Studies</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 4. TIMER -->
+  <div class="timer-block">
+    <div class="timer-value">04:32</div>
+    <div class="timer-label">Elapsed</div>
+  </div>
+
+</div>
+
+</body>
+</html>

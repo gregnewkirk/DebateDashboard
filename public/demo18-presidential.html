@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Office of Scientific Truth — Presidential Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Source+Serif+4:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pres-blue: #002f6c;
+    --pres-blue-dark: #001d44;
+    --gold: #c5a55a;
+    --gold-light: #dcc47e;
+    --gold-dark: #a8893e;
+    --white: #ffffff;
+    --charcoal: #1c1c1c;
+    --red: #c41e3a;
+    --cream: #f5f0e6;
+  }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Source Serif 4', 'Georgia', serif;
+    background: var(--pres-blue-dark);
+    color: var(--white);
+  }
+
+  /* === CURTAIN BACKGROUND === */
+  .curtain-bg {
+    position: fixed;
+    inset: 0;
+    width: 1080px;
+    height: 1920px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(0,30,68,0.0) 0px,
+        rgba(0,20,50,0.4) 15px,
+        rgba(0,47,108,0.1) 30px,
+        rgba(0,20,50,0.5) 45px,
+        rgba(0,30,68,0.0) 60px
+      ),
+      linear-gradient(180deg, #001a3d 0%, #002f6c 15%, #003580 50%, #002f6c 85%, #001a3d 100%);
+    z-index: 0;
+  }
+
+  /* subtle curtain drape overlay */
+  .curtain-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 120% 30% at 50% 0%, rgba(0,0,0,0.3) 0%, transparent 100%),
+      radial-gradient(ellipse 120% 20% at 50% 100%, rgba(0,0,0,0.4) 0%, transparent 100%);
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    width: 1080px;
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 36px;
+  }
+
+  /* === GOLD TRIM BORDERS === */
+  .gold-border-top, .gold-border-bottom {
+    position: fixed;
+    left: 0;
+    width: 1080px;
+    height: 8px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+    z-index: 10;
+  }
+  .gold-border-top { top: 0; }
+  .gold-border-bottom { bottom: 0; }
+
+  .gold-border-left, .gold-border-right {
+    position: fixed;
+    top: 0;
+    width: 8px;
+    height: 1920px;
+    background: linear-gradient(180deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+    z-index: 10;
+  }
+  .gold-border-left { left: 0; }
+  .gold-border-right { right: 0; }
+
+  /* === PRESIDENTIAL SEAL === */
+  .seal {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 6px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 10px;
+    flex-shrink: 0;
+    background: radial-gradient(circle, rgba(0,47,108,0.9) 0%, rgba(0,25,60,0.95) 100%);
+    box-shadow:
+      0 0 0 3px var(--pres-blue-dark),
+      0 0 0 7px var(--gold-dark),
+      0 0 30px rgba(197,165,90,0.3);
+  }
+
+  .seal::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+  }
+
+  .seal-inner {
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .seal-star {
+    font-size: 40px;
+    color: var(--gold);
+    display: block;
+  }
+
+  .seal-text {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .seal-text-sm {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* circular text around seal */
+  .seal-ring-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: none;
+  }
+
+  .seal-ring-text text {
+    font-family: 'Cinzel', serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    fill: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* === MAIN HEADER === */
+  .main-header {
+    font-family: 'Cinzel', serif;
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--white);
+    text-align: center;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 18px;
+    line-height: 1.1;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.5);
+  }
+
+  /* === DEPARTMENT NAME === */
+  .dept-name {
+    font-family: 'Cinzel', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  /* === GOLD DIVIDER === */
+  .gold-divider {
+    width: 80%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+    margin: 16px 0;
+    flex-shrink: 0;
+  }
+
+  .gold-divider.thin {
+    height: 2px;
+    width: 60%;
+    margin: 10px 0;
+  }
+
+  /* === RE: LINE === */
+  .re-line {
+    font-family: 'Cinzel', serif;
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--white);
+    text-align: center;
+    letter-spacing: 3px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .re-label {
+    color: var(--gold);
+  }
+
+  /* === EXECUTIVE ORDER CARD === */
+  .exec-order {
+    width: 100%;
+    background: linear-gradient(170deg, rgba(245,240,230,0.97) 0%, rgba(235,228,212,0.97) 100%);
+    border: 5px solid var(--gold);
+    border-radius: 6px;
+    padding: 30px 34px 28px;
+    margin-top: 18px;
+    position: relative;
+    box-shadow:
+      0 0 0 2px var(--pres-blue-dark),
+      0 0 0 5px var(--gold-dark),
+      0 12px 40px rgba(0,0,0,0.5);
+    color: var(--charcoal);
+    flex-shrink: 0;
+  }
+
+  /* corner flourishes */
+  .exec-order::before,
+  .exec-order::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--gold-dark);
+    border-style: solid;
+  }
+  .exec-order::before {
+    top: 10px; left: 10px;
+    border-width: 3px 0 0 3px;
+  }
+  .exec-order::after {
+    top: 10px; right: 10px;
+    border-width: 3px 3px 0 0;
+  }
+
+  .corner-bl, .corner-br {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--gold-dark);
+    border-style: solid;
+  }
+  .corner-bl {
+    bottom: 10px; left: 10px;
+    border-width: 0 0 3px 3px;
+  }
+  .corner-br {
+    bottom: 10px; right: 10px;
+    border-width: 0 3px 3px 0;
+  }
+
+  .exec-order-header {
+    font-family: 'Cinzel', serif;
+    font-size: 38px;
+    font-weight: 900;
+    color: var(--pres-blue);
+    text-align: center;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    border-bottom: 3px solid var(--gold);
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+
+  .exec-order-number {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gold-dark);
+    text-align: center;
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+
+  /* CLAIM section */
+  .claim-section {
+    margin-bottom: 16px;
+  }
+
+  .claim-label {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--pres-blue);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .claim-text {
+    font-family: 'Source Serif 4', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--charcoal);
+    line-height: 1.25;
+    padding-left: 16px;
+    border-left: 5px solid var(--red);
+  }
+
+  /* === VERDICT / STAMP === */
+  .verdict-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 18px 0 14px;
+    position: relative;
+  }
+
+  .verdict-stamp {
+    font-family: 'Cinzel', serif;
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 8px;
+    text-align: center;
+    border: 8px solid var(--red);
+    border-radius: 12px;
+    padding: 6px 30px;
+    transform: rotate(-4deg);
+    position: relative;
+    background: rgba(196,30,58,0.06);
+    box-shadow: inset 0 0 20px rgba(196,30,58,0.08);
+    text-shadow: 1px 1px 0 rgba(196,30,58,0.2);
+  }
+
+  /* seal watermark behind stamp */
+  .verdict-stamp::after {
+    content: '\2605';
+    position: absolute;
+    font-size: 110px;
+    color: rgba(196,30,58,0.07);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* === DETAILS ROWS === */
+  .detail-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .detail-label {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--pres-blue);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    min-width: 160px;
+    flex-shrink: 0;
+  }
+
+  .detail-text {
+    font-family: 'Source Serif 4', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--charcoal);
+    line-height: 1.3;
+  }
+
+  .detail-text.humor {
+    font-size: 28px;
+    font-style: italic;
+    color: #444;
+  }
+
+  .detail-text.source {
+    font-size: 28px;
+    color: var(--pres-blue);
+  }
+
+  /* === BOTTOM MOTTO === */
+  .motto-section {
+    margin-top: auto;
+    padding-top: 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .motto-stars {
+    font-size: 36px;
+    color: var(--gold);
+    letter-spacing: 16px;
+    margin-bottom: 6px;
+  }
+
+  .motto-text {
+    font-family: 'Cinzel', serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.5);
+    line-height: 1.15;
+  }
+
+  .motto-sub {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--gold-light);
+    margin-top: 6px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .mini-seal-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 10px;
+  }
+
+  .mini-seal {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--gold);
+  }
+</style>
+</head>
+<body>
+
+<div class="curtain-bg"></div>
+
+<div class="gold-border-top"></div>
+<div class="gold-border-bottom"></div>
+<div class="gold-border-left"></div>
+<div class="gold-border-right"></div>
+
+<div class="page">
+
+  <!-- PRESIDENTIAL SEAL -->
+  <div class="seal">
+    <svg class="seal-ring-text" viewBox="0 0 180 180">
+      <defs>
+        <path id="topArc" d="M 90,90 m -70,0 a 70,70 0 1,1 140,0" fill="none"/>
+        <path id="bottomArc" d="M 90,90 m 70,0 a 70,70 0 1,1 -140,0" fill="none"/>
+      </defs>
+      <text><textPath href="#topArc" startOffset="50%" text-anchor="middle">UNITED STATES OF SCIENCE</textPath></text>
+      <text><textPath href="#bottomArc" startOffset="50%" text-anchor="middle">E PLURIBUS FACTUM</textPath></text>
+    </svg>
+    <div class="seal-inner">
+      <span class="seal-star">&#9733;</span>
+      <span class="seal-text">Science</span>
+      <span class="seal-text-sm">Est. 2024</span>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER -->
+  <h1 class="main-header">The Great Board<br>of Science</h1>
+
+  <div class="gold-divider"></div>
+
+  <!-- DEPARTMENT -->
+  <h2 class="dept-name">Office of<br>Scientific Truth</h2>
+
+  <div class="gold-divider thin"></div>
+
+  <!-- RE: LINE -->
+  <div class="re-line">
+    <span class="re-label">RE:</span> Dr. YouTube
+  </div>
+
+  <!-- EXECUTIVE ORDER -->
+  <div class="exec-order">
+    <div class="corner-bl"></div>
+    <div class="corner-br"></div>
+
+    <div class="exec-order-header">Executive Order</div>
+    <div class="exec-order-number">No. 2024-SCI-0047</div>
+
+    <div class="claim-section">
+      <div class="claim-label">Claim:</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <!-- VERDICT STAMP -->
+    <div class="verdict-container">
+      <div class="verdict-stamp">Debunked</div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="detail-row">
+      <div class="detail-label">Fact:</div>
+      <div class="detail-text">The original 1998 study was retracted for fraud. 1.2 million children studied since confirm zero link.</div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-label">Humor:</div>
+      <div class="detail-text humor">The only thing vaccines cause is adults.</div>
+    </div>
+
+    <div class="detail-row">
+      <div class="detail-label">Source:</div>
+      <div class="detail-text source">Lancet Retraction 2010; CDC MMWR; WHO Vaccine Safety Review</div>
+    </div>
+  </div>
+
+  <!-- MOTTO -->
+  <div class="motto-section">
+    <div class="motto-stars">&#9733; &#9733; &#9733;</div>
+    <div class="motto-text">Patriotism<br>Requires Vaccines</div>
+    <div class="motto-sub">By Order of The Board</div>
+    <div class="mini-seal-row">
+      <div class="mini-seal">&#9733;</div>
+      <div class="mini-seal">&#9878;</div>
+      <div class="mini-seal">&#9733;</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Demo 35 — Sidebar Accent</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #002868;
+    font-family: 'Oswald', sans-serif;
+    color: #fff;
+    display: flex;
+  }
+
+  /* LEFT SIDEBAR */
+  .sidebar {
+    width: 162px; /* ~15% */
+    min-width: 162px;
+    height: 1920px;
+    background: #BF0A30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+
+  .sidebar-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: #fff;
+    letter-spacing: 10px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: rotate(180deg) translate(50%, 50%);
+  }
+
+  .star {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 38px;
+    color: #ffd700;
+    animation: starPulse 2.5s ease-in-out infinite;
+    text-shadow: 0 0 12px rgba(255,215,0,0.6);
+  }
+
+  .star:nth-child(1) { top: 40px; animation-delay: 0s; }
+  .star:nth-child(2) { top: 180px; animation-delay: 0.4s; }
+  .star:nth-child(3) { top: 320px; animation-delay: 0.8s; }
+  .star:nth-child(4) { top: 460px; animation-delay: 1.2s; }
+  .star:nth-child(5) { top: 600px; animation-delay: 0.2s; }
+  .star:nth-child(6) { top: 1320px; animation-delay: 0.6s; }
+  .star:nth-child(7) { top: 1460px; animation-delay: 1.0s; }
+  .star:nth-child(8) { top: 1600px; animation-delay: 1.4s; }
+  .star:nth-child(9) { top: 1740px; animation-delay: 0.3s; }
+  .star:nth-child(10) { top: 1860px; animation-delay: 0.9s; }
+
+  @keyframes starPulse {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.25); }
+  }
+
+  /* Sidebar edge accent line */
+  .sidebar::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #ffd700, transparent 20%, #ffd700 40%, transparent 60%, #ffd700 80%, transparent);
+    animation: edgeShimmer 4s ease-in-out infinite;
+  }
+
+  @keyframes edgeShimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* RIGHT MAIN CONTENT */
+  .main {
+    width: 918px; /* ~85% */
+    height: 1920px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 44px;
+    position: relative;
+    background: #002868;
+  }
+
+  /* Section 1: CHALLENGER */
+  .challenger-section {
+    text-align: center;
+    padding: 28px 0 20px;
+  }
+
+  .challenger-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: #BF0A30;
+    letter-spacing: 8px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+    border-bottom: 3px solid rgba(255,255,255,0.15);
+    padding-bottom: 14px;
+    display: inline-block;
+  }
+
+  /* Section 2: Claim */
+  .claim-section {
+    background: rgba(255,255,255,0.06);
+    border-left: 5px solid #BF0A30;
+    border-radius: 0 12px 12px 0;
+    padding: 28px 32px;
+    margin: 8px 0;
+  }
+
+  .claim-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 42px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1.2;
+    text-align: left;
+  }
+
+  .claim-quote {
+    font-size: 64px;
+    color: #BF0A30;
+    font-family: 'Bebas Neue', sans-serif;
+    line-height: 0.5;
+    vertical-align: top;
+    margin-right: 4px;
+  }
+
+  /* Section 3: VERDICT — middle third zone */
+  .verdict-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 0;
+    position: relative;
+    min-height: 320px;
+  }
+
+  .verdict-word {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 110px;
+    color: #BF0A30;
+    letter-spacing: 12px;
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 40px rgba(191,10,48,0.4);
+    text-align: center;
+    line-height: 1;
+    animation: verdictGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes verdictGlow {
+    0%, 100% { text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 40px rgba(191,10,48,0.3); }
+    50% { text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 60px rgba(191,10,48,0.6), 0 0 90px rgba(191,10,48,0.2); }
+  }
+
+  .verdict-line {
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(to right, transparent, #ffd700, transparent);
+    margin: 16px auto;
+  }
+
+  /* Section 4: Fact */
+  .fact-section {
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 24px 30px;
+    margin: 8px 0;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .fact-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: #ffd700;
+    letter-spacing: 5px;
+    margin-bottom: 8px;
+  }
+
+  .fact-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 34px;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.25;
+  }
+
+  /* Section 5: Humor */
+  .humor-section {
+    text-align: center;
+    padding: 16px 20px;
+    margin: 4px 0;
+  }
+
+  .humor-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.25;
+    font-style: normal;
+  }
+
+  /* Section 6: Source */
+  .source-section {
+    text-align: center;
+    padding: 10px 0;
+  }
+
+  .source-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+
+  /* Section 7: Tagline */
+  .tagline-section {
+    text-align: center;
+    padding: 24px 0 10px;
+    border-top: 2px solid rgba(255,215,0,0.2);
+    margin-top: 8px;
+  }
+
+  .tagline-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    color: #ffd700;
+    letter-spacing: 6px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    line-height: 1.15;
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT SIDEBAR -->
+<div class="sidebar">
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="sidebar-text">THE GREAT BOARD OF SCIENCE</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+  <div class="star">&#9733;</div>
+</div>
+
+<!-- RIGHT MAIN CONTENT -->
+<div class="main">
+
+  <!-- 1. CHALLENGER -->
+  <div class="challenger-section">
+    <div class="challenger-label">CHALLENGER</div>
+  </div>
+
+  <!-- 2. Claim -->
+  <div class="claim-section">
+    <div class="claim-text">
+      <span class="claim-quote">&ldquo;</span>Vaccines contain microchips that track your location through 5G towers&rdquo;
+    </div>
+  </div>
+
+  <!-- 3. VERDICT (middle zone) -->
+  <div class="verdict-section">
+    <div class="verdict-line"></div>
+    <div class="verdict-word">DEBUNKED</div>
+    <div class="verdict-line"></div>
+  </div>
+
+  <!-- 4. Fact -->
+  <div class="fact-section">
+    <div class="fact-label">THE FACTS</div>
+    <div class="fact-text">Vaccine ingredients are publicly listed by the FDA. No tracking devices exist small enough to fit through a needle. The largest microchip is still 1,000x too big.</div>
+  </div>
+
+  <!-- 5. Humor -->
+  <div class="humor-section">
+    <div class="humor-text">Your phone already tracks you for free — no injection needed.</div>
+  </div>
+
+  <!-- 6. Source -->
+  <div class="source-section">
+    <div class="source-text">FDA Vaccine Ingredient Database, 2024</div>
+  </div>
+
+  <!-- 7. Tagline -->
+  <div class="tagline-section">
+    <div class="tagline-text">PATRIOTISM REQUIRES VACCINES</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 39 - Offset Blocks</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: #0a0a1a;
+    position: relative;
+  }
+
+  .frame {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Margin motion — subtle floating stars */
+  .margin-star {
+    position: absolute;
+    color: #ffd700;
+    font-size: 24px;
+    opacity: 0.3;
+    animation: floatStar 6s ease-in-out infinite;
+  }
+  .margin-star:nth-child(1) { top: 5%; left: 3%; animation-delay: 0s; }
+  .margin-star:nth-child(2) { top: 15%; right: 4%; animation-delay: 1.2s; }
+  .margin-star:nth-child(3) { top: 45%; left: 2%; animation-delay: 2.4s; }
+  .margin-star:nth-child(4) { top: 75%; right: 3%; animation-delay: 3.6s; }
+  .margin-star:nth-child(5) { bottom: 8%; left: 5%; animation-delay: 4.8s; }
+
+  @keyframes floatStar {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.2; }
+    50% { transform: translateY(-15px) rotate(20deg); opacity: 0.5; }
+  }
+
+  /* Block base */
+  .block {
+    width: 85%;
+    padding: 28px 40px;
+    position: relative;
+  }
+
+  /* Alignment classes */
+  .align-left {
+    align-self: flex-start;
+    margin-left: 0;
+    animation: slideFromLeft 0.8s ease-out both;
+  }
+  .align-right {
+    align-self: flex-end;
+    margin-right: 0;
+    animation: slideFromRight 0.8s ease-out both;
+  }
+  .align-center {
+    width: 100%;
+    align-self: center;
+    text-align: center;
+    animation: scaleIn 0.6s ease-out both;
+  }
+
+  @keyframes slideFromLeft {
+    from { transform: translateX(-60px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideFromRight {
+    from { transform: translateX(60px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Transition stars between blocks */
+  .transition-star {
+    text-align: center;
+    color: #ffd700;
+    font-size: 32px;
+    line-height: 1;
+    padding: 6px 0;
+    letter-spacing: 20px;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  }
+
+  /* 1. Title — LEFT */
+  .block-title {
+    background: #002868;
+    border-left: 12px solid #ffd700;
+    padding: 38px 40px;
+    animation-delay: 0.1s;
+  }
+  .block-title h1 {
+    font-size: 72px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1.05;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  }
+
+  /* 2. Challenger — RIGHT */
+  .block-challenger {
+    background: #BF0A30;
+    border-right: 12px solid #ffd700;
+    text-align: right;
+    padding: 24px 40px;
+    animation-delay: 0.25s;
+  }
+  .block-challenger h2 {
+    font-size: 48px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffffff;
+    letter-spacing: 6px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+  }
+  .block-challenger .subtitle {
+    font-size: 30px;
+    color: rgba(255,255,255,0.85);
+    text-transform: uppercase;
+    margin-top: 4px;
+    letter-spacing: 3px;
+  }
+
+  /* 3. Claim — LEFT */
+  .block-claim {
+    background: #ffffff;
+    border-left: 12px solid #BF0A30;
+    padding: 30px 40px;
+    animation-delay: 0.4s;
+  }
+  .block-claim .label {
+    font-size: 28px;
+    color: #BF0A30;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .block-claim p {
+    font-size: 42px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #002868;
+    line-height: 1.15;
+  }
+
+  /* 4. Verdict — CENTER, full width */
+  .block-verdict {
+    background: linear-gradient(135deg, #BF0A30 0%, #8a0720 100%);
+    padding: 36px 40px;
+    position: relative;
+    animation-delay: 0.55s;
+    border-top: 4px solid #ffd700;
+    border-bottom: 4px solid #ffd700;
+  }
+  .block-verdict h2 {
+    font-size: 108px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffffff;
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.4), 0 0 40px rgba(255,215,0,0.3);
+    letter-spacing: 8px;
+    animation: verdictPulse 2.5s ease-in-out infinite;
+  }
+  @keyframes verdictPulse {
+    0%, 100% { text-shadow: 4px 4px 0 rgba(0,0,0,0.4), 0 0 20px rgba(255,215,0,0.2); }
+    50% { text-shadow: 4px 4px 0 rgba(0,0,0,0.4), 0 0 50px rgba(255,215,0,0.5); }
+  }
+
+  /* 5. Fact — RIGHT */
+  .block-fact {
+    background: #002868;
+    border-right: 12px solid #ffd700;
+    text-align: right;
+    padding: 28px 40px;
+    animation-delay: 0.7s;
+  }
+  .block-fact .label {
+    font-size: 28px;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .block-fact p {
+    font-size: 34px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1.2;
+  }
+
+  /* 6. Humor — LEFT */
+  .block-humor {
+    background: #ffffff;
+    border-left: 12px solid #002868;
+    padding: 22px 40px;
+    animation-delay: 0.85s;
+  }
+  .block-humor p {
+    font-size: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #002868;
+    line-height: 1.2;
+    font-style: normal;
+  }
+
+  /* 7. Source — RIGHT */
+  .block-source {
+    background: #BF0A30;
+    border-right: 12px solid #ffd700;
+    text-align: right;
+    padding: 20px 40px;
+    animation-delay: 1.0s;
+  }
+  .block-source .label {
+    font-size: 28px;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-weight: 700;
+  }
+  .block-source p {
+    font-size: 28px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-top: 4px;
+  }
+
+  /* 8. CTA — CENTER, full width */
+  .block-cta {
+    background: #002868;
+    padding: 32px 40px;
+    border-top: 4px solid #ffd700;
+    animation-delay: 1.15s;
+  }
+  .block-cta h2 {
+    font-size: 48px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #ffd700;
+    line-height: 1.1;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <!-- Margin motion stars -->
+  <div class="margin-star">&#9733;</div>
+  <div class="margin-star">&#9733;</div>
+  <div class="margin-star">&#9733;</div>
+  <div class="margin-star">&#9733;</div>
+  <div class="margin-star">&#9733;</div>
+
+  <!-- 1. LEFT: Title -->
+  <div class="block align-left block-title">
+    <h1>THE GREAT BOARD OF SCIENCE</h1>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 2. RIGHT: Challenger -->
+  <div class="block align-right block-challenger">
+    <h2>CHALLENGER</h2>
+    <div class="subtitle">WEBCAM WARRIOR</div>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 3. LEFT: Claim -->
+  <div class="block align-left block-claim">
+    <div class="label">THEIR CLAIM</div>
+    <p>"VACCINES CAUSE MORE HARM THAN THE DISEASES THEY PREVENT"</p>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 4. CENTER: Verdict -->
+  <div class="block align-center block-verdict">
+    <h2>DEBUNKED</h2>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 5. RIGHT: Fact -->
+  <div class="block align-right block-fact">
+    <div class="label">THE FACTS</div>
+    <p>VACCINES PREVENT 4-5 MILLION DEATHS EVERY YEAR. ADVERSE EVENTS ARE EXTREMELY RARE AT 1-2 PER MILLION DOSES.</p>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 6. LEFT: Humor -->
+  <div class="block align-left block-humor">
+    <p>IMAGINE TRUSTING A RANDOM BLOG OVER 200 YEARS OF IMMUNOLOGY RESEARCH. BOLD STRATEGY.</p>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 7. RIGHT: Source -->
+  <div class="block align-right block-source">
+    <div class="label">SOURCE</div>
+    <p>WORLD HEALTH ORGANIZATION, 2024 GLOBAL VACCINE SAFETY REPORT</p>
+  </div>
+
+  <div class="transition-star">&#9733; &#9733; &#9733;</div>
+
+  <!-- 8. CENTER: CTA -->
+  <div class="block align-center block-cta">
+    <h2>PATRIOTISM REQUIRES VACCINES</h2>
+  </div>
+
+</div>
+</body>
+</html>

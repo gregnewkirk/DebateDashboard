@@ -2,42 +2,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debate Dashboard — LIVE</title>
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+  <title>DR. GREG DEBATES</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- Top Banner -->
-  <header class="top-banner">
-    <span class="red-dot pulse"></span>
-    <h1>Live Fact Check</h1>
-  </header>
+<!-- PULSING MARGIN STARS -->
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
+<div class="star">&#9733;</div>
 
-  <!-- Listening Indicator (top-right) -->
-  <div class="listening-indicator" id="listening-indicator">
-    <span class="mic-icon">&#127908;</span>
-    <span>Listening</span>
-  </div>
+<!-- SIDE STRIPES -->
+<div class="side-stripe-left"></div>
+<div class="side-stripe-right"></div>
 
-  <!-- Nickname Bar -->
-  <div class="nickname-bar" id="nickname-bar" style="display:none;">
-    <span class="vs-label">VS</span>
-    <span class="nickname" id="nickname">CHALLENGER</span>
-  </div>
+<!-- MAIN CONTENT SHELL -->
+<div class="content">
 
-  <!-- Main Content Area -->
-  <main id="main-content">
-    <!-- Fact cards will be injected here by JS -->
-  </main>
-
-  <!-- Bottom Ticker -->
-  <footer class="bottom-ticker">
-    <div class="ticker-track">
-      <!-- Populated by JS -->
+  <!-- HEADER -->
+  <div class="header-section">
+    <div class="header-stars-row">
+      <span>&#9733;</span>
+      <span>&#9733;</span>
+      <span>&#9733;</span>
+      <span>&#9733;</span>
+      <span>&#9733;</span>
     </div>
-  </footer>
+    <h1>DR. GREG DEBATES</h1>
+    <div class="header-subtitle">LIBERTY DEMANDS TRUTH</div>
+  </div>
 
-  <script src="app.js"></script>
+  <!-- Angled divider: header to challenger -->
+  <div class="angled-divider red-down"></div>
+
+  <!-- CHALLENGER BAR -->
+  <div class="challenger-section" id="challenger-section">
+    <div class="challenger-label">CHALLENGER &#9654;</div>
+    <div class="challenger-name" id="challenger-name">AWAITING TARGET</div>
+  </div>
+
+  <!-- Angled divider: challenger to middle -->
+  <div class="angled-divider navy-up"></div>
+
+  <!-- DYNAMIC CONTENT AREA -->
+  <div class="middle-zone" id="main-content">
+    <!-- Fact cards, debate prompts, alerts injected here by app.js -->
+  </div>
+
+  <!-- Chevron divider: middle to bottom -->
+  <div class="chevron-divider"></div>
+
+  <!-- BOTTOM BANNER (always visible) -->
+  <div class="bottom-zone">
+    <div class="bottom-banner">
+      <div class="bottom-text">PATRIOTISM<br>REQUIRES VACCINES</div>
+      <div class="bottom-sub">&#9733; DR. GREG &#9733;</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Listening Indicator (floating) -->
+<div class="listening-indicator" id="listening-indicator">
+  <span class="mic-icon">&#9673;</span>
+  <span>ACTIVE</span>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>

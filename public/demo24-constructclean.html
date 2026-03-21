@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>THE GREAT BOARD OF SCIENCE — CLEAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #b22234;
+    --blue: #3c3b6e;
+    --white: #ffffff;
+    --gold: #ffd700;
+    --black: #111111;
+    --dark-red: #8b1a28;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: var(--blue);
+    color: var(--white);
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  /* === SPINNING GOLD STARBURST — TOP DECORATION ONLY === */
+  .spinning-star-container {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 400px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .spinning-star {
+    width: 100%;
+    height: 100%;
+    animation: spin-slow 25s linear infinite;
+  }
+  .spinning-star svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* === GEOMETRIC MARGIN ACCENTS === */
+  .margin-left {
+    position: absolute;
+    left: 0; top: 340px;
+    width: 28px;
+    height: 900px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--red) 0px, var(--red) 22px,
+      var(--white) 22px, var(--white) 44px,
+      var(--blue) 44px, var(--blue) 66px
+    );
+    z-index: 8;
+    border-right: 4px solid var(--black);
+  }
+  .margin-right {
+    position: absolute;
+    right: 0; top: 340px;
+    width: 28px;
+    height: 900px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--blue) 0px, var(--blue) 22px,
+      var(--white) 22px, var(--white) 44px,
+      var(--red) 44px, var(--red) 66px
+    );
+    z-index: 8;
+    border-left: 4px solid var(--black);
+  }
+
+  /* === DECORATIVE STARS IN MARGINS/EMPTY SPACE === */
+  .deco-star {
+    position: absolute;
+    z-index: 7;
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .deco-star svg { fill: var(--gold); }
+
+  /* === MAIN CONTAINER === */
+  .container {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* === 1. TOP BANNER WITH RAYS === */
+  .top-banner {
+    width: 100%;
+    background: var(--red);
+    border-bottom: 8px solid var(--black);
+    padding: 55px 20px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Radiating rays — ONLY in this header area */
+  .top-banner::before {
+    content: '';
+    position: absolute;
+    top: -300px; left: 50%;
+    transform: translateX(-50%);
+    width: 2400px; height: 2400px;
+    background: repeating-conic-gradient(
+      from 0deg,
+      rgba(255,255,255,0.1) 0deg 5deg,
+      transparent 5deg 10deg
+    );
+    pointer-events: none;
+  }
+  .top-banner-inner {
+    position: relative;
+    z-index: 2;
+  }
+  .top-label {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: var(--gold);
+    text-shadow: 3px 3px 0 var(--black);
+  }
+  .top-title {
+    font-size: 78px;
+    font-weight: 900;
+    line-height: 0.95;
+    color: var(--white);
+    text-shadow: 5px 5px 0 var(--black), -2px -2px 0 var(--black);
+    letter-spacing: 5px;
+    margin-top: 8px;
+  }
+  .top-stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 12px;
+  }
+
+  /* === 2. DIAGONAL RED STRIPE DIVIDER === */
+  .red-divider {
+    width: 110%;
+    margin-left: -5%;
+    height: 36px;
+    background: var(--red);
+    border-top: 5px solid var(--black);
+    border-bottom: 5px solid var(--black);
+    transform: rotate(-2.5deg);
+    margin-top: 6px;
+    position: relative;
+    z-index: 6;
+    background: repeating-linear-gradient(
+      135deg,
+      var(--red) 0px, var(--red) 30px,
+      var(--dark-red) 30px, var(--dark-red) 60px
+    );
+  }
+
+  /* === 3. YOUTUBE GUY BAR === */
+  .debater-bar {
+    width: 100%;
+    background: var(--black);
+    padding: 14px 30px;
+    text-align: center;
+    border-bottom: 6px solid var(--gold);
+    position: relative;
+    z-index: 5;
+  }
+  .debater-name {
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 10px;
+    text-shadow: 3px 3px 0 rgba(255,215,0,0.3);
+  }
+  .debater-subtitle {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 6px;
+    margin-top: -2px;
+    opacity: 0.9;
+  }
+
+  /* === 4. CLAIM PANEL === */
+  .claim-panel {
+    width: 94%;
+    margin-top: 20px;
+    background: var(--white);
+    border: 8px solid var(--black);
+    box-shadow: 6px 6px 0 var(--black);
+  }
+  .claim-header {
+    background: var(--red);
+    border-bottom: 6px solid var(--black);
+    padding: 10px 24px;
+    text-align: center;
+  }
+  .claim-label {
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--white);
+    letter-spacing: 18px;
+    text-shadow: 3px 3px 0 var(--black);
+  }
+  .claim-text {
+    padding: 22px 34px;
+    text-align: center;
+    font-size: 46px;
+    font-weight: 700;
+    color: var(--black);
+    line-height: 1.15;
+    letter-spacing: 2px;
+  }
+
+  /* === 5. VERDICT — CLEAN, NO DECORATIONS BEHIND === */
+  .verdict-panel {
+    width: 94%;
+    margin-top: 18px;
+    background: var(--white);
+    border: 8px solid var(--black);
+    box-shadow: 6px 6px 0 var(--black);
+    text-align: center;
+    padding: 16px 20px;
+  }
+  .verdict-text {
+    font-size: 112px;
+    font-weight: 900;
+    color: var(--red);
+    letter-spacing: 8px;
+    line-height: 1;
+    text-shadow:
+      4px 4px 0 var(--black),
+      -2px -2px 0 var(--black),
+      2px -2px 0 var(--black),
+      -2px 2px 0 var(--black);
+    -webkit-text-stroke: 3px var(--black);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* === 6. FACT PANEL === */
+  .fact-panel {
+    width: 94%;
+    margin-top: 14px;
+    background: var(--white);
+    border: 8px solid var(--black);
+    box-shadow: 5px 5px 0 var(--black);
+    display: flex;
+    align-items: stretch;
+  }
+  .fact-label {
+    background: var(--blue);
+    color: var(--gold);
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    border-right: 6px solid var(--black);
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .fact-content {
+    padding: 16px 24px;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--black);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+  }
+
+  /* === 7. HUMOR PANEL === */
+  .humor-panel {
+    width: 94%;
+    margin-top: 12px;
+    background: var(--white);
+    border: 8px solid var(--black);
+    box-shadow: 5px 5px 0 var(--black);
+    display: flex;
+    align-items: stretch;
+  }
+  .humor-label {
+    background: var(--red);
+    color: var(--white);
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    border-right: 6px solid var(--black);
+    text-shadow: 2px 2px 0 var(--black);
+  }
+  .humor-content {
+    padding: 14px 22px;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--black);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+  }
+
+  /* === 8. SOURCE PANEL === */
+  .source-panel {
+    width: 94%;
+    margin-top: 12px;
+    background: var(--white);
+    border: 6px solid var(--black);
+    display: flex;
+    align-items: stretch;
+  }
+  .source-label {
+    background: var(--black);
+    color: var(--gold);
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 170px;
+    border-right: 6px solid var(--black);
+  }
+  .source-content {
+    padding: 12px 22px;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--black);
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    text-transform: none;
+  }
+
+  /* === 9. BOTTOM PROCLAMATION === */
+  .bottom-section {
+    width: 100%;
+    margin-top: auto;
+  }
+  .bottom-bar {
+    width: 110%;
+    margin-left: -5%;
+    background: var(--blue);
+    border-top: 6px solid var(--black);
+    border-bottom: 6px solid var(--black);
+    transform: rotate(1.5deg);
+    padding: 18px 40px;
+    text-align: center;
+    position: relative;
+    z-index: 6;
+  }
+  .bottom-proclamation {
+    font-size: 54px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-shadow: 4px 4px 0 var(--black);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  /* === STRIPES FOOTER === */
+  .stripes-footer {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+  }
+  .stripe { flex: 1; }
+  .stripe.red { background: var(--red); }
+  .stripe.white { background: var(--white); }
+
+  .footer-text {
+    background: var(--black);
+    width: 100%;
+    text-align: center;
+    padding: 14px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 12px;
+    color: var(--gold);
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.1); }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPINNING GOLD STARBURST — above header, decorative only -->
+<div class="spinning-star-container">
+  <div class="spinning-star">
+    <svg viewBox="0 0 200 200">
+      <defs>
+        <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#ffd700"/>
+          <stop offset="100%" style="stop-color:#ffaa00"/>
+        </linearGradient>
+      </defs>
+      <!-- Multi-point starburst -->
+      <polygon points="100,0 110,70 150,10 115,75 190,40 120,85 200,100 120,115 190,160 115,125 150,190 110,130 100,200 90,130 50,190 85,125 10,160 80,115 0,100 80,85 10,40 85,75 50,10 90,70" fill="url(#starGrad)" stroke="#111" stroke-width="2" opacity="0.7"/>
+      <!-- Inner star -->
+      <polygon points="100,30 112,75 155,45 118,82 170,100 118,118 155,155 112,125 100,170 88,125 45,155 82,118 30,100 82,82 45,45 88,75" fill="#ffd700" stroke="#111" stroke-width="1.5" opacity="0.5"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Geometric margin accents -->
+<div class="margin-left"></div>
+<div class="margin-right"></div>
+
+<!-- Decorative stars in EMPTY margins only -->
+<div class="deco-star" style="top:360px; left:38px;">
+  <svg width="80" height="80" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35"/></svg>
+</div>
+<div class="deco-star" style="top:800px; right:35px; left:auto;">
+  <svg width="70" height="70" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35"/></svg>
+</div>
+<div class="deco-star" style="top:1250px; left:42px;">
+  <svg width="65" height="65" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35"/></svg>
+</div>
+<div class="deco-star" style="top:1550px; right:40px; left:auto;">
+  <svg width="75" height="75" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35"/></svg>
+</div>
+
+<div class="container">
+
+  <!-- 1. TOP BANNER — rays behind header only -->
+  <div class="top-banner">
+    <div class="top-banner-inner">
+      <div class="top-label">&#9733; WORKERS OF TRUTH UNITE &#9733;</div>
+      <div class="top-title">THE GREAT BOARD<br>OF SCIENCE</div>
+      <div class="top-stars-row">
+        <svg width="46" height="46" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="5"/></svg>
+        <svg width="46" height="46" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="5"/></svg>
+        <svg width="46" height="46" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="5"/></svg>
+        <svg width="46" height="46" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="5"/></svg>
+        <svg width="46" height="46" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="5"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Diagonal red stripe divider -->
+  <div class="red-divider"></div>
+
+  <!-- 3. YOUTUBE GUY on black bar -->
+  <div class="debater-bar">
+    <div class="debater-name">YOUTUBE GUY</div>
+    <div class="debater-subtitle">ENEMY OF THE PEOPLE'S SCIENCE</div>
+  </div>
+
+  <!-- 4. CLAIM — clean white panel -->
+  <div class="claim-panel">
+    <div class="claim-header">
+      <div class="claim-label">&#9733; CLAIM &#9733;</div>
+    </div>
+    <div class="claim-text">"VACCINES CAUSE AUTISM"</div>
+  </div>
+
+  <!-- 5. VERDICT — clean, nothing behind it -->
+  <div class="verdict-panel">
+    <div class="verdict-text">DEBUNKED</div>
+  </div>
+
+  <!-- 6. FACT — clean white panel, huge text -->
+  <div class="fact-panel">
+    <div class="fact-label">FACT</div>
+    <div class="fact-content">THE 1998 WAKEFIELD STUDY WAS RETRACTED. OVER 1.2 MILLION CHILDREN STUDIED &mdash; NO LINK FOUND.</div>
+  </div>
+
+  <!-- 7. HUMOR — clean white panel -->
+  <div class="humor-panel">
+    <div class="humor-label">HUMOR</div>
+    <div class="humor-content">COMRADE, THE ONLY THING VACCINES CAUSE IS ADULTS WHO LIVE LONG ENOUGH TO ARGUE ON THE INTERNET.</div>
+  </div>
+
+  <!-- 8. SOURCE -->
+  <div class="source-panel">
+    <div class="source-label">SOURCE</div>
+    <div class="source-content">Madsen et al., 2019. Annals of Internal Medicine. N = 657,461</div>
+  </div>
+
+  <!-- 9. BOTTOM PROCLAMATION -->
+  <div class="bottom-section">
+    <div class="bottom-bar">
+      <div class="bottom-proclamation">
+        <svg width="48" height="48" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="4"/></svg>
+        PATRIOTISM REQUIRES VACCINES
+        <svg width="48" height="48" viewBox="0 0 100 100"><polygon points="50,0 61,35 98,35 68,57 79,91 50,70 21,91 32,57 2,35 39,35" fill="#ffd700" stroke="#111" stroke-width="4"/></svg>
+      </div>
+    </div>
+
+    <div class="stripes-footer">
+      <div class="stripe red"></div>
+      <div class="stripe white"></div>
+      <div class="stripe red"></div>
+      <div class="stripe white"></div>
+      <div class="stripe red"></div>
+    </div>
+
+    <div class="footer-text">THE SCIENCE REVOLUTION</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>DIAMOND PATRIOT</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #002868;
+    --red: #BF0A30;
+    --white: #FFFFFF;
+    --gold: #FFD700;
+    --dark-navy: #001a44;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: var(--dark-navy);
+    position: relative;
+    color: var(--white);
+    text-transform: uppercase;
+  }
+
+  /* === STAR CORNERS === */
+  .corner-star {
+    position: absolute;
+    font-size: 60px;
+    color: var(--gold);
+    z-index: 100;
+    animation: starPulse 2s ease-in-out infinite;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+    pointer-events: none;
+  }
+  .corner-star.tl { top: 12px; left: 18px; }
+  .corner-star.tr { top: 12px; right: 18px; animation-delay: 0.5s; }
+  .corner-star.bl { bottom: 12px; left: 18px; animation-delay: 1s; }
+  .corner-star.br { bottom: 12px; right: 18px; animation-delay: 1.5s; }
+
+  @keyframes starPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.25); }
+  }
+
+  /* === MARGIN STARS === */
+  .margin-stars {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .margin-star {
+    position: absolute;
+    color: var(--gold);
+    opacity: 0.3;
+    animation: driftStar 6s ease-in-out infinite alternate;
+  }
+  .margin-star:nth-child(odd) { animation-direction: alternate-reverse; }
+
+  @keyframes driftStar {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+    50% { opacity: 0.5; }
+    100% { transform: translateY(-30px) rotate(20deg); opacity: 0.2; }
+  }
+
+  /* === STRIPE BG === */
+  .stripe-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 38px,
+      rgba(191, 10, 48, 0.04) 38px,
+      rgba(191, 10, 48, 0.04) 76px
+    );
+  }
+
+  /* === SECTIONS === */
+  .section {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* 1. HEADER — chevron bottom */
+  .header-section {
+    top: 0;
+    height: 220px;
+    background: linear-gradient(180deg, var(--navy) 0%, #001d55 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+    padding: 20px 60px 50px;
+    border-bottom: none;
+  }
+  .header-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background: var(--gold);
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+  }
+  .header-title {
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    line-height: 1;
+    color: var(--white);
+    text-shadow: 3px 3px 0 var(--red), 0 0 30px rgba(255, 215, 0, 0.3);
+  }
+  .header-sub {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 12px;
+    margin-top: 4px;
+  }
+
+  /* 2. CHALLENGER — inverted chevron top, chevron bottom */
+  .challenger-section {
+    top: 195px;
+    height: 200px;
+    background: linear-gradient(180deg, var(--red) 0%, #8a0722 100%);
+    clip-path: polygon(0 15%, 50% 0, 100% 15%, 100% 78%, 50% 100%, 0 78%);
+    padding: 40px 80px 40px;
+  }
+  .challenger-label {
+    font-size: 32px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 10px;
+    margin-bottom: 2px;
+  }
+  .challenger-name {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  }
+  .challenger-topic {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-top: 2px;
+  }
+
+  /* 3. CLAIM — diamond-ish shape */
+  .claim-section {
+    top: 370px;
+    height: 300px;
+    background: linear-gradient(180deg, var(--dark-navy) 0%, #002050 100%);
+    clip-path: polygon(3% 12%, 50% 0, 97% 12%, 100% 85%, 50% 100%, 0 85%);
+    padding: 55px 90px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .claim-tag {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 8px;
+    margin-bottom: 8px;
+  }
+  .claim-text {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--white);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    max-width: 900px;
+  }
+  .claim-quote {
+    color: var(--gold);
+    font-size: 56px;
+    vertical-align: middle;
+    line-height: 0;
+  }
+
+  /* 4. VERDICT — massive, the core */
+  .verdict-section {
+    top: 640px;
+    height: 360px;
+    background: linear-gradient(180deg, var(--red) 0%, #6b0520 50%, var(--red) 100%);
+    clip-path: polygon(0 10%, 50% 0, 100% 10%, 100% 88%, 50% 100%, 0 88%);
+    padding: 50px 60px 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .verdict-word {
+    font-size: 110px;
+    font-weight: 900;
+    letter-spacing: 12px;
+    color: var(--white);
+    text-shadow:
+      4px 4px 0 rgba(0,0,0,0.6),
+      0 0 40px rgba(255, 215, 0, 0.5),
+      0 0 80px rgba(255, 215, 0, 0.2);
+    animation: verdictGlow 3s ease-in-out infinite;
+    line-height: 1;
+  }
+  @keyframes verdictGlow {
+    0%, 100% { text-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 40px rgba(255,215,0,0.4); }
+    50% { text-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 60px rgba(255,215,0,0.8), 0 0 100px rgba(255,215,0,0.3); }
+  }
+  .verdict-bar {
+    width: 600px;
+    height: 6px;
+    background: var(--gold);
+    margin: 12px 0;
+    clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
+  }
+  .verdict-conf {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 6px;
+  }
+
+  /* 5. FACT — explanation */
+  .fact-section {
+    top: 970px;
+    height: 310px;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--dark-navy) 100%);
+    clip-path: polygon(2% 10%, 50% 0, 98% 10%, 100% 88%, 50% 100%, 0 88%);
+    padding: 55px 80px 55px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .fact-tag {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 10px;
+    margin-bottom: 10px;
+  }
+  .fact-text {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--white);
+    max-width: 880px;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  }
+
+  /* 6. HUMOR */
+  .humor-section {
+    top: 1250px;
+    height: 200px;
+    background: linear-gradient(180deg, var(--red), #900820);
+    clip-path: polygon(0 18%, 50% 0, 100% 18%, 100% 80%, 50% 100%, 0 80%);
+    padding: 40px 80px 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .humor-text {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.25;
+    max-width: 860px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+
+  /* 7. SOURCE */
+  .source-section {
+    top: 1420px;
+    height: 170px;
+    background: linear-gradient(180deg, var(--dark-navy) 0%, #001030 100%);
+    clip-path: polygon(3% 15%, 50% 0, 97% 15%, 100% 82%, 50% 100%, 0 82%);
+    padding: 35px 80px 35px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .source-label {
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 8px;
+    margin-bottom: 4px;
+  }
+  .source-text {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    max-width: 860px;
+    line-height: 1.2;
+  }
+
+  /* 8. BOTTOM BANNER — inverted chevron top */
+  .banner-section {
+    top: 1565px;
+    height: 355px;
+    width: 100%;
+    background: linear-gradient(180deg, var(--navy) 0%, #000d2a 100%);
+    clip-path: polygon(0 12%, 50% 0, 100% 12%, 100% 100%, 0 100%);
+    padding: 70px 60px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .banner-stars {
+    font-size: 40px;
+    color: var(--gold);
+    letter-spacing: 20px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 15px rgba(255,215,0,0.6);
+  }
+  .banner-text {
+    font-size: 50px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    color: var(--white);
+    text-align: center;
+    line-height: 1.15;
+    text-shadow: 3px 3px 0 var(--red), 0 0 30px rgba(255,215,0,0.3);
+    max-width: 920px;
+  }
+  .banner-sub {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 8px;
+    margin-top: 10px;
+    opacity: 0.8;
+  }
+
+  /* === CHEVRON DIVIDER ACCENTS (gold arrows between sections) === */
+  .chevron-accent {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 30px;
+    z-index: 60;
+    clip-path: polygon(0 0, 50% 100%, 100% 0, 85% 0, 50% 70%, 15% 0);
+    background: var(--gold);
+    opacity: 0.7;
+  }
+  .chev-1 { top: 200px; }
+  .chev-2 { top: 377px; }
+  .chev-3 { top: 650px; }
+  .chev-4 { top: 980px; }
+  .chev-5 { top: 1258px; }
+  .chev-6 { top: 1428px; }
+
+  /* === WEBCAM BADGE === */
+  .webcam-badge {
+    position: absolute;
+    top: 165px;
+    right: 60px;
+    z-index: 80;
+    background: var(--dark-navy);
+    border: 3px solid var(--gold);
+    border-radius: 8px;
+    padding: 6px 18px;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+  .webcam-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    background: var(--red);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1.5s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* === EDGE STRIPES (left/right margin decoration) === */
+  .edge-stripe-left, .edge-stripe-right {
+    position: absolute;
+    top: 0;
+    width: 28px;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .edge-stripe-left {
+    left: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      var(--red) 0px, var(--red) 40px,
+      var(--white) 40px, var(--white) 50px,
+      var(--navy) 50px, var(--navy) 90px,
+      var(--white) 90px, var(--white) 100px
+    );
+    opacity: 0.3;
+  }
+  .edge-stripe-right {
+    right: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      var(--navy) 0px, var(--navy) 40px,
+      var(--white) 40px, var(--white) 50px,
+      var(--red) 50px, var(--red) 90px,
+      var(--white) 90px, var(--white) 100px
+    );
+    opacity: 0.3;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Corner Stars -->
+  <div class="corner-star tl">&#9733;</div>
+  <div class="corner-star tr">&#9733;</div>
+  <div class="corner-star bl">&#9733;</div>
+  <div class="corner-star br">&#9733;</div>
+
+  <!-- Margin Stars -->
+  <div class="margin-stars">
+    <div class="margin-star" style="top:280px;left:45px;font-size:28px;">&#9733;</div>
+    <div class="margin-star" style="top:520px;right:42px;left:auto;font-size:22px;animation-delay:0.8s;">&#9733;</div>
+    <div class="margin-star" style="top:760px;left:40px;font-size:32px;animation-delay:1.6s;">&#9733;</div>
+    <div class="margin-star" style="top:1100px;right:38px;left:auto;font-size:26px;animation-delay:2.4s;">&#9733;</div>
+    <div class="margin-star" style="top:1380px;left:42px;font-size:24px;animation-delay:3.2s;">&#9733;</div>
+    <div class="margin-star" style="top:1680px;right:44px;left:auto;font-size:30px;animation-delay:4s;">&#9733;</div>
+    <div class="margin-star" style="top:440px;left:48px;font-size:18px;animation-delay:0.4s;">&#9733;</div>
+    <div class="margin-star" style="top:900px;right:46px;left:auto;font-size:20px;animation-delay:2s;">&#9733;</div>
+  </div>
+
+  <!-- Edge Stripes -->
+  <div class="edge-stripe-left"></div>
+  <div class="edge-stripe-right"></div>
+
+  <!-- Stripe BG -->
+  <div class="stripe-bg"></div>
+
+  <!-- Gold chevron accents between sections -->
+  <div class="chevron-accent chev-1"></div>
+  <div class="chevron-accent chev-2"></div>
+  <div class="chevron-accent chev-3"></div>
+  <div class="chevron-accent chev-4"></div>
+  <div class="chevron-accent chev-5"></div>
+  <div class="chevron-accent chev-6"></div>
+
+  <!-- WEBCAM Badge -->
+  <div class="webcam-badge"><span class="webcam-dot"></span>WEBCAM</div>
+
+  <!-- 1. HEADER -->
+  <div class="section header-section">
+    <div class="header-title">THE GREAT BOARD<br>OF SCIENCE</div>
+    <div class="header-sub">&#9733; LIVE FACT CHECK &#9733;</div>
+  </div>
+
+  <!-- 2. CHALLENGER -->
+  <div class="section challenger-section">
+    <div class="challenger-label">CHALLENGER</div>
+    <div class="challenger-name">ANTI-VACCINE ACTIVIST</div>
+    <div class="challenger-topic">CLAIMS VACCINES CAUSE AUTISM</div>
+  </div>
+
+  <!-- 3. CLAIM -->
+  <div class="section claim-section">
+    <div class="claim-tag">&#9670; THEIR CLAIM &#9670;</div>
+    <div class="claim-text">
+      <span class="claim-quote">&ldquo;</span>EXPOSED! CDC EXPOSED EXPOSED! THE CDC EXPOSED THE CDC EXPOSED! CDC EXPOSED! EXPOSED! EXPOSED EXPOSED EXPOSED EXPOSED EXPOSED!! EXPOSED!!<span class="claim-quote">&rdquo;</span>
+    </div>
+  </div>
+
+  <!-- 4. VERDICT -->
+  <div class="section verdict-section">
+    <div class="verdict-bar"></div>
+    <div class="verdict-word">DEBUNKED</div>
+    <div class="verdict-bar"></div>
+    <div class="verdict-conf">CONFIDENCE: 97%</div>
+  </div>
+
+  <!-- 5. FACT -->
+  <div class="section fact-section">
+    <div class="fact-tag">&#9670; THE FACTS &#9670;</div>
+    <div class="fact-text">THE ORIGINAL 1998 STUDY WAS RETRACTED FOR FRAUD. DOZENS OF STUDIES WITH MILLIONS OF CHILDREN FOUND ZERO LINK BETWEEN VACCINES AND AUTISM.</div>
+  </div>
+
+  <!-- 6. HUMOR -->
+  <div class="section humor-section">
+    <div class="humor-text">IMAGINE THINKING ONE FRAUDULENT PAPER OUTWEIGHS 25 YEARS OF GLOBAL RESEARCH. THAT IS SOME WORLD-CLASS CHERRYPICKING.</div>
+  </div>
+
+  <!-- 7. SOURCE -->
+  <div class="section source-section">
+    <div class="source-label">&#9670; SOURCE &#9670;</div>
+    <div class="source-text">LANCET RETRACTION (2010) &bull; COCHRANE REVIEW (2012) &bull; CDC MMWR STUDIES</div>
+  </div>
+
+  <!-- 8. BOTTOM BANNER -->
+  <div class="section banner-section">
+    <div class="banner-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+    <div class="banner-text">PATRIOTISM REQUIRES VACCINES</div>
+    <div class="banner-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+    <div class="banner-sub">DEFEND YOUR NATION &bull; PROTECT YOUR NEIGHBORS</div>
+  </div>
+
+</body>
+</html>

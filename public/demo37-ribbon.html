@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 37 — Ribbon Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #002868;
+    --red: #BF0A30;
+    --white: #FFFFFF;
+    --gold: #FFD700;
+    --shadow-dark: rgba(0,0,0,0.45);
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #0a0a12;
+    font-family: 'Oswald', sans-serif;
+    position: relative;
+  }
+
+  /* Subtle animated margin texture */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        135deg,
+        transparent,
+        transparent 40px,
+        rgba(255,215,0,0.03) 40px,
+        rgba(255,215,0,0.03) 42px
+      );
+    animation: marginShimmer 12s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes marginShimmer {
+    0% { background-position: 0 0; }
+    100% { background-position: 200px 200px; }
+  }
+
+  .ribbon-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    height: 100%;
+  }
+
+  /* ── RIBBON SEGMENT BASE ── */
+  .ribbon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* ── FOLD CONNECTOR ── */
+  .fold {
+    position: relative;
+    width: 100%;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  /* The triangular fold effect between ribbons */
+  .fold-left, .fold-right {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+  }
+
+  .fold-left {
+    left: 0;
+  }
+
+  .fold-right {
+    right: 0;
+  }
+
+  /* Gold star pin at each fold */
+  .star-pin {
+    width: 44px;
+    height: 44px;
+    position: relative;
+    z-index: 20;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    animation: starPulse 3s ease-in-out infinite;
+  }
+
+  .star-pin svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 2px 10px rgba(255,215,0,0.6)); }
+  }
+
+  /* ── RIBBON 1: Red — Title ── */
+  .ribbon-1 {
+    width: 95%;
+    min-height: 160px;
+    background: linear-gradient(135deg, var(--red) 0%, #d4102f 50%, var(--red) 100%);
+    color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1.05;
+    clip-path: polygon(0 0, 100% 0, 98% 50%, 100% 100%, 0 100%, 2% 50%);
+    box-shadow: 0 8px 30px var(--shadow-dark);
+    padding: 30px 60px;
+    text-shadow: 2px 3px 6px rgba(0,0,0,0.5);
+  }
+
+  /* ── RIBBON 2: Navy — Challenger ── */
+  .ribbon-2 {
+    width: 85%;
+    min-height: 110px;
+    background: linear-gradient(135deg, var(--navy) 0%, #003580 50%, var(--navy) 100%);
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1.1;
+    clip-path: polygon(3% 0, 97% 0, 100% 50%, 97% 100%, 3% 100%, 0 50%);
+    box-shadow: 0 8px 25px var(--shadow-dark);
+    padding: 20px 50px;
+    text-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+  }
+
+  /* ── RIBBON 3: White — Claim ── */
+  .ribbon-3 {
+    width: 92%;
+    min-height: 170px;
+    background: linear-gradient(135deg, #f8f8f8 0%, var(--white) 50%, #f0f0f0 100%);
+    color: #1a1a2e;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.15;
+    clip-path: polygon(1% 0, 99% 0, 97% 50%, 99% 100%, 1% 100%, 3% 50%);
+    box-shadow: 0 8px 25px var(--shadow-dark);
+    padding: 28px 60px;
+    border-top: 3px solid var(--gold);
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .ribbon-3 .quote-mark {
+    color: var(--red);
+    font-size: 56px;
+    font-family: 'Bebas Neue', sans-serif;
+    line-height: 0;
+    vertical-align: middle;
+  }
+
+  /* ── RIBBON 4: Red — VERDICT (CENTER) ── */
+  .ribbon-4 {
+    width: 98%;
+    min-height: 220px;
+    background:
+      radial-gradient(ellipse at center, rgba(255,215,0,0.12) 0%, transparent 70%),
+      linear-gradient(180deg, #c40e2e 0%, var(--red) 30%, #a00820 100%);
+    color: var(--white);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 108px;
+    line-height: 1;
+    clip-path: polygon(0 0, 100% 0, 97% 50%, 100% 100%, 0 100%, 3% 50%);
+    box-shadow:
+      0 0 60px rgba(191,10,48,0.4),
+      0 10px 40px var(--shadow-dark);
+    padding: 30px 50px;
+    text-shadow: 3px 4px 8px rgba(0,0,0,0.6), 0 0 40px rgba(255,215,0,0.2);
+    animation: verdictGlow 4s ease-in-out infinite;
+  }
+
+  @keyframes verdictGlow {
+    0%, 100% { box-shadow: 0 0 60px rgba(191,10,48,0.4), 0 10px 40px var(--shadow-dark); }
+    50% { box-shadow: 0 0 80px rgba(191,10,48,0.6), 0 10px 40px var(--shadow-dark), 0 0 30px rgba(255,215,0,0.15); }
+  }
+
+  .verdict-sub {
+    display: block;
+    font-family: 'Oswald', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 6px;
+    margin-top: 4px;
+  }
+
+  /* ── RIBBON 5: Navy — Fact ── */
+  .ribbon-5 {
+    width: 88%;
+    min-height: 150px;
+    background: linear-gradient(135deg, var(--navy) 0%, #003a8c 50%, var(--navy) 100%);
+    color: var(--white);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1.2;
+    clip-path: polygon(2% 0, 98% 0, 100% 50%, 98% 100%, 2% 100%, 0 50%);
+    box-shadow: 0 8px 25px var(--shadow-dark);
+    padding: 24px 55px;
+  }
+
+  .ribbon-5 .fact-label {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    color: var(--gold);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+  }
+
+  /* ── RIBBON 6: White — Humor ── */
+  .ribbon-6 {
+    width: 82%;
+    min-height: 100px;
+    background: linear-gradient(135deg, #fafafa 0%, var(--white) 50%, #f2f2f2 100%);
+    color: #1a1a2e;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.2;
+    clip-path: polygon(3% 0, 97% 0, 99% 50%, 97% 100%, 3% 100%, 1% 50%);
+    box-shadow: 0 6px 20px var(--shadow-dark);
+    padding: 20px 50px;
+    font-style: italic;
+  }
+
+  /* ── RIBBON 7: Red — Source ── */
+  .ribbon-7 {
+    width: 86%;
+    min-height: 90px;
+    background: linear-gradient(135deg, var(--red) 0%, #c41030 50%, var(--red) 100%);
+    color: rgba(255,255,255,0.9);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.2;
+    clip-path: polygon(2% 0, 98% 0, 100% 50%, 98% 100%, 2% 100%, 0 50%);
+    box-shadow: 0 6px 20px var(--shadow-dark);
+    padding: 18px 50px;
+  }
+
+  .ribbon-7 .source-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 3px;
+  }
+
+  /* ── RIBBON 8: Gold — Tagline ── */
+  .ribbon-8 {
+    width: 95%;
+    min-height: 120px;
+    background:
+      linear-gradient(135deg, #e6c200 0%, var(--gold) 30%, #fff1a0 50%, var(--gold) 70%, #e6c200 100%);
+    color: var(--navy);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1.1;
+    clip-path: polygon(0 0, 100% 0, 97% 50%, 100% 100%, 0 100%, 3% 50%);
+    box-shadow:
+      0 0 40px rgba(255,215,0,0.3),
+      0 10px 30px var(--shadow-dark);
+    padding: 24px 60px;
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+    animation: goldShine 5s ease-in-out infinite;
+  }
+
+  @keyframes goldShine {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* ── FOLD COLOR VARIANTS ── */
+  .fold-1 .fold-left { border-bottom: 18px solid #8a0620; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-1 .fold-right { border-bottom: 18px solid #001a4d; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-2 .fold-left { border-bottom: 18px solid #001a4d; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-2 .fold-right { border-bottom: 18px solid #c8c8c8; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-3 .fold-left { border-bottom: 18px solid #c8c8c8; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-3 .fold-right { border-bottom: 18px solid #8a0620; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-4 .fold-left { border-bottom: 18px solid #8a0620; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-4 .fold-right { border-bottom: 18px solid #001a4d; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-5 .fold-left { border-bottom: 18px solid #001a4d; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-5 .fold-right { border-bottom: 18px solid #c8c8c8; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-6 .fold-left { border-bottom: 18px solid #c8c8c8; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-6 .fold-right { border-bottom: 18px solid #8a0620; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  .fold-7 .fold-left { border-bottom: 18px solid #8a0620; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+  .fold-7 .fold-right { border-bottom: 18px solid #b8a000; border-left: 30px solid transparent; border-right: 30px solid transparent; }
+
+  /* Edge decorations — subtle animated stars in margins */
+  .margin-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .margin-star {
+    position: absolute;
+    color: var(--gold);
+    opacity: 0.15;
+    font-size: 28px;
+    animation: twinkle 4s ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.08; transform: scale(0.8); }
+    50% { opacity: 0.2; transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div class="margin-stars">
+  <span class="margin-star" style="top:5%;left:2%;animation-delay:0s">&#9733;</span>
+  <span class="margin-star" style="top:15%;right:1%;animation-delay:0.8s">&#9733;</span>
+  <span class="margin-star" style="top:30%;left:1%;animation-delay:1.6s">&#9733;</span>
+  <span class="margin-star" style="top:50%;right:2%;animation-delay:2.4s">&#9733;</span>
+  <span class="margin-star" style="top:65%;left:3%;animation-delay:0.4s">&#9733;</span>
+  <span class="margin-star" style="top:80%;right:3%;animation-delay:1.2s">&#9733;</span>
+  <span class="margin-star" style="top:92%;left:1%;animation-delay:2s">&#9733;</span>
+</div>
+
+<div class="ribbon-container">
+
+  <!-- RIBBON 1: Red — Title -->
+  <div class="ribbon ribbon-1">
+    THE GREAT BOARD<br>OF SCIENCE
+  </div>
+
+  <!-- Fold 1 -->
+  <div class="fold fold-1">
+    <div class="star-pin">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 2: Navy — Challenger -->
+  <div class="ribbon ribbon-2">
+    CHALLENGER
+  </div>
+
+  <!-- Fold 2 -->
+  <div class="fold fold-2">
+    <div class="star-pin" style="animation-delay:0.5s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 3: White — Claim -->
+  <div class="ribbon ribbon-3">
+    <span class="quote-mark">&ldquo; </span>Vaccines contain microchips that track you through 5G towers<span class="quote-mark"> &rdquo;</span>
+  </div>
+
+  <!-- Fold 3 -->
+  <div class="fold fold-3">
+    <div class="star-pin" style="animation-delay:1s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 4: Red — VERDICT (CENTER) -->
+  <div class="ribbon ribbon-4">
+    DEBUNKED
+    <span class="verdict-sub">ZERO EVIDENCE</span>
+  </div>
+
+  <!-- Fold 4 -->
+  <div class="fold fold-4">
+    <div class="star-pin" style="animation-delay:1.5s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 5: Navy — Fact -->
+  <div class="ribbon ribbon-5">
+    <span class="fact-label">THE FACTS</span>
+    Vaccine needles are far too small for microchips. No tracking device exists that could fit in a vaccine dose or be powered inside the body.
+  </div>
+
+  <!-- Fold 5 -->
+  <div class="fold fold-5">
+    <div class="star-pin" style="animation-delay:2s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 6: White — Humor -->
+  <div class="ribbon ribbon-6">
+    You willingly carry a GPS phone everywhere but worry about a needle? Sure.
+  </div>
+
+  <!-- Fold 6 -->
+  <div class="fold fold-6">
+    <div class="star-pin" style="animation-delay:2.5s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 7: Red — Source -->
+  <div class="ribbon ribbon-7">
+    <span class="source-label">SOURCE: </span>CDC Vaccine Safety Monitoring, 2024
+  </div>
+
+  <!-- Fold 7 -->
+  <div class="fold fold-7">
+    <div class="star-pin" style="animation-delay:3s">
+      <svg viewBox="0 0 50 50"><polygon points="25,2 31,18 49,18 35,29 40,46 25,36 10,46 15,29 1,18 19,18" fill="#FFD700" stroke="#b8960a" stroke-width="1.5"/></svg>
+    </div>
+  </div>
+
+  <!-- RIBBON 8: Gold — Tagline -->
+  <div class="ribbon ribbon-8">
+    PATRIOTISM REQUIRES VACCINES
+  </div>
+
+</div>
+
+</body>
+</html>

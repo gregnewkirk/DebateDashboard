@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo 38 — Spotlight Stage</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    background: #0a1628;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Spotlight container shared */
+  .spot {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 0 60px;
+  }
+
+  /* Radial glow behind each spotlight — pseudo element */
+  .spot::before {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .spot-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === SPOTLIGHT 1: Title === */
+  .spot-title {
+    margin-top: 60px;
+    height: 160px;
+  }
+  .spot-title::before {
+    width: 700px;
+    height: 260px;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, transparent 70%);
+  }
+  .spot-title .spot-content {
+    font-size: 72px;
+    color: #ffffff;
+    letter-spacing: 4px;
+    text-shadow: 0 0 40px rgba(255,255,255,0.3), 0 0 80px rgba(255,255,255,0.1);
+    line-height: 1.05;
+  }
+
+  /* === DARK GAP 1 === */
+  .gap1 { height: 60px; }
+
+  /* === SPOTLIGHT 2: Challenger === */
+  .spot-challenger {
+    height: 110px;
+  }
+  .spot-challenger::before {
+    width: 550px;
+    height: 200px;
+    background: radial-gradient(ellipse at center, rgba(191,10,48,0.12) 0%, transparent 70%);
+  }
+  .spot-challenger .spot-content {
+    font-size: 48px;
+    color: #BF0A30;
+    letter-spacing: 8px;
+    text-shadow: 0 0 30px rgba(191,10,48,0.4);
+  }
+
+  /* === DARK GAP 2 === */
+  .gap2 { height: 40px; }
+
+  /* === SPOTLIGHT 3: Claim === */
+  .spot-claim {
+    height: 200px;
+    padding: 0 70px;
+  }
+  .spot-claim::before {
+    width: 900px;
+    height: 300px;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.09) 0%, transparent 65%);
+  }
+  .spot-claim .spot-content {
+    font-size: 42px;
+    color: #e8e8e8;
+    line-height: 1.2;
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.15);
+  }
+
+  /* === SPOTLIGHT 4: VERDICT — BRIGHTEST, CENTER === */
+  .spot-verdict {
+    height: 260px;
+    margin-top: 20px;
+  }
+  .spot-verdict::before {
+    width: 1000px;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(191,10,48,0.25) 0%, rgba(191,10,48,0.10) 35%, transparent 70%);
+  }
+  .spot-verdict .spot-content {
+    font-size: 108px;
+    color: #BF0A30;
+    letter-spacing: 10px;
+    text-shadow:
+      0 0 20px rgba(191,10,48,0.9),
+      0 0 60px rgba(191,10,48,0.6),
+      0 0 120px rgba(191,10,48,0.3),
+      0 4px 0 #8a0720;
+    line-height: 1;
+  }
+
+  /* === SPOTLIGHT 5: Fact === */
+  .spot-fact {
+    height: 220px;
+    padding: 0 65px;
+    margin-top: 10px;
+  }
+  .spot-fact::before {
+    width: 850px;
+    height: 300px;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, transparent 65%);
+  }
+  .spot-fact .spot-content {
+    font-size: 34px;
+    color: #d0d0d0;
+    line-height: 1.25;
+    letter-spacing: 1px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.1);
+  }
+
+  /* === SPOTLIGHT 6: Humor === */
+  .spot-humor {
+    height: 140px;
+    padding: 0 80px;
+  }
+  .spot-humor::before {
+    width: 750px;
+    height: 220px;
+    background: radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 65%);
+  }
+  .spot-humor .spot-content {
+    font-size: 30px;
+    color: #ffd700;
+    line-height: 1.25;
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  /* === DARK GAP 3 === */
+  .gap3 { height: 50px; }
+
+  /* === SPOTLIGHT 7: Tagline (gold) === */
+  .spot-tagline {
+    height: 140px;
+    padding: 0 60px;
+  }
+  .spot-tagline::before {
+    width: 900px;
+    height: 240px;
+    background: radial-gradient(ellipse at center, rgba(255,215,0,0.10) 0%, transparent 65%);
+  }
+  .spot-tagline .spot-content {
+    font-size: 48px;
+    color: #ffd700;
+    letter-spacing: 5px;
+    text-shadow: 0 0 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.15);
+    line-height: 1.1;
+  }
+
+  /* === GOLD STAR ACCENTS IN DARK MARGINS === */
+  .star {
+    position: absolute;
+    color: #ffd700;
+    opacity: 0.25;
+    z-index: 1;
+    font-size: 28px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  }
+  .star.s1  { top: 35px;   left: 50px; font-size: 22px; opacity: 0.15; }
+  .star.s2  { top: 90px;   right: 65px; font-size: 18px; opacity: 0.20; }
+  .star.s3  { top: 250px;  left: 35px; font-size: 14px; opacity: 0.12; }
+  .star.s4  { top: 420px;  right: 40px; font-size: 20px; opacity: 0.18; }
+  .star.s5  { top: 680px;  left: 28px; font-size: 16px; opacity: 0.15; }
+  .star.s6  { top: 780px;  right: 30px; font-size: 24px; opacity: 0.22; }
+  .star.s7  { top: 1050px; left: 40px; font-size: 12px; opacity: 0.10; }
+  .star.s8  { top: 1200px; right: 50px; font-size: 18px; opacity: 0.16; }
+  .star.s9  { top: 1400px; left: 32px; font-size: 20px; opacity: 0.18; }
+  .star.s10 { top: 1550px; right: 38px; font-size: 14px; opacity: 0.12; }
+  .star.s11 { top: 1700px; left: 55px; font-size: 22px; opacity: 0.20; }
+  .star.s12 { top: 1830px; right: 60px; font-size: 16px; opacity: 0.14; }
+  .star.s13 { top: 600px;  left: 22px; font-size: 10px; opacity: 0.10; }
+  .star.s14 { top: 1350px; right: 25px; font-size: 10px; opacity: 0.08; }
+
+  /* Subtle animated shimmer on stars */
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--base-op); }
+    50% { opacity: calc(var(--base-op) + 0.08); }
+  }
+  .star { animation: twinkle 3s ease-in-out infinite; }
+  .star.s1  { --base-op: 0.15; animation-delay: 0s; }
+  .star.s2  { --base-op: 0.20; animation-delay: 0.4s; }
+  .star.s3  { --base-op: 0.12; animation-delay: 0.8s; }
+  .star.s4  { --base-op: 0.18; animation-delay: 1.2s; }
+  .star.s5  { --base-op: 0.15; animation-delay: 1.6s; }
+  .star.s6  { --base-op: 0.22; animation-delay: 0.3s; }
+  .star.s7  { --base-op: 0.10; animation-delay: 0.7s; }
+  .star.s8  { --base-op: 0.16; animation-delay: 1.1s; }
+  .star.s9  { --base-op: 0.18; animation-delay: 1.5s; }
+  .star.s10 { --base-op: 0.12; animation-delay: 2.0s; }
+  .star.s11 { --base-op: 0.20; animation-delay: 0.5s; }
+  .star.s12 { --base-op: 0.14; animation-delay: 1.8s; }
+  .star.s13 { --base-op: 0.10; animation-delay: 2.2s; }
+  .star.s14 { --base-op: 0.08; animation-delay: 2.6s; }
+
+  /* Subtle spotlight cone animation on verdict */
+  @keyframes verdictPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.08); }
+  }
+  .spot-verdict {
+    animation: verdictPulse 2.5s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- Gold star accents in dark margins -->
+<span class="star s1">&#9733;</span>
+<span class="star s2">&#9733;</span>
+<span class="star s3">&#9733;</span>
+<span class="star s4">&#9733;</span>
+<span class="star s5">&#9733;</span>
+<span class="star s6">&#9733;</span>
+<span class="star s7">&#9733;</span>
+<span class="star s8">&#9733;</span>
+<span class="star s9">&#9733;</span>
+<span class="star s10">&#9733;</span>
+<span class="star s11">&#9733;</span>
+<span class="star s12">&#9733;</span>
+<span class="star s13">&#9733;</span>
+<span class="star s14">&#9733;</span>
+
+<div class="stage">
+
+  <!-- SPOTLIGHT 1: Title -->
+  <div class="spot spot-title">
+    <div class="spot-content">THE GREAT BOARD<br>OF SCIENCE</div>
+  </div>
+
+  <!-- DARK GAP -->
+  <div class="gap1"></div>
+
+  <!-- SPOTLIGHT 2: Challenger -->
+  <div class="spot spot-challenger">
+    <div class="spot-content">CHALLENGER</div>
+  </div>
+
+  <!-- DARK GAP -->
+  <div class="gap2"></div>
+
+  <!-- SPOTLIGHT 3: Claim -->
+  <div class="spot spot-claim">
+    <div class="spot-content">"VACCINES CAUSE AUTISM BECAUSE<br>OF THE MERCURY IN THEM"</div>
+  </div>
+
+  <!-- SPOTLIGHT 4: Verdict — BRIGHTEST -->
+  <div class="spot spot-verdict">
+    <div class="spot-content">DEBUNKED</div>
+  </div>
+
+  <!-- SPOTLIGHT 5: Fact -->
+  <div class="spot spot-fact">
+    <div class="spot-content">THIMEROSAL WAS REMOVED FROM CHILDHOOD<br>VACCINES IN 2001. AUTISM RATES CONTINUED<br>TO RISE. ZERO CAUSAL LINK IN 1.2 MILLION<br>CHILDREN STUDIED.</div>
+  </div>
+
+  <!-- SPOTLIGHT 6: Humor -->
+  <div class="spot spot-humor">
+    <div class="spot-content">IMAGINE BLAMING MERCURY FOR AUTISM<br>WHEN MERCURY ISN'T EVEN THERE ANYMORE</div>
+  </div>
+
+  <!-- DARK GAP -->
+  <div class="gap3"></div>
+
+  <!-- SPOTLIGHT 7: Tagline -->
+  <div class="spot spot-tagline">
+    <div class="spot-content">PATRIOTISM<br>REQUIRES VACCINES</div>
+  </div>
+
+</div>
+
+</body>
+</html>

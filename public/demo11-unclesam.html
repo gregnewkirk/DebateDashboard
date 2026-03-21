@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>THE GREAT BOARD OF SCIENCE</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #002868;
+    --red: #BF0A30;
+    --parchment: #f5e6c8;
+    --parchment-dark: #e8d5aa;
+    --cream: #fdf8ef;
+    --ink: #1a1206;
+    --gold: #c9a84c;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Oswald', sans-serif;
+    background: var(--parchment);
+    position: relative;
+    /* Aged paper texture */
+    background-image:
+      radial-gradient(ellipse at 20% 80%, rgba(139,90,43,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(139,90,43,0.10) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(160,120,60,0.06) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(139,90,43,0.02) 3px, rgba(139,90,43,0.02) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(139,90,43,0.015) 5px, rgba(139,90,43,0.015) 6px);
+    background-color: var(--parchment);
+  }
+
+  /* Worn poster edge effect */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow:
+      inset 0 0 80px rgba(90,60,20,0.35),
+      inset 0 0 200px rgba(90,60,20,0.15);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Vertical stripes on sides */
+  .stripe-left, .stripe-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 48px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .stripe-left { left: 0; }
+  .stripe-right { right: 0; }
+
+  .stripe-left div, .stripe-right div {
+    flex: 1;
+  }
+  .stripe-left div:nth-child(odd), .stripe-right div:nth-child(odd) {
+    background: var(--red);
+  }
+  .stripe-left div:nth-child(even), .stripe-right div:nth-child(even) {
+    background: var(--cream);
+  }
+
+  /* Stars row */
+  .stars-row {
+    text-align: center;
+    font-size: 38px;
+    color: var(--navy);
+    letter-spacing: 18px;
+    padding: 10px 60px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(0,40,104,0.3);
+  }
+
+  /* Main content area */
+  .content {
+    position: relative;
+    z-index: 2;
+    padding: 20px 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 1920px;
+  }
+
+  /* Top navy banner */
+  .top-banner {
+    background: var(--navy);
+    width: 960px;
+    border: 4px solid var(--gold);
+    border-radius: 4px;
+    padding: 18px 24px 14px;
+    text-align: center;
+    margin-top: 28px;
+    position: relative;
+  }
+  .top-banner::before, .top-banner::after {
+    content: '\2605';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 44px;
+    color: var(--gold);
+  }
+  .top-banner::before { left: 18px; }
+  .top-banner::after { right: 18px; }
+
+  .top-banner h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 70px;
+    color: var(--cream);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    line-height: 1.05;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Stars divider */
+  .star-divider {
+    font-size: 32px;
+    color: var(--red);
+    letter-spacing: 24px;
+    text-align: center;
+    margin: 16px 0;
+    text-shadow: 1px 1px 0 rgba(191,10,48,0.3);
+  }
+
+  /* Subtitle */
+  .subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  /* Uncle Sam pointing hand */
+  .pointing-section {
+    text-align: center;
+    margin: 10px 0;
+    position: relative;
+  }
+  .pointing-hand {
+    font-size: 130px;
+    display: block;
+    filter: grayscale(30%);
+    line-height: 1;
+  }
+  .wants-you {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 62px;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+    line-height: 1.1;
+  }
+  .wants-you em {
+    font-style: italic;
+    font-size: 72px;
+    color: var(--navy);
+  }
+
+  /* Subject line */
+  .subject-line {
+    background: var(--cream);
+    border: 4px solid var(--navy);
+    border-radius: 2px;
+    width: 900px;
+    padding: 14px 28px;
+    text-align: center;
+    margin: 16px 0;
+    position: relative;
+  }
+  .subject-line::before {
+    content: '\2605 \2605 \2605';
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--cream);
+    padding: 0 12px;
+    font-size: 22px;
+    color: var(--red);
+    letter-spacing: 8px;
+  }
+  .subject-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 8px;
+  }
+  .subject-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 54px;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Main bulletin card */
+  .bulletin {
+    background: var(--cream);
+    border: 5px solid var(--navy);
+    width: 920px;
+    padding: 28px 32px 24px;
+    margin: 14px 0;
+    position: relative;
+    box-shadow: 6px 6px 0 rgba(0,40,104,0.2);
+  }
+  .bulletin::before {
+    content: 'OFFICIAL SCIENCE BULLETIN';
+    position: absolute;
+    top: -17px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--navy);
+    color: var(--gold);
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    padding: 2px 20px;
+    letter-spacing: 5px;
+    white-space: nowrap;
+    border: 3px solid var(--gold);
+  }
+
+  .claim-section {
+    margin-top: 12px;
+    margin-bottom: 18px;
+  }
+  .claim-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--red);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+  }
+  .claim-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 44px;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-top: 4px;
+    border-left: 5px solid var(--red);
+    padding-left: 18px;
+  }
+
+  /* DEBUNKED stamp */
+  .stamp-container {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+  }
+  .stamp {
+    display: inline-block;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 100px;
+    color: var(--red);
+    border: 7px solid var(--red);
+    padding: 4px 40px;
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+    position: relative;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(191,10,48,0.2);
+    box-shadow:
+      inset 0 0 0 3px var(--red),
+      0 0 0 2px var(--red);
+    /* Worn stamp effect */
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(245,230,200,0.3) 2px, rgba(245,230,200,0.3) 4px);
+  }
+  .stamp::before, .stamp::after {
+    content: '\2605';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 36px;
+  }
+  .stamp::before { left: 8px; }
+  .stamp::after { right: 8px; }
+
+  /* Fact line */
+  .fact-section {
+    margin: 16px 0 10px;
+    border-top: 3px dashed var(--navy);
+    padding-top: 14px;
+  }
+  .fact-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--navy);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+  }
+  .fact-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 36px;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-top: 4px;
+  }
+
+  /* Humor line */
+  .humor-section {
+    margin: 14px 0 8px;
+    text-align: center;
+  }
+  .humor-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--red);
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Source */
+  .source-section {
+    border-top: 3px solid var(--navy);
+    padding-top: 10px;
+    margin-top: 8px;
+    text-align: center;
+  }
+  .source-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--navy);
+    letter-spacing: 5px;
+  }
+  .source-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 30px;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .retracted {
+    display: inline-block;
+    background: var(--red);
+    color: white;
+    font-weight: 700;
+    padding: 2px 12px;
+    letter-spacing: 4px;
+    margin-left: 6px;
+  }
+
+  /* Bottom patriotic motto */
+  .bottom-motto {
+    background: var(--navy);
+    width: 920px;
+    border: 4px solid var(--gold);
+    padding: 20px 24px;
+    text-align: center;
+    margin-top: 14px;
+    position: relative;
+  }
+  .bottom-motto::before, .bottom-motto::after {
+    content: '\2605 \2605 \2605';
+    display: block;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 16px;
+  }
+  .bottom-motto::before { margin-bottom: 6px; }
+  .bottom-motto::after { margin-top: 6px; }
+
+  .motto-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 52px;
+    color: var(--cream);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    line-height: 1.15;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Bottom read a book */
+  .read-book {
+    margin-top: 14px;
+    text-align: center;
+  }
+  .read-book-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 38px;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+  }
+
+  /* Bottom stars */
+  .bottom-stars {
+    text-align: center;
+    font-size: 34px;
+    color: var(--navy);
+    letter-spacing: 20px;
+    margin-top: 8px;
+  }
+
+  /* Decorative corner stars */
+  .corner-star {
+    position: absolute;
+    font-size: 60px;
+    color: var(--gold);
+    z-index: 3;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+  }
+  .corner-star.tl { top: 56px; left: 62px; }
+  .corner-star.tr { top: 56px; right: 62px; }
+  .corner-star.bl { bottom: 30px; left: 62px; }
+  .corner-star.br { bottom: 30px; right: 62px; }
+
+</style>
+</head>
+<body>
+
+<!-- Side stripes -->
+<div class="stripe-left">
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+</div>
+<div class="stripe-right">
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+  <div></div><div></div><div></div><div></div><div></div>
+</div>
+
+<!-- Corner stars -->
+<div class="corner-star tl">&#9733;</div>
+<div class="corner-star tr">&#9733;</div>
+<div class="corner-star bl">&#9733;</div>
+<div class="corner-star br">&#9733;</div>
+
+<div class="content">
+
+  <!-- Stars row top -->
+  <div class="stars-row" style="margin-top: 14px;">&#9733; &#9733; &#9733; &#9733; &#9733; &#9733; &#9733;</div>
+
+  <!-- Main title banner -->
+  <div class="top-banner">
+    <h1>THE GREAT BOARD<br>OF SCIENCE</h1>
+  </div>
+
+  <!-- Star divider -->
+  <div class="star-divider">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+
+  <!-- Subtitle -->
+  <div class="subtitle">OFFICIAL FACT-CHECK DIVISION</div>
+
+  <!-- Uncle Sam pointing section -->
+  <div class="pointing-section">
+    <span class="pointing-hand">&#9758;</span>
+    <div class="wants-you">SCIENCE WANTS <em>YOU</em></div>
+  </div>
+
+  <!-- Subject line -->
+  <div class="subject-line">
+    <div class="subject-label">&#9670; SUBJECT &#9670;</div>
+    <div class="subject-name">DR. YOUTUBE</div>
+  </div>
+
+  <!-- Main bulletin -->
+  <div class="bulletin">
+
+    <div class="claim-section">
+      <div class="claim-label">&#9654; Claim Filed:</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <div class="stamp-container">
+      <div class="stamp">DEBUNKED</div>
+    </div>
+
+    <div class="fact-section">
+      <div class="fact-label">&#9654; Intelligence Report:</div>
+      <div class="fact-text">Exposed in 2010 as a total fraud. The original study was retracted and the author stripped of his medical license.</div>
+    </div>
+
+    <div class="humor-section">
+      <div class="humor-text">"Even WebMD disagrees with you."</div>
+    </div>
+
+    <div class="source-section">
+      <div class="source-label">&#9654; SOURCE</div>
+      <div class="source-text">The Lancet, 2010 <span class="retracted">RETRACTED</span></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom motto -->
+  <div class="bottom-motto">
+    <div class="motto-text">PATRIOTISM<br>REQUIRES VACCINES</div>
+  </div>
+
+  <!-- Read a book -->
+  <div class="read-book">
+    <div class="read-book-text">Uncle Science wants you... to read a book.</div>
+  </div>
+
+  <!-- Bottom stars -->
+  <div class="bottom-stars">&#9733; &#9733; &#9733; &#9733; &#9733; &#9733; &#9733;</div>
+
+</div>
+
+</body>
+</html>

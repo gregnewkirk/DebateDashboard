@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CYBERPUNK HACKER TERMINAL — Debate Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ═══════════════════════════════════════════
+     CYBERPUNK HACKER TERMINAL — 9:16 PORTRAIT
+     Blade Runner × Mr. Robot × Matrix
+     ═══════════════════════════════════════════ */
+
+  :root {
+    --noir: #0a0e1a;
+    --noir-light: #0f1428;
+    --cyan: #00fff7;
+    --magenta: #ff00ff;
+    --green: #00ff41;
+    --amber: #ffaa00;
+    --red: #ff0040;
+    --cyan-dim: rgba(0,255,247,0.15);
+    --magenta-dim: rgba(255,0,255,0.12);
+    --green-dim: rgba(0,255,65,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--noir);
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--cyan);
+  }
+
+  /* ── MATRIX RAIN CANVAS ── */
+  #matrix-rain {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.12;
+  }
+
+  /* ── SCAN LINES OVERLAY ── */
+  .scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+  }
+
+  /* ── CRT GLOW VIGNETTE ── */
+  .crt-glow {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 150px rgba(0,255,247,0.04),
+      inset 0 0 300px rgba(0,0,0,0.5);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .dashboard {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px;
+    gap: 16px;
+  }
+
+  /* ══════════════════════════════════
+     HEADER — THE GREAT BOARD OF SCIENCE
+     ══════════════════════════════════ */
+  .header {
+    text-align: center;
+    padding: 24px 16px 18px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 3px solid var(--cyan);
+    opacity: 0.3;
+    clip-path: polygon(0 0, 95% 0, 100% 20%, 100% 100%, 5% 100%, 0 80%);
+  }
+
+  .header-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    color: var(--green);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 8px;
+    animation: flicker 4s infinite;
+  }
+
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 62px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    background: linear-gradient(
+      90deg,
+      var(--cyan) 0%,
+      var(--magenta) 30%,
+      var(--cyan) 50%,
+      #fff 70%,
+      var(--magenta) 100%
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: holographic-shift 4s ease-in-out infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 20px rgba(0,255,247,0.4));
+  }
+
+  @keyframes holographic-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* ══════════════════════════════════
+     SUBJECT BANNER
+     ══════════════════════════════════ */
+  .subject-banner {
+    background: linear-gradient(90deg, var(--magenta-dim), transparent 70%);
+    border-left: 5px solid var(--magenta);
+    border-right: 5px solid transparent;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .subject-banner::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,0,255,0.08));
+    animation: data-stream 2s linear infinite;
+  }
+
+  @keyframes data-stream {
+    0% { transform: translateX(-200px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100vw); opacity: 0; }
+  }
+
+  .subject-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 36px;
+    color: var(--magenta);
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(255,0,255,0.5);
+  }
+
+  .subject-label .name {
+    color: #fff;
+    font-weight: bold;
+  }
+
+  .threat-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--red);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border: 3px solid var(--red);
+    background: rgba(255,0,64,0.1);
+    animation: threat-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes threat-pulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,0,64,0.3); }
+    50% { box-shadow: 0 0 30px rgba(255,0,64,0.6), inset 0 0 20px rgba(255,0,64,0.1); }
+  }
+
+  /* ══════════════════════════════════
+     FACT CHECK TERMINAL — MAIN CARD
+     ══════════════════════════════════ */
+  .terminal-card {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    padding: 4px;
+    background: linear-gradient(
+      135deg,
+      var(--cyan),
+      var(--magenta),
+      var(--green),
+      var(--amber),
+      var(--cyan),
+      var(--magenta)
+    );
+    background-size: 400% 400%;
+    animation: holographic-border 6s ease infinite;
+    clip-path: polygon(0 0, 97% 0, 100% 3%, 100% 100%, 3% 100%, 0 97%);
+  }
+
+  @keyframes holographic-border {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+  }
+
+  .terminal-inner {
+    width: 100%;
+    height: 100%;
+    background: var(--noir);
+    clip-path: polygon(0 0, 97% 0, 100% 3%, 100% 100%, 3% 100%, 0 97%);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 28px 20px;
+    gap: 14px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Terminal header bar */
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(0,255,247,0.2);
+    flex-shrink: 0;
+  }
+
+  .terminal-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .terminal-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: dot-blink 2s infinite;
+  }
+  .terminal-dot:nth-child(2) { background: var(--amber); box-shadow: 0 0 8px var(--amber); animation-delay: 0.3s; }
+  .terminal-dot:nth-child(3) { background: var(--red); box-shadow: 0 0 8px var(--red); animation-delay: 0.6s; }
+
+  @keyframes dot-blink {
+    0%, 85%, 100% { opacity: 1; }
+    90% { opacity: 0.3; }
+  }
+
+  .terminal-id {
+    font-size: 28px;
+    color: rgba(0,255,247,0.5);
+    letter-spacing: 3px;
+  }
+
+  .terminal-status {
+    font-size: 28px;
+    color: var(--green);
+    letter-spacing: 2px;
+    animation: flicker 3s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 97%, 100% { opacity: 1; }
+    98% { opacity: 0.4; }
+  }
+
+  /* ── INTERCEPTED HEADER ── */
+  .intercepted {
+    text-align: center;
+    padding: 10px 0;
+    flex-shrink: 0;
+  }
+
+  .intercepted-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(255,170,0,0.5);
+    position: relative;
+    display: inline-block;
+    animation: glitch-text 5s infinite;
+  }
+
+  .intercepted-label::before,
+  .intercepted-label::after {
+    content: 'CLAIM INTERCEPTED';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+  .intercepted-label::before {
+    color: var(--cyan);
+    animation: glitch-1 3s infinite;
+    clip-path: inset(0 0 65% 0);
+  }
+  .intercepted-label::after {
+    color: var(--magenta);
+    animation: glitch-2 3s infinite;
+    clip-path: inset(65% 0 0 0);
+  }
+
+  @keyframes glitch-1 {
+    0%, 92%, 100% { transform: translate(0); }
+    93% { transform: translate(-4px, -2px); }
+    95% { transform: translate(4px, 1px); }
+    97% { transform: translate(-2px, 2px); }
+  }
+  @keyframes glitch-2 {
+    0%, 90%, 100% { transform: translate(0); }
+    91% { transform: translate(3px, 2px); }
+    93% { transform: translate(-3px, -1px); }
+    96% { transform: translate(2px, -2px); }
+  }
+  @keyframes glitch-text {
+    0%, 89%, 100% { text-shadow: 0 0 20px rgba(255,170,0,0.5); }
+    90% { text-shadow: -3px 0 var(--cyan), 3px 0 var(--magenta); }
+    91% { text-shadow: 3px 0 var(--cyan), -3px 0 var(--magenta); }
+    92% { text-shadow: 0 0 20px rgba(255,170,0,0.5); }
+  }
+
+  /* ── CLAIM TEXT ── */
+  .claim-block {
+    background: rgba(255,0,255,0.06);
+    border-left: 5px solid var(--magenta);
+    padding: 18px 24px;
+    flex-shrink: 0;
+  }
+
+  .claim-prefix {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 30px;
+    color: var(--magenta);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+
+  .claim-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+    text-shadow: 0 0 10px rgba(255,255,255,0.15);
+  }
+
+  /* ── VERDICT ── */
+  .verdict-section {
+    text-align: center;
+    padding: 20px 0;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .verdict-prefix {
+    font-size: 32px;
+    color: rgba(0,255,247,0.5);
+    letter-spacing: 6px;
+    margin-bottom: 6px;
+  }
+
+  .verdict-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    line-height: 1;
+    animation: verdict-glow 2s ease-in-out infinite;
+  }
+
+  .verdict-text.debunked {
+    color: var(--cyan);
+    text-shadow:
+      0 0 20px var(--cyan),
+      0 0 40px var(--cyan),
+      0 0 80px rgba(0,255,247,0.4);
+  }
+
+  @keyframes verdict-glow {
+    0%, 100% {
+      filter: brightness(1);
+      text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan), 0 0 80px rgba(0,255,247,0.4);
+    }
+    50% {
+      filter: brightness(1.3);
+      text-shadow: 0 0 30px var(--cyan), 0 0 60px var(--cyan), 0 0 120px rgba(0,255,247,0.6);
+    }
+  }
+
+  .verdict-line {
+    width: 80%;
+    height: 3px;
+    margin: 12px auto 0;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: line-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes line-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* ── FACT / HUMOR / SOURCE ── */
+  .info-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .info-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .info-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 2px;
+    min-width: 160px;
+    flex-shrink: 0;
+    text-shadow: 0 0 10px rgba(0,255,65,0.3);
+  }
+
+  .info-label.humor { color: var(--magenta); text-shadow: 0 0 10px rgba(255,0,255,0.3); }
+  .info-label.source { color: var(--amber); text-shadow: 0 0 10px rgba(255,170,0,0.3); }
+
+  .info-value {
+    font-size: 32px;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.3;
+  }
+
+  .info-value.humor-text {
+    font-size: 30px;
+    color: rgba(255,255,255,0.8);
+    font-style: italic;
+  }
+
+  .info-value.source-text {
+    font-size: 28px;
+    color: rgba(0,255,247,0.6);
+    letter-spacing: 1px;
+  }
+
+  /* ══════════════════════════════════
+     BOTTOM TICKER
+     ══════════════════════════════════ */
+  .ticker {
+    flex-shrink: 0;
+    background: var(--noir-light);
+    border-top: 3px solid var(--cyan);
+    border-bottom: 3px solid var(--cyan);
+    overflow: hidden;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .ticker::before,
+  .ticker::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 60px;
+    z-index: 5;
+  }
+  .ticker::before { left: 0; background: linear-gradient(90deg, var(--noir-light), transparent); }
+  .ticker::after { right: 0; background: linear-gradient(90deg, transparent, var(--noir-light)); }
+
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    animation: ticker-scroll 30s linear infinite;
+    width: max-content;
+  }
+
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    padding: 0 40px;
+  }
+
+  .ticker-item .sep {
+    color: var(--magenta);
+    margin: 0 16px;
+  }
+
+  .ticker-item .stat-label {
+    color: rgba(0,255,247,0.5);
+  }
+
+  .ticker-item .stat-value {
+    color: var(--cyan);
+    font-weight: bold;
+  }
+
+  .ticker-item .stat-value.bad { color: var(--red); }
+  .ticker-item .stat-value.good { color: var(--green); }
+
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ══════════════════════════════════
+     UTILITY & MISC
+     ══════════════════════════════════ */
+
+  /* Typing cursor blink */
+  .cursor {
+    display: inline-block;
+    width: 16px;
+    height: 32px;
+    background: var(--cyan);
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: cursor-blink 1s step-end infinite;
+  }
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Corner decorations */
+  .corner-deco {
+    position: fixed;
+    width: 60px; height: 60px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .corner-deco.tl { top: 8px; left: 8px; border-top: 4px solid var(--cyan); border-left: 4px solid var(--cyan); }
+  .corner-deco.tr { top: 8px; right: 8px; border-top: 4px solid var(--cyan); border-right: 4px solid var(--cyan); }
+  .corner-deco.bl { bottom: 8px; left: 8px; border-bottom: 4px solid var(--magenta); border-left: 4px solid var(--magenta); }
+  .corner-deco.br { bottom: 8px; right: 8px; border-bottom: 4px solid var(--magenta); border-right: 4px solid var(--magenta); }
+
+  /* Hex grid subtle background */
+  .hex-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.03;
+    background-image:
+      linear-gradient(30deg, var(--cyan) 12%, transparent 12.5%, transparent 87%, var(--cyan) 87.5%, var(--cyan)),
+      linear-gradient(150deg, var(--cyan) 12%, transparent 12.5%, transparent 87%, var(--cyan) 87.5%, var(--cyan)),
+      linear-gradient(30deg, var(--cyan) 12%, transparent 12.5%, transparent 87%, var(--cyan) 87.5%, var(--cyan)),
+      linear-gradient(150deg, var(--cyan) 12%, transparent 12.5%, transparent 87%, var(--cyan) 87.5%, var(--cyan));
+    background-size: 80px 140px;
+    background-position: 0 0, 0 0, 40px 70px, 40px 70px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Matrix rain canvas -->
+<canvas id="matrix-rain"></canvas>
+
+<!-- Hex pattern bg -->
+<div class="hex-bg"></div>
+
+<!-- CRT scan lines -->
+<div class="scanlines"></div>
+
+<!-- CRT glow vignette -->
+<div class="crt-glow"></div>
+
+<!-- Corner decorations -->
+<div class="corner-deco tl"></div>
+<div class="corner-deco tr"></div>
+<div class="corner-deco bl"></div>
+<div class="corner-deco br"></div>
+
+<!-- ════════════════════════════════════
+     MAIN DASHBOARD
+     ════════════════════════════════════ -->
+<div class="dashboard">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-tag">// SYSTEM v4.2.0 — ACTIVE //</div>
+    <div class="header-title">THE GREAT BOARD<br>OF SCIENCE</div>
+  </div>
+
+  <!-- SUBJECT BANNER -->
+  <div class="subject-banner">
+    <div class="subject-label">
+      SUBJECT: <span class="name">DR. YOUTUBE</span>
+    </div>
+    <div class="threat-badge">THREAT: HIGH</div>
+  </div>
+
+  <!-- FACT CHECK TERMINAL CARD -->
+  <div class="terminal-card">
+    <div class="terminal-inner">
+
+      <!-- Terminal bar -->
+      <div class="terminal-bar">
+        <div class="terminal-bar-left">
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <div class="terminal-dot"></div>
+          <span class="terminal-id">FACTCHECK.EXE</span>
+        </div>
+        <span class="terminal-status">● SCANNING<span class="cursor"></span></span>
+      </div>
+
+      <!-- Intercepted -->
+      <div class="intercepted">
+        <span class="intercepted-label">CLAIM INTERCEPTED</span>
+      </div>
+
+      <!-- Claim -->
+      <div class="claim-block">
+        <div class="claim-prefix">&gt; CLAIM_DATA:</div>
+        <div class="claim-text">"Vaccines cause autism"</div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="verdict-section">
+        <div class="verdict-prefix">// ANALYSIS COMPLETE //</div>
+        <div class="verdict-text debunked">DEBUNKED</div>
+        <div class="verdict-line"></div>
+      </div>
+
+      <!-- Facts / Humor / Source -->
+      <div class="info-section">
+        <div class="info-row">
+          <span class="info-label">&gt; FACT_</span>
+          <span class="info-value">The original 1998 Wakefield study was retracted. Dozens of studies involving millions of children found zero link.</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label humor">&gt; ROAST</span>
+          <span class="info-value humor-text">"My source is a Facebook meme from 2012" — every anti-vaxxer's peer review process.</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label source">&gt; SRC_</span>
+          <span class="info-value source-text">The Lancet retraction (2010) · CDC · WHO · Meta-analysis, JAMA 2019</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ticker-item">
+        <span class="stat-label">CLAIMS SCANNED:</span> <span class="stat-value">2,847</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">BS DETECTED:</span> <span class="stat-value bad">1,923</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">ACCURACY:</span> <span class="stat-value good">99.7%</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">THREAT LEVEL:</span> <span class="stat-value bad">CRITICAL</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">UPTIME:</span> <span class="stat-value">847:23:11</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">DEBUNKS/HR:</span> <span class="stat-value good">42</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">NEXT SCAN IN:</span> <span class="stat-value">3.2s</span>
+        <span class="sep">◆</span>
+      </span>
+      <!-- Duplicate for seamless scroll -->
+      <span class="ticker-item">
+        <span class="stat-label">CLAIMS SCANNED:</span> <span class="stat-value">2,847</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">BS DETECTED:</span> <span class="stat-value bad">1,923</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">ACCURACY:</span> <span class="stat-value good">99.7%</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">THREAT LEVEL:</span> <span class="stat-value bad">CRITICAL</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">UPTIME:</span> <span class="stat-value">847:23:11</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">DEBUNKS/HR:</span> <span class="stat-value good">42</span>
+        <span class="sep">◆</span>
+        <span class="stat-label">NEXT SCAN IN:</span> <span class="stat-value">3.2s</span>
+        <span class="sep">◆</span>
+      </span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════
+     MATRIX RAIN SCRIPT
+     ════════════════════════════════════ -->
+<script>
+(function() {
+  const canvas = document.getElementById('matrix-rain');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF<>{}[]=/\\';
+  const charArr = chars.split('');
+  const fontSize = 18;
+  let columns = Math.floor(canvas.width / fontSize);
+  let drops = new Array(columns).fill(1);
+
+  window.addEventListener('resize', function() {
+    columns = Math.floor(canvas.width / fontSize);
+    drops = new Array(columns).fill(1);
+  });
+
+  function draw() {
+    ctx.fillStyle = 'rgba(10, 14, 26, 0.06)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#00ff41';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = charArr[Math.floor(Math.random() * charArr.length)];
+
+      // Vary color slightly
+      if (Math.random() > 0.95) {
+        ctx.fillStyle = '#00fff7';
+      } else if (Math.random() > 0.97) {
+        ctx.fillStyle = '#ff00ff';
+      } else {
+        ctx.fillStyle = '#00ff41';
+      }
+
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+
+  setInterval(draw, 45);
+})();
+</script>
+
+</body>
+</html>

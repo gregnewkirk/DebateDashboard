@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEBATE DASHBOARD — ARCADE BOSS FIGHT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --crt-green: #39ff14;
+    --hot-pink: #ff006e;
+    --electric-blue: #00b4d8;
+    --pixel-yellow: #ffe66d;
+    --bg-black: #0a0a0a;
+    --dark-panel: #111111;
+    --pixel-border: 4px;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-black);
+    font-family: 'VT323', monospace;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 9/16;
+    max-height: 100vh;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* === CRT SCANLINES OVERLAY === */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.15) 3px,
+      rgba(0,0,0,0.15) 6px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* === CRT FLICKER === */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* === PIXEL BORDER MIXIN === */
+  .pixel-box {
+    border: var(--pixel-border) solid;
+    box-shadow:
+      inset calc(var(--pixel-border)*-1) calc(var(--pixel-border)*-1) 0 0 rgba(0,0,0,0.3),
+      calc(var(--pixel-border)) calc(var(--pixel-border)) 0 0 rgba(0,0,0,0.5);
+  }
+
+  /* === HEADER / TITLE === */
+  .title-bar {
+    background: linear-gradient(180deg, #1a1a2e 0%, #0a0a14 100%);
+    border-bottom: 5px solid var(--hot-pink);
+    padding: 18px 16px 14px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .title-bar h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: var(--pixel-yellow);
+    text-shadow:
+      3px 3px 0 #b8860b,
+      0 0 20px rgba(255,230,109,0.5);
+    line-height: 1.5;
+    letter-spacing: 1px;
+  }
+
+  .title-sub {
+    font-family: 'VT323', monospace;
+    font-size: 34px;
+    color: var(--crt-green);
+    margin-top: 6px;
+    text-shadow: 0 0 10px rgba(57,255,20,0.6);
+  }
+
+  /* === SCORE / HUD ROW === */
+  .hud-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--dark-panel);
+    border-bottom: 4px solid var(--electric-blue);
+    flex-shrink: 0;
+  }
+
+  .score-block {
+    text-align: center;
+  }
+
+  .score-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--electric-blue);
+    text-shadow: 0 0 8px rgba(0,180,216,0.5);
+  }
+
+  .score-value {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    color: var(--pixel-yellow);
+    text-shadow: 2px 2px 0 #b8860b;
+    margin-top: 4px;
+  }
+
+  .combo-block {
+    text-align: center;
+    animation: comboPulse 0.6s ease-in-out infinite alternate;
+  }
+
+  .combo-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 44px;
+    color: var(--hot-pink);
+    text-shadow:
+      3px 3px 0 #990042,
+      0 0 30px rgba(255,0,110,0.7);
+  }
+
+  .combo-sub {
+    font-family: 'VT323', monospace;
+    font-size: 30px;
+    color: var(--pixel-yellow);
+    text-shadow: 0 0 8px rgba(255,230,109,0.5);
+  }
+
+  @keyframes comboPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+
+  /* === BOSS HEALTH SECTION === */
+  .boss-section {
+    background: linear-gradient(180deg, #1a0a0a 0%, #0a0a0a 100%);
+    border-bottom: 5px solid var(--hot-pink);
+    padding: 14px 16px;
+    flex-shrink: 0;
+  }
+
+  .boss-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+
+  .boss-icon {
+    font-size: 40px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .boss-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    color: var(--hot-pink);
+    text-shadow:
+      2px 2px 0 #990042,
+      0 0 20px rgba(255,0,110,0.5);
+  }
+
+  .boss-hp-pct {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    color: #ff3333;
+    text-shadow: 0 0 15px rgba(255,50,50,0.7);
+    animation: hpFlash 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes hpFlash {
+    from { opacity: 1; }
+    to { opacity: 0.6; }
+  }
+
+  .boss-bar-outer {
+    width: 100%;
+    height: 44px;
+    background: #1a1a1a;
+    border: 4px solid #555;
+    position: relative;
+    box-shadow:
+      inset 0 0 10px rgba(0,0,0,0.8),
+      0 0 10px rgba(255,0,110,0.3);
+  }
+
+  .boss-bar-inner {
+    height: 100%;
+    width: 23%;
+    background: linear-gradient(90deg, #ff0000 0%, #ff3333 40%, #ff6666 100%);
+    position: relative;
+    transition: width 1s ease;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+  }
+
+  .boss-bar-inner::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px; right: 2px;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  }
+
+  .boss-bar-label {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    z-index: 2;
+  }
+
+  /* === MAIN CLAIM/FACT BOX === */
+  .claim-arena {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    gap: 12px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .claim-box {
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border: 5px solid var(--electric-blue);
+    padding: 16px;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow:
+      0 0 20px rgba(0,180,216,0.3),
+      inset 0 0 30px rgba(0,180,216,0.05);
+  }
+
+  .claim-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--electric-blue);
+    text-shadow: 0 0 10px rgba(0,180,216,0.6);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .claim-label::before {
+    content: '>';
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .claim-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    color: #fff;
+    line-height: 1.6;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  }
+
+  /* === VERDICT === */
+  .verdict-box {
+    text-align: center;
+    padding: 16px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .verdict-main {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 64px;
+    color: var(--hot-pink);
+    text-shadow:
+      4px 4px 0 #990042,
+      0 0 40px rgba(255,0,110,0.8),
+      0 0 80px rgba(255,0,110,0.4);
+    animation: verdictSlam 0.5s ease-out;
+    letter-spacing: 3px;
+  }
+
+  @keyframes verdictSlam {
+    0% { transform: scale(3); opacity: 0; }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .damage-number {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 48px;
+    color: var(--pixel-yellow);
+    text-shadow:
+      3px 3px 0 #b8860b,
+      0 0 20px rgba(255,230,109,0.6);
+    margin-top: 8px;
+    animation: damageFloat 1.5s ease-out infinite;
+  }
+
+  @keyframes damageFloat {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0.3; }
+  }
+
+  /* === FACT + HUMOR === */
+  .response-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .response-block {
+    background: var(--dark-panel);
+    border: 4px solid;
+    padding: 14px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .response-block.fact {
+    border-color: var(--crt-green);
+    box-shadow: 0 0 15px rgba(57,255,20,0.2);
+  }
+
+  .response-block.humor {
+    border-color: var(--pixel-yellow);
+    box-shadow: 0 0 15px rgba(255,230,109,0.2);
+  }
+
+  .response-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .response-block.fact .response-label {
+    color: var(--crt-green);
+    text-shadow: 0 0 10px rgba(57,255,20,0.5);
+  }
+
+  .response-block.humor .response-label {
+    color: var(--pixel-yellow);
+    text-shadow: 0 0 10px rgba(255,230,109,0.5);
+  }
+
+  .response-text {
+    font-family: 'VT323', monospace;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #ddd;
+  }
+
+  .response-block.fact .response-text {
+    color: #c8ffc8;
+  }
+
+  .response-block.humor .response-text {
+    color: #fff5d0;
+  }
+
+  /* === BOTTOM TICKER === */
+  .ticker-bar {
+    background: #0d0d0d;
+    border-top: 4px solid var(--crt-green);
+    padding: 10px 0;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .ticker-content {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: var(--crt-green);
+    text-shadow: 0 0 10px rgba(57,255,20,0.5);
+    white-space: nowrap;
+    animation: tickerScroll 25s linear infinite;
+    display: inline-block;
+    padding-left: 100%;
+  }
+
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  .ticker-separator {
+    color: var(--hot-pink);
+    margin: 0 24px;
+  }
+
+  /* === PIXEL DECORATIONS === */
+  .pixel-corner {
+    position: absolute;
+    width: 16px; height: 16px;
+  }
+
+  .pixel-corner.tl { top: -4px; left: -4px; border-top: 4px solid; border-left: 4px solid; }
+  .pixel-corner.tr { top: -4px; right: -4px; border-top: 4px solid; border-right: 4px solid; }
+  .pixel-corner.bl { bottom: -4px; left: -4px; border-bottom: 4px solid; border-left: 4px solid; }
+  .pixel-corner.br { bottom: -4px; right: -4px; border-bottom: 4px solid; border-right: 4px solid; }
+
+  .claim-box .pixel-corner { border-color: var(--electric-blue); }
+
+  /* === SCREEN FLASH ON VERDICT === */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--hot-pink);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 998;
+    animation: screenFlash 1.5s ease-out;
+  }
+
+  @keyframes screenFlash {
+    0% { opacity: 0.6; }
+    100% { opacity: 0; }
+  }
+
+  /* === FINISH HIM OVERLAY (hidden by default, toggle class) === */
+  .finish-him {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .finish-him.active {
+    display: flex;
+    animation: finishFadeIn 0.5s ease;
+  }
+
+  .finish-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 56px;
+    color: var(--hot-pink);
+    text-shadow:
+      4px 4px 0 #990042,
+      0 0 60px rgba(255,0,110,0.9),
+      0 0 120px rgba(255,0,110,0.5);
+    animation: finishPulse 0.4s ease-in-out infinite alternate;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @keyframes finishPulse {
+    from { transform: scale(1); text-shadow: 4px 4px 0 #990042, 0 0 60px rgba(255,0,110,0.9); }
+    to { transform: scale(1.06); text-shadow: 4px 4px 0 #990042, 0 0 100px rgba(255,0,110,1); }
+  }
+
+  @keyframes finishFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* === STAR PARTICLES === */
+  .stars {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .star {
+    position: absolute;
+    font-family: 'Press Start 2P', monospace;
+    animation: starBurst 1s ease-out forwards;
+    font-size: 28px;
+  }
+
+  @keyframes starBurst {
+    0% { transform: scale(0) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+    100% { transform: scale(0.5) rotate(360deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- SCREEN FLASH -->
+  <div class="flash-overlay"></div>
+
+  <!-- TITLE BAR -->
+  <div class="title-bar">
+    <h1>THE GREAT BOARD<br>OF SCIENCE</h1>
+    <div class="title-sub">STAGE 4 &mdash; FINAL BOSS</div>
+  </div>
+
+  <!-- HUD ROW: SCORE + COMBO -->
+  <div class="hud-row">
+    <div class="score-block">
+      <div class="score-label">ROUND</div>
+      <div class="score-value">04</div>
+    </div>
+    <div class="combo-block">
+      <div class="combo-text">COMBO x3!</div>
+      <div class="combo-sub">UNSTOPPABLE</div>
+    </div>
+    <div class="score-block">
+      <div class="score-label">SCORE</div>
+      <div class="score-value">7,200</div>
+    </div>
+  </div>
+
+  <!-- BOSS HEALTH BAR -->
+  <div class="boss-section">
+    <div class="boss-name-row">
+      <div>
+        <span class="boss-icon">&#x1F47E;</span>
+        <span class="boss-name">DR. YOUTUBE</span>
+      </div>
+      <div class="boss-hp-pct">23%</div>
+    </div>
+    <div class="boss-bar-outer">
+      <div class="boss-bar-label">CREDIBILITY</div>
+      <div class="boss-bar-inner"></div>
+    </div>
+  </div>
+
+  <!-- MAIN ARENA -->
+  <div class="claim-arena">
+
+    <!-- CLAIM -->
+    <div class="claim-box">
+      <div class="pixel-corner tl"></div>
+      <div class="pixel-corner tr"></div>
+      <div class="pixel-corner bl"></div>
+      <div class="pixel-corner br"></div>
+      <div class="claim-label">ENEMY ATTACK</div>
+      <div class="claim-text">"Vaccines cause autism"</div>
+    </div>
+
+    <!-- VERDICT -->
+    <div class="verdict-box">
+      <div class="verdict-main">DEBUNKED</div>
+      <div class="damage-number">-50 HP!</div>
+    </div>
+
+    <!-- FACT + HUMOR RESPONSES -->
+    <div class="response-area">
+      <div class="response-block fact">
+        <div class="response-label">&#x2694; SCIENCE ATTACK</div>
+        <div class="response-text">The Wakefield study was retracted in 2010. Over 1.2 million children studied &mdash; ZERO link between vaccines and autism. The original author lost his medical license for fraud.</div>
+      </div>
+
+      <div class="response-block humor">
+        <div class="response-label">&#x1F525; CRITICAL HIT</div>
+        <div class="response-text">Imagine losing your medical license AND still being someone's primary source. That's like citing a banned player's stats to win a fantasy league.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TICKER -->
+  <div class="ticker-bar">
+    <div class="ticker-content">
+      PLAYER 1: SCIENCE
+      <span class="ticker-separator">&#x2726;</span>
+      DEBUNKS: 12
+      <span class="ticker-separator">&#x2726;</span>
+      WIN STREAK: 3
+      <span class="ticker-separator">&#x2726;</span>
+      BOSS HP CRITICAL &mdash; FINISH HIM!
+      <span class="ticker-separator">&#x2726;</span>
+      INSERT COIN TO CONTINUE
+      <span class="ticker-separator">&#x2726;</span>
+      HIGH SCORE: 14,500
+      <span class="ticker-separator">&#x2726;</span>
+      NEXT BOSS: FLAT EARTH KAREN
+      <span class="ticker-separator">&#x2726;</span>
+    </div>
+  </div>
+
+  <!-- FINISH HIM OVERLAY (press F to toggle) -->
+  <div class="finish-him" id="finishHim">
+    <div class="finish-text">FINISH<br>HIM!</div>
+  </div>
+
+  <script>
+    // Toggle FINISH HIM overlay with F key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'f' || e.key === 'F') {
+        document.getElementById('finishHim').classList.toggle('active');
+      }
+    });
+
+    // Re-trigger flash animation on spacebar
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        const flash = document.querySelector('.flash-overlay');
+        flash.style.animation = 'none';
+        flash.offsetHeight; // reflow
+        flash.style.animation = 'screenFlash 1.5s ease-out';
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE GREAT BOARD OF SCIENCE</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d48b;
+    --gold-dark: #8b7332;
+    --royal-blue: #1a237e;
+    --blue-deep: #0d1442;
+    --parchment: #f5e6c8;
+    --parchment-dark: #d4c4a0;
+    --iron: #5c5c5c;
+    --iron-dark: #3a3a3a;
+    --wax-red: #b22222;
+    --wax-red-light: #d44040;
+    --seal-shadow: #5a0e0e;
+  }
+
+  html, body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #0a0a12;
+    font-family: 'Cinzel', serif;
+  }
+
+  body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ===== STONE BACKGROUND ===== */
+  .stone-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(26,35,126,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(26,35,126,0.15) 0%, transparent 50%),
+      linear-gradient(180deg, #12122a 0%, #0e0e1e 30%, #0a0a15 70%, #08080f 100%);
+    z-index: 0;
+  }
+
+  /* ===== TORCH GLOW ON EDGES ===== */
+  .torch-left, .torch-right {
+    position: absolute;
+    top: 0;
+    width: 200px;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .torch-left {
+    left: 0;
+    background: linear-gradient(90deg, rgba(201,168,76,0.1) 0%, transparent 100%);
+    animation: torchFlicker 3s ease-in-out infinite alternate;
+  }
+  .torch-right {
+    right: 0;
+    background: linear-gradient(-90deg, rgba(201,168,76,0.1) 0%, transparent 100%);
+    animation: torchFlicker 3.5s ease-in-out infinite alternate-reverse;
+  }
+
+  @keyframes torchFlicker {
+    0% { opacity: 0.4; }
+    33% { opacity: 0.9; }
+    66% { opacity: 0.5; }
+    100% { opacity: 0.8; }
+  }
+
+  /* ===== TORCH FLAMES ===== */
+  .torch-fixture {
+    position: absolute;
+    z-index: 5;
+    width: 70px;
+    top: 100px;
+  }
+  .torch-fixture.left { left: 15px; }
+  .torch-fixture.right { right: 15px; }
+
+  .torch-bracket {
+    width: 54px;
+    height: 90px;
+    background: linear-gradient(135deg, #5c5c5c 0%, #3a3a3a 40%, #2a2a2a 100%);
+    border-radius: 5px 5px 2px 2px;
+    margin: 0 auto;
+    border: 2px solid #6a6a6a;
+  }
+
+  .flame-container {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 60px;
+  }
+
+  .flame {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 26px;
+    height: 42px;
+    background: radial-gradient(ellipse at 50% 80%, #ffd700 0%, #ff8c00 40%, #ff4500 70%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flameWaver 0.4s ease-in-out infinite alternate;
+  }
+
+  .flame::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 24px;
+    background: radial-gradient(ellipse at 50% 80%, #fff8dc 0%, #ffd700 50%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flameInner 0.3s ease-in-out infinite alternate-reverse;
+  }
+
+  .flame-glow {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255,165,0,0.3) 0%, rgba(255,69,0,0.1) 40%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes flameWaver {
+    0% { transform: translateX(-50%) skewX(-3deg) scaleY(1); }
+    100% { transform: translateX(-50%) skewX(3deg) scaleY(1.1); }
+  }
+  @keyframes flameInner {
+    0% { transform: translateX(-50%) scaleY(0.9); }
+    100% { transform: translateX(-50%) scaleY(1.1); }
+  }
+  @keyframes glowPulse {
+    0% { opacity: 0.5; transform: translateX(-50%) scale(0.9); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  }
+
+  /* ===== MAIN CONTENT ===== */
+  .content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 30px;
+  }
+
+  /* ===== 1. TOP BANNER ===== */
+  .banner-wrapper {
+    margin-top: 30px;
+    position: relative;
+    width: 960px;
+    text-align: center;
+  }
+
+  .banner {
+    position: relative;
+    background:
+      linear-gradient(180deg, #2a3698 0%, #1a237e 30%, #151d6b 70%, #0f1555 100%);
+    padding: 28px 50px 50px;
+    clip-path: polygon(
+      0% 0%, 100% 0%,
+      100% 72%, 50% 100%, 0% 72%
+    );
+    box-shadow:
+      0 10px 40px rgba(0,0,0,0.6),
+      inset 0 2px 0 rgba(201,168,76,0.3);
+  }
+
+  .banner::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 72%, 50% 100%, 0% 72%);
+    border: 3px solid var(--gold);
+    pointer-events: none;
+  }
+
+  .banner-nail {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: radial-gradient(circle at 40% 35%, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
+    z-index: 5;
+  }
+  .banner-nail.tl { top: 14px; left: 30px; }
+  .banner-nail.tr { top: 14px; right: 30px; }
+
+  .banner-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 68px;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow:
+      0 0 25px rgba(201,168,76,0.5),
+      0 3px 0 var(--gold-dark),
+      0 5px 10px rgba(0,0,0,0.6);
+    letter-spacing: 5px;
+    line-height: 1.1;
+    animation: titleGlow 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes titleGlow {
+    0% { text-shadow: 0 0 20px rgba(201,168,76,0.3), 0 3px 0 var(--gold-dark), 0 5px 10px rgba(0,0,0,0.5); }
+    100% { text-shadow: 0 0 40px rgba(201,168,76,0.6), 0 3px 0 var(--gold-dark), 0 5px 10px rgba(0,0,0,0.5), 0 0 70px rgba(201,168,76,0.15); }
+  }
+
+  .banner-line { display: block; }
+
+  .banner-deco {
+    margin-top: 4px;
+    font-size: 30px;
+    color: var(--gold);
+    letter-spacing: 12px;
+    opacity: 0.5;
+  }
+
+  /* ===== 2. CHALLENGER RIBBON ===== */
+  .challenger-ribbon-wrapper {
+    margin-top: 28px;
+    position: relative;
+    width: 920px;
+  }
+
+  .challenger-ribbon {
+    position: relative;
+    background:
+      linear-gradient(180deg, var(--parchment) 0%, var(--parchment-dark) 50%, #c4b490 100%);
+    padding: 22px 70px;
+    text-align: center;
+    box-shadow:
+      0 6px 20px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.5);
+    border-top: 4px solid var(--gold);
+    border-bottom: 4px solid var(--gold);
+  }
+
+  .challenger-ribbon::before,
+  .challenger-ribbon::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    width: 50px;
+    z-index: -1;
+  }
+  .challenger-ribbon::before {
+    left: -30px;
+    background: linear-gradient(90deg, #a89060 0%, var(--parchment-dark) 100%);
+    transform: skewY(5deg);
+    box-shadow: -3px 3px 8px rgba(0,0,0,0.3);
+    border-left: 3px solid var(--gold-dark);
+  }
+  .challenger-ribbon::after {
+    right: -30px;
+    background: linear-gradient(-90deg, #a89060 0%, var(--parchment-dark) 100%);
+    transform: skewY(-5deg);
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+    border-right: 3px solid var(--gold-dark);
+  }
+
+  .challenger-text {
+    font-family: 'Cinzel', serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: var(--royal-blue);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    letter-spacing: 4px;
+  }
+
+  .challenger-text .swords {
+    color: #8b1a1a;
+    font-size: 48px;
+  }
+
+  /* ===== 3. TIMER ===== */
+  .timer-area {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .timer-label {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    color: var(--gold-light);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(201,168,76,0.3);
+  }
+
+  .timer-value {
+    font-family: 'Cinzel', serif;
+    font-size: 80px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 14px;
+    text-shadow:
+      0 0 20px rgba(201,168,76,0.5),
+      0 3px 0 var(--gold-dark),
+      0 6px 12px rgba(0,0,0,0.5);
+    animation: timerPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+  }
+
+  /* ===== 4. SHIELD FACT CHECK CARD ===== */
+  .shield-card-wrapper {
+    margin-top: 22px;
+    position: relative;
+    width: 980px;
+  }
+
+  .shield-card {
+    position: relative;
+    background:
+      linear-gradient(160deg, #1e2a7a 0%, #1a237e 20%, #151d6b 50%, #111855 80%, #0d1242 100%);
+    border: 5px solid var(--gold);
+    border-radius: 24px;
+    padding: 40px 40px 30px;
+    box-shadow:
+      0 15px 50px rgba(0,0,0,0.6),
+      0 0 0 2px rgba(201,168,76,0.15),
+      inset 0 0 60px rgba(26,35,126,0.3);
+    overflow: hidden;
+  }
+
+  /* Hammered metal texture overlay */
+  .shield-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(201,168,76,0.06) 0%, transparent 20%),
+      radial-gradient(circle at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 15%),
+      radial-gradient(circle at 45% 70%, rgba(201,168,76,0.05) 0%, transparent 18%),
+      radial-gradient(circle at 90% 60%, rgba(201,168,76,0.04) 0%, transparent 14%);
+    pointer-events: none;
+  }
+
+  /* Inner border */
+  .shield-card::after {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 2px solid rgba(201,168,76,0.15);
+    border-radius: 16px;
+    pointer-events: none;
+  }
+
+  /* Corner ornaments */
+  .shield-corner {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    z-index: 2;
+  }
+  .shield-corner::before, .shield-corner::after {
+    content: '';
+    position: absolute;
+    background: var(--gold);
+  }
+  .shield-corner.tl { top: 16px; left: 16px; }
+  .shield-corner.tl::before { top: 0; left: 0; width: 24px; height: 3px; }
+  .shield-corner.tl::after { top: 0; left: 0; width: 3px; height: 24px; }
+  .shield-corner.tr { top: 16px; right: 16px; }
+  .shield-corner.tr::before { top: 0; right: 0; width: 24px; height: 3px; }
+  .shield-corner.tr::after { top: 0; right: 0; width: 3px; height: 24px; }
+  .shield-corner.bl { bottom: 16px; left: 16px; }
+  .shield-corner.bl::before { bottom: 0; left: 0; width: 24px; height: 3px; }
+  .shield-corner.bl::after { bottom: 0; left: 0; width: 3px; height: 24px; }
+  .shield-corner.br { bottom: 16px; right: 16px; }
+  .shield-corner.br::before { bottom: 0; right: 0; width: 24px; height: 3px; }
+  .shield-corner.br::after { bottom: 0; right: 0; width: 3px; height: 24px; }
+
+  /* Rivets */
+  .shield-rivet {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 40% 35%, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.3);
+    z-index: 3;
+  }
+  .shield-rivet.t { top: 20px; left: 50%; transform: translateX(-50%); }
+  .shield-rivet.b { bottom: 20px; left: 50%; transform: translateX(-50%); }
+  .shield-rivet.l { left: 20px; top: 50%; transform: translateY(-50%); }
+  .shield-rivet.r { right: 20px; top: 50%; transform: translateY(-50%); }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* CLAIM */
+  .claim-label {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(201,168,76,0.3);
+  }
+
+  .claim-text {
+    font-family: 'Cinzel', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--parchment);
+    line-height: 1.25;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    border-left: 5px solid var(--gold);
+    padding-left: 22px;
+  }
+
+  .claim-text::before {
+    content: '\201C';
+    font-size: 70px;
+    color: var(--gold);
+    opacity: 0.5;
+    position: relative;
+    top: 18px;
+    margin-right: 4px;
+    line-height: 0;
+  }
+
+  /* VERDICT WAX SEAL */
+  .verdict-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .verdict-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+
+  .wax-seal {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: sealStamp 0.8s ease-out forwards;
+  }
+
+  @keyframes sealStamp {
+    0% { transform: scale(1.5) rotate(-15deg); opacity: 0; }
+    60% { transform: scale(0.95) rotate(2deg); opacity: 1; }
+    80% { transform: scale(1.02) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .seal-outer {
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle at 45% 40%,
+      var(--wax-red-light) 0%,
+      var(--wax-red) 30%,
+      #9b1b1b 60%,
+      var(--seal-shadow) 85%,
+      #3d0808 100%
+    );
+    border-radius: 50%;
+    box-shadow:
+      0 8px 30px rgba(0,0,0,0.7),
+      0 3px 8px rgba(0,0,0,0.5),
+      inset 0 2px 4px rgba(255,100,100,0.2),
+      inset 0 -3px 6px rgba(0,0,0,0.3);
+    clip-path: polygon(
+      50% 0%, 58% 2%, 65% 1%, 72% 3%, 78% 2%, 85% 5%, 90% 8%,
+      95% 14%, 97% 20%, 99% 28%, 100% 35%, 99% 42%, 100% 50%,
+      99% 57%, 100% 64%, 98% 72%, 96% 78%, 93% 85%, 89% 90%,
+      84% 95%, 78% 97%, 72% 99%, 65% 100%, 58% 99%, 50% 100%,
+      42% 99%, 35% 100%, 28% 98%, 22% 96%, 16% 93%, 11% 89%,
+      7% 84%, 4% 78%, 2% 72%, 1% 65%, 0% 58%, 1% 50%,
+      0% 42%, 1% 35%, 2% 28%, 4% 22%, 7% 16%, 11% 10%,
+      16% 6%, 22% 3%, 28% 2%, 35% 0%, 42% 1%
+    );
+  }
+
+  .seal-inner {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border: 3px solid rgba(255,200,200,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .seal-text {
+    font-family: 'Cinzel', serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: #ffd4d4;
+    letter-spacing: 3px;
+    text-shadow:
+      0 1px 0 rgba(0,0,0,0.5),
+      0 -1px 0 rgba(255,150,150,0.15);
+    text-align: center;
+    line-height: 1;
+    transform: rotate(-8deg);
+  }
+
+  .seal-icon {
+    font-size: 42px;
+    margin-bottom: 4px;
+  }
+
+  /* Big verdict text beside seal */
+  .verdict-stamp {
+    font-family: 'Cinzel', serif;
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--wax-red-light);
+    letter-spacing: 6px;
+    text-shadow:
+      0 0 30px rgba(178,34,34,0.4),
+      0 3px 0 #8b1a1a,
+      0 6px 12px rgba(0,0,0,0.5);
+    text-transform: uppercase;
+    margin-left: 20px;
+    animation: stampReveal 1s ease-out 0.3s both;
+  }
+
+  @keyframes stampReveal {
+    0% { opacity: 0; transform: scale(1.3); }
+    60% { opacity: 1; transform: scale(0.97); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* FACT */
+  .fact-section {
+    background: rgba(245,230,200,0.07);
+    border: 3px solid rgba(201,168,76,0.25);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 16px;
+  }
+
+  .fact-label {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .fact-text {
+    font-family: 'Cinzel', serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--parchment);
+    line-height: 1.35;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+
+  .fact-icon {
+    font-size: 34px;
+    margin-right: 10px;
+  }
+
+  /* HUMOR */
+  .humor-section {
+    background: rgba(201,168,76,0.08);
+    border-left: 5px solid var(--gold);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 24px;
+    margin-bottom: 16px;
+  }
+
+  .humor-text {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 30px;
+    color: var(--gold-light);
+    line-height: 1.35;
+  }
+
+  .humor-text::before {
+    content: '\2620  ';
+    font-style: normal;
+  }
+
+  /* SOURCE */
+  .source-section {
+    text-align: center;
+    padding-top: 12px;
+    border-top: 2px solid rgba(201,168,76,0.2);
+  }
+
+  .source-label {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+  }
+
+  .source-text {
+    font-family: 'Cinzel', serif;
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .source-text .retracted {
+    color: var(--wax-red-light);
+    font-weight: 900;
+  }
+
+  /* ===== 5. SCROLLING TEXT ===== */
+  .scroll-area {
+    margin-top: 22px;
+    width: 980px;
+    position: relative;
+    overflow: hidden;
+    height: 80px;
+    background:
+      linear-gradient(180deg,
+        var(--parchment-dark) 0%,
+        var(--parchment) 15%,
+        var(--parchment) 85%,
+        var(--parchment-dark) 100%
+      );
+    border-top: 4px solid var(--gold);
+    border-bottom: 4px solid var(--gold);
+    box-shadow:
+      0 5px 20px rgba(0,0,0,0.4),
+      inset 0 3px 8px rgba(0,0,0,0.1);
+  }
+
+  .scroll-area::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg,
+        var(--parchment) 0%,
+        transparent 6%,
+        transparent 94%,
+        var(--parchment) 100%
+      );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .scroll-track {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    animation: scrollText 25s linear infinite;
+  }
+
+  .scroll-item {
+    font-family: 'MedievalSharp', cursive;
+    font-size: 32px;
+    color: var(--royal-blue);
+    padding: 0 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-weight: 700;
+  }
+
+  .scroll-item .divider {
+    color: var(--gold-dark);
+    font-size: 36px;
+  }
+
+  @keyframes scrollText {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* ===== BOTTOM CREST ===== */
+  .crest-area {
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .crest-symbol {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .crest-text {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(201,168,76,0.3);
+  }
+
+  /* ===== DUST PARTICLES ===== */
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+    animation: dustFloat linear infinite;
+  }
+
+  @keyframes dustFloat {
+    0% { opacity: 0; transform: translateY(0) translateX(0); }
+    15% { opacity: 0.6; }
+    85% { opacity: 0.3; }
+    100% { opacity: 0; transform: translateY(-200px) translateX(30px); }
+  }
+
+  /* ===== ENTRANCE ANIMATIONS ===== */
+  .content > * {
+    animation: fadeInUp 0.8s ease-out both;
+  }
+  .content > *:nth-child(1) { animation-delay: 0.1s; }
+  .content > *:nth-child(2) { animation-delay: 0.25s; }
+  .content > *:nth-child(3) { animation-delay: 0.4s; }
+  .content > *:nth-child(4) { animation-delay: 0.55s; }
+  .content > *:nth-child(5) { animation-delay: 0.7s; }
+  .content > *:nth-child(6) { animation-delay: 0.8s; }
+
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="stone-bg"></div>
+<div class="torch-left"></div>
+<div class="torch-right"></div>
+
+<!-- Torch fixtures -->
+<div class="torch-fixture left">
+  <div class="flame-container">
+    <div class="flame"></div>
+    <div class="flame-glow"></div>
+  </div>
+  <div class="torch-bracket"></div>
+</div>
+<div class="torch-fixture right">
+  <div class="flame-container">
+    <div class="flame" style="animation-delay: 0.15s;"></div>
+    <div class="flame-glow" style="animation-delay: 0.5s;"></div>
+  </div>
+  <div class="torch-bracket"></div>
+</div>
+
+<div class="content">
+
+  <!-- 1. TOP BANNER -->
+  <div class="banner-wrapper">
+    <div class="banner">
+      <div class="banner-nail tl"></div>
+      <div class="banner-nail tr"></div>
+      <div class="banner-title">
+        <span class="banner-line">THE GREAT</span>
+        <span class="banner-line">BOARD OF</span>
+        <span class="banner-line">SCIENCE</span>
+      </div>
+      <div class="banner-deco">&mdash; &#9876; &mdash;</div>
+    </div>
+  </div>
+
+  <!-- 2. CHALLENGER RIBBON -->
+  <div class="challenger-ribbon-wrapper">
+    <div class="challenger-ribbon">
+      <div class="challenger-text">
+        <span class="swords">&#9876;</span>
+        CHALLENGER: DR. YOUTUBE
+        <span class="swords">&#9876;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TIMER -->
+  <div class="timer-area">
+    <div class="timer-label">Time in Battle</div>
+    <div class="timer-value">04:32</div>
+  </div>
+
+  <!-- 4. SHIELD FACT CHECK CARD -->
+  <div class="shield-card-wrapper">
+    <div class="shield-card">
+      <div class="shield-corner tl"></div>
+      <div class="shield-corner tr"></div>
+      <div class="shield-corner bl"></div>
+      <div class="shield-corner br"></div>
+      <div class="shield-rivet t"></div>
+      <div class="shield-rivet b"></div>
+      <div class="shield-rivet l"></div>
+      <div class="shield-rivet r"></div>
+
+      <div class="card-content">
+        <!-- CLAIM -->
+        <div class="claim-section">
+          <div class="claim-label">&#9876; Claim Presented</div>
+          <div class="claim-text">Vaccines cause autism</div>
+        </div>
+
+        <!-- VERDICT -->
+        <div class="verdict-area">
+          <div class="wax-seal">
+            <div class="seal-outer"></div>
+            <div class="seal-inner">
+              <div class="seal-text">
+                <span class="seal-icon">&#9760;</span><br>
+                FALSE
+              </div>
+            </div>
+          </div>
+          <div class="verdict-stamp">DEBUNKED</div>
+        </div>
+
+        <!-- FACT -->
+        <div class="fact-section">
+          <div class="fact-label">&#128220; The Truth</div>
+          <div class="fact-text">
+            The original 1998 study was exposed as a total fraud. Exposed in 2010 and retracted.
+          </div>
+        </div>
+
+        <!-- HUMOR -->
+        <div class="humor-section">
+          <div class="humor-text">Even WebMD disagrees with you</div>
+        </div>
+
+        <!-- SOURCE -->
+        <div class="source-section">
+          <div class="source-label">&#128214; Source</div>
+          <div class="source-text">
+            Lancet, 2010 &mdash; <span class="retracted">RETRACTED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. SCROLLING TEXT -->
+  <div class="scroll-area">
+    <div class="scroll-track">
+      <span class="scroll-item">
+        <span class="divider">&#9876;</span>
+        Science is the shield against ignorance
+        <span class="divider">&#9876;</span>
+      </span>
+      <span class="scroll-item">
+        Extraordinary claims require extraordinary evidence
+      </span>
+      <span class="scroll-item">
+        <span class="divider">&#9876;</span>
+        Peer review is the anvil of truth
+        <span class="divider">&#9876;</span>
+      </span>
+      <span class="scroll-item">
+        The burden of proof lies with the claimant
+      </span>
+      <span class="scroll-item">
+        <span class="divider">&#9876;</span>
+        Science is the shield against ignorance
+        <span class="divider">&#9876;</span>
+      </span>
+      <span class="scroll-item">
+        Extraordinary claims require extraordinary evidence
+      </span>
+      <span class="scroll-item">
+        <span class="divider">&#9876;</span>
+        Peer review is the anvil of truth
+        <span class="divider">&#9876;</span>
+      </span>
+      <span class="scroll-item">
+        The burden of proof lies with the claimant
+      </span>
+    </div>
+  </div>
+
+  <!-- 6. BOTTOM CREST -->
+  <div class="crest-area">
+    <span class="crest-symbol">&#9812;</span>
+    <div class="crest-text">Veritas et Scientia</div>
+  </div>
+
+</div>
+
+<script>
+  // Generate floating dust particles
+  (function() {
+    const body = document.body;
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = (Math.random() * 1080) + 'px';
+      p.style.top = (200 + Math.random() * 1600) + 'px';
+      p.style.width = (1 + Math.random() * 2.5) + 'px';
+      p.style.height = p.style.width;
+      p.style.animationDuration = (5 + Math.random() * 10) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      body.appendChild(p);
+    }
+  })();
+</script>
+
+</body>
+</html>

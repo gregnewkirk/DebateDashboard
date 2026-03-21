@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>Demo 17 - American Eagle / Military Science</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --olive: #556b2f;
+    --olive-dark: #3b4a20;
+    --flag-red: #b22234;
+    --flag-blue: #3c3b6e;
+    --gold: #d4af37;
+    --gold-light: #e8c84a;
+    --white: #f5f5f0;
+    --cream: #eae6d6;
+    --black: #1a1a1a;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    background: var(--olive-dark);
+    color: var(--white);
+    position: relative;
+  }
+
+  /* Camo-subtle background pattern */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-conic-gradient(var(--olive) 0% 25%, transparent 0% 50%) 0 0 / 80px 80px,
+      repeating-conic-gradient(var(--olive-dark) 0% 25%, transparent 0% 50%) 40px 40px / 80px 80px;
+    opacity: 0.3;
+    z-index: 0;
+  }
+
+  /* Second camo layer */
+  body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 120px 60px at 200px 400px, rgba(59,74,32,0.5) 0%, transparent 100%),
+      radial-gradient(ellipse 100px 80px at 700px 600px, rgba(85,107,47,0.4) 0%, transparent 100%),
+      radial-gradient(ellipse 150px 50px at 400px 1200px, rgba(59,74,32,0.4) 0%, transparent 100%),
+      radial-gradient(ellipse 90px 70px at 850px 1500px, rgba(85,107,47,0.3) 0%, transparent 100%);
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ===== TOP CHEVRON BAR ===== */
+  .top-bar {
+    width: 100%;
+    height: 60px;
+    background: var(--flag-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    border-bottom: 6px solid var(--gold);
+    position: relative;
+  }
+
+  .star {
+    color: var(--gold);
+    font-size: 32px;
+    line-height: 1;
+    text-shadow: 0 0 8px rgba(212,175,55,0.6);
+  }
+
+  .star.big { font-size: 42px; }
+
+  /* ===== EAGLE WING HEADER ===== */
+  .header-section {
+    width: 100%;
+    position: relative;
+    background: linear-gradient(180deg, var(--flag-blue) 0%, #2a2a52 60%, var(--olive-dark) 100%);
+    padding: 30px 40px 50px;
+    text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+    border-bottom: none;
+  }
+
+  /* Eagle wing shapes on sides */
+  .wing-left, .wing-right {
+    position: absolute;
+    top: 20px;
+    width: 140px;
+    height: 200px;
+    opacity: 0.25;
+  }
+
+  .wing-left {
+    left: 20px;
+    clip-path: polygon(100% 0%, 40% 15%, 0% 40%, 10% 60%, 30% 55%, 20% 80%, 50% 70%, 40% 100%, 100% 80%);
+    background: var(--gold);
+  }
+
+  .wing-right {
+    right: 20px;
+    clip-path: polygon(0% 0%, 60% 15%, 100% 40%, 90% 60%, 70% 55%, 80% 80%, 50% 70%, 60% 100%, 0% 80%);
+    background: var(--gold);
+  }
+
+  /* Stars row above title */
+  .stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .stars-row .star { font-size: 36px; }
+
+  .header-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 30px;
+    color: var(--gold);
+    letter-spacing: 12px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 74px;
+    color: var(--white);
+    letter-spacing: 6px;
+    line-height: 1.0;
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.3);
+    position: relative;
+  }
+
+  .header-title span {
+    color: var(--gold);
+  }
+
+  /* Chevron decoration under header */
+  .chevron-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .chevron {
+    width: 0;
+    height: 0;
+    border-left: 22px solid transparent;
+    border-right: 22px solid transparent;
+    border-top: 18px solid var(--gold);
+    opacity: 0.8;
+  }
+
+  /* ===== SLOGAN ===== */
+  .slogan-bar {
+    width: 92%;
+    background: linear-gradient(90deg, transparent 0%, var(--flag-red) 10%, var(--flag-red) 90%, transparent 100%);
+    padding: 14px 30px;
+    text-align: center;
+    margin-top: -20px;
+    position: relative;
+    z-index: 2;
+    clip-path: polygon(3% 0%, 97% 0%, 100% 50%, 97% 100%, 3% 100%, 0% 50%);
+  }
+
+  .slogan-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    color: var(--white);
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  }
+
+  /* ===== TARGET DESIGNATION ===== */
+  .target-section {
+    width: 92%;
+    margin-top: 24px;
+    background: rgba(0,0,0,0.4);
+    border: 5px solid var(--olive);
+    border-left: 8px solid var(--flag-red);
+    padding: 18px 30px;
+    position: relative;
+  }
+
+  .target-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 8px;
+    margin-bottom: 4px;
+  }
+
+  .target-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 54px;
+    color: var(--flag-red);
+    letter-spacing: 3px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  }
+
+  /* Crosshair decoration */
+  .target-section::after {
+    content: '\2316';
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 80px;
+    color: var(--flag-red);
+    opacity: 0.4;
+  }
+
+  /* ===== DOG TAG FACT CHECK ===== */
+  .dogtag-section {
+    width: 92%;
+    margin-top: 24px;
+    position: relative;
+  }
+
+  /* Dog tag chain dots */
+  .chain {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .chain-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .dogtag {
+    background: linear-gradient(135deg, #7a7a6e 0%, #8c8c80 30%, #6e6e62 70%, #7a7a6e 100%);
+    border-radius: 18px;
+    border: 5px solid #5c5c52;
+    padding: 30px 34px;
+    position: relative;
+    box-shadow:
+      inset 0 2px 4px rgba(255,255,255,0.2),
+      inset 0 -2px 4px rgba(0,0,0,0.3),
+      0 8px 24px rgba(0,0,0,0.5);
+  }
+
+  /* Notch on dog tag */
+  .dogtag::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 4px solid #5c5c52;
+    background: rgba(0,0,0,0.15);
+  }
+
+  /* Embossed text effect */
+  .dogtag-field {
+    margin-bottom: 10px;
+  }
+
+  .dogtag-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    color: #3a3a32;
+    letter-spacing: 6px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  }
+
+  .claim-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    color: #1a1a14;
+    line-height: 1.15;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+    margin-top: 2px;
+  }
+
+  /* ===== VERDICT STAMP ===== */
+  .verdict-container {
+    width: 92%;
+    margin-top: 20px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  .verdict-stamp {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    color: var(--flag-red);
+    letter-spacing: 10px;
+    transform: rotate(-4deg);
+    border: 8px solid var(--flag-red);
+    padding: 4px 40px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    box-shadow: 0 0 20px rgba(178,34,52,0.4), inset 0 0 20px rgba(178,34,52,0.1);
+    background: rgba(0,0,0,0.3);
+    position: relative;
+  }
+
+  /* Double border effect on stamp */
+  .verdict-stamp::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 3px solid var(--flag-red);
+    opacity: 0.5;
+  }
+
+  /* ===== INTEL BRIEFING (fact + humor) ===== */
+  .intel-section {
+    width: 92%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .intel-card {
+    background: rgba(0,0,0,0.45);
+    border-left: 7px solid var(--gold);
+    padding: 16px 24px;
+    position: relative;
+  }
+
+  .intel-card.humor {
+    border-left-color: var(--olive);
+  }
+
+  .intel-card.source {
+    border-left-color: var(--flag-blue);
+  }
+
+  .intel-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--gold);
+    letter-spacing: 5px;
+    margin-bottom: 4px;
+  }
+
+  .intel-card.humor .intel-heading { color: var(--olive); color: #8aad5a; }
+  .intel-card.source .intel-heading { color: #7a7ab8; }
+
+  .intel-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 34px;
+    color: var(--cream);
+    line-height: 1.25;
+  }
+
+  .intel-text.small {
+    font-size: 30px;
+  }
+
+  /* ===== BOTTOM PATRIOT BAR ===== */
+  .patriot-bar {
+    width: 100%;
+    margin-top: auto;
+    position: relative;
+  }
+
+  .patriot-banner {
+    width: 100%;
+    background: linear-gradient(180deg, transparent 0%, var(--flag-blue) 20%);
+    padding: 24px 40px 16px;
+    text-align: center;
+    clip-path: polygon(0 20%, 50% 0%, 100% 20%, 100% 100%, 0 100%);
+  }
+
+  .patriot-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 50px;
+    color: var(--white);
+    letter-spacing: 4px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    margin-top: 10px;
+  }
+
+  .patriot-text span {
+    color: var(--gold);
+  }
+
+  .duty-bar {
+    width: 100%;
+    background: var(--flag-red);
+    padding: 14px 40px;
+    text-align: center;
+    border-top: 5px solid var(--gold);
+  }
+
+  .duty-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px;
+    color: var(--white);
+    letter-spacing: 10px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Bottom stars */
+  .bottom-stars {
+    width: 100%;
+    background: var(--flag-blue);
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    border-top: 4px solid var(--gold);
+  }
+
+  /* ===== EAGLE SILHOUETTE ===== */
+  .eagle-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    opacity: 0.04;
+    z-index: 0;
+    clip-path: polygon(
+      50% 0%, 55% 5%, 70% 2%, 65% 12%, 80% 8%, 72% 18%,
+      90% 15%, 78% 25%, 95% 22%, 82% 32%, 100% 30%,
+      85% 38%, 75% 45%, 65% 42%, 58% 50%, 55% 65%,
+      60% 80%, 58% 95%, 54% 100%, 50% 95%, 46% 100%,
+      42% 95%, 40% 80%, 45% 65%, 42% 50%, 35% 42%,
+      25% 45%, 15% 38%, 0% 30%, 18% 32%, 5% 22%,
+      22% 25%, 10% 15%, 28% 18%, 20% 8%, 35% 12%,
+      30% 2%, 45% 5%
+    );
+    background: var(--gold);
+  }
+
+  /* Military rank insignia decoration */
+  .insignia {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    opacity: 0.15;
+  }
+
+  .insignia-left {
+    left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .insignia-right {
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .insignia svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Eagle background silhouette -->
+  <div class="eagle-bg"></div>
+
+  <!-- TOP STARS BAR -->
+  <div class="top-bar">
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star big">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star big">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star big">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+  </div>
+
+  <!-- EAGLE WING HEADER -->
+  <div class="header-section">
+    <div class="wing-left"></div>
+    <div class="wing-right"></div>
+
+    <div class="stars-row">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+
+    <div class="header-subtitle">UNITED STATES OF</div>
+    <div class="header-title">THE GREAT BOARD<br>OF <span>SCIENCE</span></div>
+
+    <div class="chevron-row">
+      <div class="chevron"></div>
+      <div class="chevron"></div>
+      <div class="chevron"></div>
+      <div class="chevron"></div>
+      <div class="chevron"></div>
+    </div>
+  </div>
+
+  <!-- SLOGAN BAR -->
+  <div class="slogan-bar">
+    <div class="slogan-text">BE ALL YOU CAN BE... BY BELIEVING IN SCIENCE</div>
+  </div>
+
+  <!-- TARGET DESIGNATION -->
+  <div class="target-section">
+    <div class="target-label">&#9670; TARGET DESIGNATION</div>
+    <div class="target-name">DR. YOUTUBE</div>
+  </div>
+
+  <!-- DOG TAG FACT CHECK -->
+  <div class="dogtag-section">
+    <div class="chain">
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+      <div class="chain-dot"></div>
+    </div>
+    <div class="dogtag">
+      <div class="dogtag-field">
+        <div class="dogtag-label">CLAIM INTERCEPTED:</div>
+        <div class="claim-text">"Vaccines cause autism"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERDICT STAMP -->
+  <div class="verdict-container">
+    <div class="verdict-stamp">DEBUNKED</div>
+  </div>
+
+  <!-- INTEL BRIEFING -->
+  <div class="intel-section">
+    <div class="intel-card">
+      <div class="intel-heading">&#9670; INTELLIGENCE REPORT</div>
+      <div class="intel-text">The original 1998 Wakefield study was retracted. Over 1.2 million children studied since then show zero link between vaccines and autism.</div>
+    </div>
+
+    <div class="intel-card humor">
+      <div class="intel-heading">&#9670; MORALE BOOST</div>
+      <div class="intel-text small">Imagine getting your medical intel from a paper so fraudulent it got its author court-martialed from medicine.</div>
+    </div>
+
+    <div class="intel-card source">
+      <div class="intel-heading">&#9670; SOURCE VERIFICATION</div>
+      <div class="intel-text small">Taylor et al., 2014 &mdash; Vaccines are not associated with autism: meta-analysis (1,266,327 children)</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM PATRIOT SECTION -->
+  <div class="patriot-bar">
+    <div class="patriot-banner">
+      <div class="patriot-text">PATRIOTISM <span>REQUIRES</span> VACCINES</div>
+    </div>
+    <div class="duty-bar">
+      <div class="duty-text">SCIENCE: IT'S YOUR DUTY</div>
+    </div>
+    <div class="bottom-stars">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star big">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star big">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star big">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

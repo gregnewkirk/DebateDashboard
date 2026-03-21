@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLADIATOR COLOSSEUM — Debate Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --sand: #d4c5a9;
+    --sand-light: #e8dcc8;
+    --purple: #4a0e4e;
+    --purple-deep: #2d0730;
+    --bronze: #cd7f32;
+    --bronze-light: #e0a050;
+    --blood: #8b0000;
+    --blood-glow: #cc1100;
+    --marble: #f0ece2;
+    --marble-dark: #c8c0b0;
+    --gold: #ffd700;
+    --gold-dim: #c9a800;
+    --charcoal: #1a1208;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Cinzel', serif;
+    background: var(--charcoal);
+    color: var(--marble);
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* ── Portrait container (9:16) ── */
+  .arena {
+    position: relative;
+    width: min(100vw, 56.25vh);
+    height: min(100vh, 177.78vw);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(139,0,0,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(74,14,78,0.25) 0%, transparent 60%),
+      linear-gradient(175deg, #2a1a08 0%, #1a1208 30%, #0e0a04 70%, #1a0e0e 100%);
+  }
+
+  /* ── Stone / marble texture overlay ── */
+  .arena::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Column borders ── */
+  .column-left, .column-right {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 32px;
+    z-index: 10;
+    background:
+      repeating-linear-gradient(180deg,
+        var(--sand) 0px, var(--sand-light) 6px, var(--marble-dark) 8px,
+        var(--sand) 10px, var(--sand) 60px);
+    border: 3px solid var(--bronze);
+  }
+  .column-left { left: 0; border-left: none; border-radius: 0 6px 6px 0; }
+  .column-right { right: 0; border-right: none; border-radius: 6px 0 0 6px; }
+
+  .column-left::before, .column-right::before,
+  .column-left::after, .column-right::after {
+    content: '';
+    position: absolute;
+    left: -3px; right: -3px;
+    height: 50px;
+    background: linear-gradient(180deg, var(--bronze), var(--bronze-light), var(--bronze));
+    border: 3px solid var(--gold-dim);
+  }
+  .column-left::before, .column-right::before { top: 0; }
+  .column-left::after, .column-right::after { bottom: 0; }
+
+  /* ── Main content ── */
+  .content {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    padding: 18px 44px 14px;
+    gap: 0;
+  }
+
+  /* ══════════════════════
+     1. HEADER — THE GREAT BOARD
+     ══════════════════════ */
+  .header {
+    text-align: center;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+  }
+
+  /* Roman arch */
+  .arch {
+    position: relative;
+    padding: 18px 20px 14px;
+    border: 4px solid var(--bronze);
+    border-radius: 50% 50% 0 0 / 30% 30% 0 0;
+    background:
+      linear-gradient(180deg, rgba(74,14,78,0.35) 0%, rgba(26,18,8,0.6) 100%);
+    box-shadow:
+      0 0 30px rgba(205,127,50,0.2),
+      inset 0 0 40px rgba(0,0,0,0.4);
+  }
+  .arch::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2px solid rgba(205,127,50,0.3);
+    border-radius: 50% 50% 0 0 / 28% 28% 0 0;
+    pointer-events: none;
+  }
+
+  .laurel-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .laurel {
+    font-size: 40px;
+    filter: drop-shadow(0 0 6px rgba(205,127,50,0.5));
+  }
+
+  .title-main {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(42px, 7vw, 68px);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--gold);
+    text-shadow:
+      0 0 20px rgba(255,215,0,0.4),
+      0 2px 0 var(--bronze),
+      0 4px 8px rgba(0,0,0,0.7);
+    letter-spacing: 2px;
+  }
+
+  .title-sub {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 700;
+    color: var(--bronze-light);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.6);
+    letter-spacing: 4px;
+    margin-top: 2px;
+  }
+
+  /* ══════════════════════
+     2. SPEAKER TABLET
+     ══════════════════════ */
+  .speaker-tablet {
+    width: 100%;
+    text-align: center;
+    padding: 14px 16px;
+    margin: 6px 0;
+    background:
+      linear-gradient(180deg, #3a2a14 0%, #2a1c0c 50%, #3a2a14 100%);
+    border: 4px solid var(--bronze);
+    border-radius: 8px;
+    box-shadow:
+      inset 0 2px 10px rgba(0,0,0,0.6),
+      0 4px 16px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .speaker-tablet::before {
+    content: '⚔️';
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 32px;
+  }
+  .speaker-tablet::after {
+    content: '⚔️';
+    position: absolute;
+    right: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 32px;
+  }
+
+  .speaker-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(38px, 6vw, 56px);
+    font-weight: 700;
+    color: var(--marble);
+    text-shadow:
+      0 0 12px rgba(240,236,226,0.3),
+      0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 3px;
+  }
+  .speaker-label {
+    font-size: 28px;
+    color: var(--sand);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    margin-bottom: 2px;
+  }
+
+  /* ══════════════════════
+     3. FACT-CHECK DECREE
+     ══════════════════════ */
+  .decree {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background:
+      linear-gradient(170deg, rgba(45,7,48,0.3) 0%, rgba(26,18,8,0.5) 100%);
+    border: 5px solid var(--bronze);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 6px 0;
+    box-shadow:
+      0 0 40px rgba(139,0,0,0.15),
+      inset 0 0 30px rgba(0,0,0,0.4);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .decree-header {
+    text-align: center;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--bronze-light);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .decree-header::after {
+    content: '';
+    display: block;
+    width: 80%;
+    height: 3px;
+    margin: 8px auto 0;
+    background: linear-gradient(90deg, transparent, var(--bronze), transparent);
+  }
+
+  /* Claim */
+  .claim-block {
+    margin-bottom: 12px;
+  }
+  .claim-label {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gold-dim);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .claim-text {
+    font-size: clamp(36px, 5vw, 44px);
+    font-weight: 700;
+    color: var(--marble);
+    line-height: 1.2;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    padding: 10px 14px;
+    background: rgba(0,0,0,0.3);
+    border-left: 6px solid var(--blood);
+    border-radius: 4px;
+  }
+
+  /* Verdict */
+  .verdict-block {
+    text-align: center;
+    padding: 16px 10px;
+    margin: 8px 0;
+    background:
+      radial-gradient(ellipse at center, rgba(139,0,0,0.25) 0%, transparent 70%);
+    position: relative;
+  }
+
+  .thumb-icon {
+    font-size: 80px;
+    display: block;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 0 20px rgba(139,0,0,0.6));
+    animation: thumbPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes thumbPulse {
+    0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 20px rgba(139,0,0,0.6)); }
+    50% { transform: scale(1.08) rotate(-3deg); filter: drop-shadow(0 0 35px rgba(204,17,0,0.8)); }
+  }
+
+  .verdict-label {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--sand);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+  .verdict-text {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(60px, 10vw, 96px);
+    font-weight: 900;
+    color: var(--blood-glow);
+    text-shadow:
+      0 0 30px rgba(204,17,0,0.5),
+      0 0 60px rgba(139,0,0,0.3),
+      0 3px 0 #5a0000,
+      0 6px 12px rgba(0,0,0,0.8);
+    letter-spacing: 3px;
+    line-height: 1;
+    margin-top: 4px;
+  }
+
+  /* Fact / Humor / Source */
+  .detail-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .detail-row {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 3px solid var(--bronze);
+    background: rgba(0,0,0,0.35);
+  }
+  .detail-row-label {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 3px;
+  }
+  .detail-row-text {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--sand-light);
+    line-height: 1.25;
+  }
+
+  .detail-row.humor .detail-row-label { color: var(--bronze-light); }
+  .detail-row.humor .detail-row-text { font-size: 28px; color: var(--sand); }
+
+  .detail-row.source .detail-row-label { color: var(--marble-dark); }
+  .detail-row.source .detail-row-text {
+    font-size: 28px;
+    color: var(--sand);
+    font-style: italic;
+  }
+
+  /* ══════════════════════
+     4. MOTTO FOOTER
+     ══════════════════════ */
+  .motto {
+    text-align: center;
+    flex-shrink: 0;
+    padding: 10px 0 4px;
+  }
+  .motto-text {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(36px, 5.5vw, 52px);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow:
+      0 0 25px rgba(255,215,0,0.4),
+      0 2px 0 var(--bronze),
+      0 4px 10px rgba(0,0,0,0.7);
+    letter-spacing: 6px;
+  }
+  .motto-divider {
+    width: 60%;
+    height: 3px;
+    margin: 6px auto;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--bronze), var(--gold), transparent);
+  }
+
+  /* ══════════════════════
+     5. PARTICLES & FX
+     ══════════════════════ */
+
+  /* Dust particles */
+  .dust-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .dust {
+    position: absolute;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(212,197,169,0.4);
+    animation: dustFloat linear infinite;
+  }
+
+  @keyframes dustFloat {
+    0% { transform: translateY(100vh) translateX(0) scale(1); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-20vh) translateX(40px) scale(0.3); opacity: 0; }
+  }
+
+  /* Torch glow - left */
+  .torch-left, .torch-right {
+    position: absolute;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    z-index: 3;
+    pointer-events: none;
+  }
+  .torch-left {
+    top: 55px; left: 0;
+    background: radial-gradient(circle, rgba(255,140,0,0.4) 0%, rgba(255,80,0,0.15) 40%, transparent 70%);
+    animation: torchFlicker 3s ease-in-out infinite;
+  }
+  .torch-right {
+    top: 55px; right: 0;
+    background: radial-gradient(circle, rgba(255,140,0,0.4) 0%, rgba(255,80,0,0.15) 40%, transparent 70%);
+    animation: torchFlicker 3s ease-in-out infinite 1.5s;
+  }
+  .torch-left::before, .torch-right::before {
+    content: '🔥';
+    position: absolute;
+    font-size: 36px;
+    top: 8px;
+  }
+  .torch-left::before { left: 14px; }
+  .torch-right::before { right: 14px; }
+
+  @keyframes torchFlicker {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    25% { opacity: 1; transform: scale(1.1); }
+    50% { opacity: 0.7; transform: scale(0.95); }
+    75% { opacity: 1; transform: scale(1.05); }
+  }
+
+  /* Arena glow at bottom */
+  .arena-glow {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 120px;
+    background: radial-gradient(ellipse 100% 100% at 50% 100%, rgba(139,0,0,0.12) 0%, transparent 70%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Vignette */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, rgba(0,0,0,0.4) 100%);
+    z-index: 4;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="arena">
+  <!-- Decorative layers -->
+  <div class="column-left"></div>
+  <div class="column-right"></div>
+  <div class="torch-left"></div>
+  <div class="torch-right"></div>
+  <div class="arena-glow"></div>
+  <div class="vignette"></div>
+
+  <!-- Dust particles (generated by JS) -->
+  <div class="dust-container" id="dustContainer"></div>
+
+  <!-- Main content -->
+  <div class="content">
+
+    <!-- 1. HEADER -->
+    <div class="header">
+      <div class="arch">
+        <div class="laurel-row">
+          <span class="laurel">🏛️</span>
+          <span class="laurel" style="font-size:34px;">🌿</span>
+          <span class="laurel">🏛️</span>
+        </div>
+        <div class="title-main">THE GREAT</div>
+        <div class="title-sub">BOARD OF SCIENCE</div>
+      </div>
+    </div>
+
+    <!-- 2. SPEAKER TABLET -->
+    <div class="speaker-tablet">
+      <div class="speaker-label">Gladiator</div>
+      <div class="speaker-name">DR. YOUTUBE</div>
+    </div>
+
+    <!-- 3. FACT-CHECK DECREE -->
+    <div class="decree">
+      <div class="decree-header">Imperial Decree</div>
+
+      <div class="claim-block">
+        <div class="claim-label">Claim</div>
+        <div class="claim-text">"Vaccines cause autism"</div>
+      </div>
+
+      <div class="verdict-block">
+        <span class="thumb-icon">👎</span>
+        <div class="verdict-label">Pollice Verso</div>
+        <div class="verdict-text">DEBUNKED</div>
+      </div>
+
+      <div class="detail-rows">
+        <div class="detail-row fact">
+          <div class="detail-row-label">Fact</div>
+          <div class="detail-row-text">The original 1998 Wakefield study was retracted for fraud. Dozens of studies with millions of children found zero link.</div>
+        </div>
+        <div class="detail-row humor">
+          <div class="detail-row-label">Humor</div>
+          <div class="detail-row-text">The only thing vaccines cause is adults.</div>
+        </div>
+        <div class="detail-row source">
+          <div class="detail-row-label">Source</div>
+          <div class="detail-row-text">The Lancet retraction, 2010; CDC MMWR studies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. MOTTO -->
+    <div class="motto">
+      <div class="motto-divider"></div>
+      <div class="motto-text">AVE SCIENTIA</div>
+      <div class="motto-divider"></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /arena -->
+
+<script>
+  // Generate dust particles
+  const container = document.getElementById('dustContainer');
+  for (let i = 0; i < 25; i++) {
+    const dust = document.createElement('div');
+    dust.classList.add('dust');
+    dust.style.left = Math.random() * 100 + '%';
+    dust.style.animationDuration = (8 + Math.random() * 14) + 's';
+    dust.style.animationDelay = (Math.random() * 12) + 's';
+    dust.style.width = dust.style.height = (2 + Math.random() * 4) + 'px';
+    dust.style.opacity = 0.2 + Math.random() * 0.4;
+    container.appendChild(dust);
+  }
+</script>
+
+</body>
+</html>

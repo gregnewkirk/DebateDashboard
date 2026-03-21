@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE GREAT BOARD OF SCIENCE - Propaganda Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red: #cc0000;
+    --red-dark: #990000;
+    --red-light: #e63333;
+    --cream: #f5e6d3;
+    --cream-dark: #e8d5bc;
+    --black: #1a1a1a;
+    --gold: #ffd700;
+    --gold-dark: #cca800;
+  }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    margin: 0 auto;
+    background: var(--cream);
+    font-family: 'Oswald', sans-serif;
+    color: var(--black);
+    overflow: hidden;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 99;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(26,26,26,0.35) 100%);
+  }
+
+  /* ==================== TOP BANNER ==================== */
+  .banner-section {
+    position: relative;
+    width: 100%;
+    height: 420px;
+    background: var(--red);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 10px solid var(--black);
+  }
+
+  /* Radiating rays */
+  .rays {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1600px;
+    height: 1600px;
+    transform: translate(-50%, -50%);
+    animation: rotateRays 80s linear infinite;
+  }
+
+  @keyframes rotateRays {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  .ray {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+  }
+
+  .ray::before {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 80px solid transparent;
+    border-right: 80px solid transparent;
+    border-bottom: 1000px solid rgba(255,255,255,0.08);
+    transform: translate(-50%, -100%);
+  }
+
+  /* Corner stars */
+  .corner-star {
+    position: absolute;
+    color: var(--gold);
+    font-size: 90px;
+    line-height: 1;
+    z-index: 5;
+    filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));
+    animation: pulseStar 3s ease-in-out infinite;
+  }
+  .corner-star.tl { top: 15px; left: 24px; }
+  .corner-star.tr { top: 15px; right: 24px; }
+  @keyframes pulseStar {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.12); opacity: 0.85; }
+  }
+
+  .banner-content {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+  }
+
+  .banner-top-line {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 36px;
+    letter-spacing: 16px;
+    color: var(--gold);
+    margin-bottom: 6px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  }
+
+  .banner-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 120px;
+    line-height: 0.88;
+    color: var(--cream);
+    text-shadow: 5px 5px 0 rgba(0,0,0,0.55), 0 0 60px rgba(255,215,0,0.15);
+    letter-spacing: 8px;
+    padding: 0 30px;
+  }
+
+  .banner-subtitle {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 18px;
+    color: var(--gold);
+    margin-top: 10px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  }
+
+  /* Decorative stripe bar */
+  .stripe-bar {
+    width: 100%;
+    height: 28px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--black) 0px,
+      var(--black) 44px,
+      var(--gold) 44px,
+      var(--gold) 48px
+    );
+  }
+
+  /* ==================== TARGET / MATCHUP ==================== */
+  .target-section {
+    position: relative;
+    padding: 40px 60px 30px;
+    text-align: center;
+    background: var(--cream);
+  }
+
+  .target-decree {
+    display: inline-block;
+    position: relative;
+    padding: 24px 50px;
+    border: 8px solid var(--black);
+    background: var(--cream);
+  }
+
+  .target-decree::before,
+  .target-decree::after {
+    content: '';
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border: 5px solid var(--red);
+  }
+  .target-decree::before { top: -10px; left: -10px; border-right: none; border-bottom: none; }
+  .target-decree::after { bottom: -10px; right: -10px; border-left: none; border-top: none; }
+
+  .target-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 10px;
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+
+  .target-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: var(--black);
+    line-height: 1;
+    letter-spacing: 4px;
+  }
+
+  .target-vs {
+    color: var(--red);
+  }
+
+  /* ==================== GEOMETRIC DIVIDER ==================== */
+  .geo-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 12px 50px;
+  }
+
+  .geo-line {
+    flex: 1;
+    height: 5px;
+    background: var(--black);
+  }
+
+  .geo-diamond {
+    width: 24px;
+    height: 24px;
+    background: var(--red);
+    transform: rotate(45deg);
+    margin: 0 14px;
+    flex-shrink: 0;
+  }
+
+  .geo-star-center {
+    color: var(--red);
+    font-size: 44px;
+    line-height: 1;
+    margin: 0 10px;
+    flex-shrink: 0;
+  }
+
+  /* ==================== FACT CHECK CARD ==================== */
+  .card-section {
+    padding: 16px 44px;
+    position: relative;
+  }
+
+  .fact-card {
+    position: relative;
+    background: var(--cream-dark);
+    border: 8px solid var(--black);
+    overflow: visible;
+  }
+
+  /* Card header */
+  .card-header {
+    background: var(--red);
+    padding: 22px 36px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 6px solid var(--black);
+  }
+
+  .card-header-star {
+    color: var(--gold);
+    font-size: 56px;
+    line-height: 1;
+    filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));
+  }
+
+  .card-header-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    color: var(--cream);
+    letter-spacing: 6px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  }
+
+  .card-number {
+    margin-left: auto;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    color: var(--gold);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    line-height: 1;
+  }
+
+  .card-body {
+    padding: 28px 32px 24px;
+    position: relative;
+  }
+
+  /* Claim block */
+  .claim-block {
+    position: relative;
+    margin-bottom: 24px;
+    padding: 24px 28px;
+    background: var(--black);
+    color: var(--cream);
+  }
+
+  .claim-block::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-top: 44px solid var(--cream-dark);
+    border-left: 44px solid transparent;
+  }
+
+  .claim-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 8px;
+    color: var(--red-light);
+    margin-bottom: 10px;
+  }
+
+  .claim-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 44px;
+    line-height: 1.15;
+    color: var(--cream);
+    letter-spacing: 1px;
+  }
+
+  /* ==================== VERDICT STAMP ==================== */
+  .verdict-block {
+    position: relative;
+    margin: 28px 0;
+    text-align: center;
+  }
+
+  .verdict-bg {
+    position: relative;
+    display: inline-block;
+    padding: 18px 50px 14px;
+    background: var(--red);
+    border: 6px solid var(--red-dark);
+    transform: rotate(-2deg);
+    box-shadow: 5px 5px 0 var(--black), inset 0 0 40px rgba(0,0,0,0.25);
+    animation: stampSlam 0.6s ease-out forwards, stampGlow 3s ease-in-out 0.6s infinite;
+  }
+
+  @keyframes stampSlam {
+    0% { transform: rotate(-2deg) scale(2.8); opacity: 0; }
+    60% { transform: rotate(-2deg) scale(0.95); opacity: 1; }
+    100% { transform: rotate(-2deg) scale(1); opacity: 1; }
+  }
+
+  @keyframes stampGlow {
+    0%, 100% { box-shadow: 5px 5px 0 var(--black), inset 0 0 40px rgba(0,0,0,0.25), 0 0 0 rgba(204,0,0,0); }
+    50% { box-shadow: 5px 5px 0 var(--black), inset 0 0 40px rgba(0,0,0,0.25), 0 0 40px rgba(204,0,0,0.4); }
+  }
+
+  .verdict-top-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 10px;
+    color: var(--gold);
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+  }
+
+  .verdict-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 100px;
+    color: var(--cream);
+    text-shadow: 4px 4px 0 rgba(0,0,0,0.6);
+    letter-spacing: 12px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  /* Stamp ring decoration */
+  .verdict-bg::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border: 4px dashed rgba(204,0,0,0.45);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+
+  /* Stamp corner stars */
+  .stamp-star {
+    position: absolute;
+    color: var(--gold);
+    font-size: 36px;
+    filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.6));
+  }
+  .stamp-star.s-tl { top: -18px; left: -18px; }
+  .stamp-star.s-tr { top: -18px; right: -18px; }
+  .stamp-star.s-bl { bottom: -18px; left: -18px; }
+  .stamp-star.s-br { bottom: -18px; right: -18px; }
+
+  /* ==================== FACT ROWS ==================== */
+  .fact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 16px;
+    padding: 16px 22px;
+    background: rgba(26,26,26,0.07);
+    border-left: 7px solid var(--red);
+  }
+
+  .fact-row-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: var(--red);
+    color: var(--cream);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fact-row-label {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 5px;
+    color: var(--red);
+    margin-bottom: 4px;
+  }
+
+  .fact-row-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 32px;
+    color: var(--black);
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+  }
+
+  /* Humor row */
+  .fact-row.humor-row {
+    border-left-color: var(--gold-dark);
+    background: rgba(255,215,0,0.1);
+  }
+  .fact-row.humor-row .fact-row-icon {
+    background: var(--gold-dark);
+    color: var(--black);
+  }
+  .fact-row.humor-row .fact-row-label {
+    color: var(--gold-dark);
+  }
+  .fact-row.humor-row .fact-row-text {
+    font-style: italic;
+    text-transform: none;
+  }
+
+  /* Source row */
+  .fact-row.source-row .fact-row-icon {
+    background: var(--black);
+  }
+  .fact-row.source-row .fact-row-label {
+    color: var(--black);
+  }
+
+  .retracted-tag {
+    display: inline-block;
+    background: var(--red);
+    color: var(--cream);
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    padding: 3px 14px;
+    letter-spacing: 4px;
+    margin-left: 10px;
+    transform: rotate(-1deg);
+  }
+
+  /* ==================== BOTTOM SECTION ==================== */
+  .bottom-section {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .bottom-geo-stripe {
+    height: 28px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--gold) 0px,
+      var(--gold) 44px,
+      var(--black) 44px,
+      var(--black) 48px
+    );
+  }
+
+  .bottom-banner {
+    background: var(--black);
+    padding: 34px 60px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Diagonal red accents */
+  .bottom-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20px;
+    width: 220px;
+    height: 100%;
+    background: var(--red);
+    transform: skewX(-15deg);
+    opacity: 0.35;
+  }
+  .bottom-banner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -20px;
+    width: 220px;
+    height: 100%;
+    background: var(--red);
+    transform: skewX(15deg);
+    opacity: 0.35;
+  }
+
+  .bottom-main-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 88px;
+    color: var(--cream);
+    letter-spacing: 14px;
+    text-shadow: 4px 4px 0 var(--red);
+    position: relative;
+    z-index: 2;
+    animation: glowText 4s ease-in-out infinite;
+  }
+
+  @keyframes glowText {
+    0%, 100% { text-shadow: 4px 4px 0 var(--red), 0 0 0 transparent; }
+    50% { text-shadow: 4px 4px 0 var(--red), 0 0 40px rgba(204,0,0,0.35); }
+  }
+
+  .bottom-sub-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 14px;
+    color: var(--gold);
+    margin-top: 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .bottom-credit-bar {
+    background: var(--red);
+    padding: 14px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 4px solid var(--gold-dark);
+  }
+
+  .credit-text {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: 5px;
+    color: var(--cream);
+  }
+
+  .credit-stars {
+    color: var(--gold);
+    font-size: 30px;
+    letter-spacing: 10px;
+  }
+
+  /* ==================== SIDE DECORATIONS ==================== */
+  .side-deco {
+    position: absolute;
+    top: 450px;
+    width: 40px;
+    height: 550px;
+    z-index: 10;
+  }
+  .side-deco.left { left: 0; }
+  .side-deco.right { right: 0; }
+
+  .side-deco .sd-bar {
+    width: 100%;
+    background: var(--red);
+    position: absolute;
+  }
+  .side-deco.left .sd-bar { height: 100%; border-right: 5px solid var(--black); }
+  .side-deco.right .sd-bar { height: 100%; border-left: 5px solid var(--black); }
+
+  .side-deco .sd-star {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--gold);
+    font-size: 32px;
+    z-index: 2;
+    filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
+  }
+  .side-deco .sd-star:nth-child(2) { top: 60px; }
+  .side-deco .sd-star:nth-child(3) { top: 220px; }
+  .side-deco .sd-star:nth-child(4) { top: 380px; }
+
+  /* ==================== FLOATING ELEMENTS ==================== */
+  .float-star {
+    position: absolute;
+    color: var(--red);
+    opacity: 0.07;
+    font-size: 240px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .float-star.fs1 { top: 750px; left: -50px; transform: rotate(15deg); }
+  .float-star.fs2 { top: 1200px; right: -40px; transform: rotate(-20deg); font-size: 200px; }
+
+  /* Geometric triangles */
+  .geo-tri {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.06;
+  }
+  .geo-tri.t1 {
+    top: 520px; right: 60px;
+    border-left: 90px solid transparent;
+    border-right: 90px solid transparent;
+    border-bottom: 160px solid var(--black);
+  }
+  .geo-tri.t2 {
+    top: 1350px; left: 80px;
+    border-left: 70px solid transparent;
+    border-right: 70px solid transparent;
+    border-bottom: 120px solid var(--red);
+    transform: rotate(15deg);
+  }
+</style>
+</head>
+<body>
+
+<!-- Background floating elements -->
+<div class="float-star fs1">&#9733;</div>
+<div class="float-star fs2">&#9733;</div>
+<div class="geo-tri t1"></div>
+<div class="geo-tri t2"></div>
+
+<!-- Side decorations -->
+<div class="side-deco left">
+  <div class="sd-bar"></div>
+  <span class="sd-star">&#9733;</span>
+  <span class="sd-star">&#9733;</span>
+  <span class="sd-star">&#9733;</span>
+</div>
+<div class="side-deco right">
+  <div class="sd-bar"></div>
+  <span class="sd-star">&#9733;</span>
+  <span class="sd-star">&#9733;</span>
+  <span class="sd-star">&#9733;</span>
+</div>
+
+<!-- ===== TOP BANNER ===== -->
+<div class="banner-section">
+  <!-- Rays -->
+  <div class="rays">
+    <div class="ray" style="transform: rotate(0deg)"></div>
+    <div class="ray" style="transform: rotate(15deg)"></div>
+    <div class="ray" style="transform: rotate(30deg)"></div>
+    <div class="ray" style="transform: rotate(45deg)"></div>
+    <div class="ray" style="transform: rotate(60deg)"></div>
+    <div class="ray" style="transform: rotate(75deg)"></div>
+    <div class="ray" style="transform: rotate(90deg)"></div>
+    <div class="ray" style="transform: rotate(105deg)"></div>
+    <div class="ray" style="transform: rotate(120deg)"></div>
+    <div class="ray" style="transform: rotate(135deg)"></div>
+    <div class="ray" style="transform: rotate(150deg)"></div>
+    <div class="ray" style="transform: rotate(165deg)"></div>
+    <div class="ray" style="transform: rotate(180deg)"></div>
+    <div class="ray" style="transform: rotate(195deg)"></div>
+    <div class="ray" style="transform: rotate(210deg)"></div>
+    <div class="ray" style="transform: rotate(225deg)"></div>
+    <div class="ray" style="transform: rotate(240deg)"></div>
+    <div class="ray" style="transform: rotate(255deg)"></div>
+    <div class="ray" style="transform: rotate(270deg)"></div>
+    <div class="ray" style="transform: rotate(285deg)"></div>
+    <div class="ray" style="transform: rotate(300deg)"></div>
+    <div class="ray" style="transform: rotate(315deg)"></div>
+    <div class="ray" style="transform: rotate(330deg)"></div>
+    <div class="ray" style="transform: rotate(345deg)"></div>
+  </div>
+
+  <span class="corner-star tl">&#9733;</span>
+  <span class="corner-star tr">&#9733;</span>
+
+  <div class="banner-content">
+    <div class="banner-top-line">&#9733; PRESENTING &#9733;</div>
+    <div class="banner-title">THE GREAT<br>BOARD OF<br>SCIENCE</div>
+    <div class="banner-subtitle">TRUTH IS NOT OPTIONAL</div>
+  </div>
+</div>
+
+<!-- Decorative stripe -->
+<div class="stripe-bar"></div>
+
+<!-- ===== TARGET DECREE ===== -->
+<div class="target-section">
+  <div class="target-decree">
+    <div class="target-label">&#9733; OFFICIAL DECREE &#9733;</div>
+    <div class="target-name">THE PEOPLE <span class="target-vs">vs</span> DR. YOUTUBE</div>
+  </div>
+</div>
+
+<!-- Geometric divider -->
+<div class="geo-divider">
+  <div class="geo-line"></div>
+  <div class="geo-diamond"></div>
+  <span class="geo-star-center">&#9733;</span>
+  <div class="geo-diamond"></div>
+  <div class="geo-line"></div>
+</div>
+
+<!-- ===== FACT CHECK CARD ===== -->
+<div class="card-section">
+  <div class="fact-card">
+    <!-- Card header -->
+    <div class="card-header">
+      <span class="card-header-star">&#9733;</span>
+      <span class="card-header-text">FACT CHECK DECREE</span>
+      <span class="card-number">#07</span>
+    </div>
+
+    <!-- Card body -->
+    <div class="card-body">
+      <!-- Claim -->
+      <div class="claim-block">
+        <div class="claim-label">&#9654; THE ACCUSED CLAIMS</div>
+        <div class="claim-text">"Vaccines cause autism"</div>
+      </div>
+
+      <!-- Verdict stamp -->
+      <div class="verdict-block">
+        <div class="verdict-bg">
+          <span class="stamp-star s-tl">&#9733;</span>
+          <span class="stamp-star s-tr">&#9733;</span>
+          <span class="stamp-star s-bl">&#9733;</span>
+          <span class="stamp-star s-br">&#9733;</span>
+          <div class="verdict-top-text">THE PEOPLE'S VERDICT</div>
+          <div class="verdict-main">DEBUNKED</div>
+        </div>
+      </div>
+
+      <!-- Fact -->
+      <div class="fact-row">
+        <div class="fact-row-icon">&#9873;</div>
+        <div>
+          <div class="fact-row-label">THE TRUTH</div>
+          <div class="fact-row-text">Exposed in 2010 as a total fraud. Author lost his medical license.</div>
+        </div>
+      </div>
+
+      <!-- Humor -->
+      <div class="fact-row humor-row">
+        <div class="fact-row-icon">!</div>
+        <div>
+          <div class="fact-row-label">DISPATCH</div>
+          <div class="fact-row-text">Even WebMD disagrees with you</div>
+        </div>
+      </div>
+
+      <!-- Source -->
+      <div class="fact-row source-row">
+        <div class="fact-row-icon">&#9878;</div>
+        <div>
+          <div class="fact-row-label">SOURCE DOCUMENT</div>
+          <div class="fact-row-text">Lancet, 2010 <span class="retracted-tag">RETRACTED</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOTTOM SECTION ===== -->
+<div class="bottom-section">
+  <div class="bottom-geo-stripe"></div>
+  <div class="bottom-banner">
+    <div class="bottom-main-text">&#9733; SCIENCE WILL PREVAIL &#9733;</div>
+    <div class="bottom-sub-text">THE REVOLUTION DEMANDS EVIDENCE</div>
+  </div>
+  <div class="bottom-credit-bar">
+    <span class="credit-text">DR. GREG'S LABORATORY</span>
+    <span class="credit-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+    <span class="credit-text">BOARD OF SCIENCE v7.0</span>
+  </div>
+</div>
+
+</body>
+</html>
