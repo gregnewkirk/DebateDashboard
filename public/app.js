@@ -96,6 +96,9 @@ function connectWebSocket() {
         case "session_end":
           handleSessionEnd(msg.data);
           break;
+        case "report_card":
+          showReportCard(msg);
+          break;
         default:
           console.log("[WS] Unknown message type:", msg.type);
       }
@@ -139,7 +142,143 @@ function handleSessionStart() {
 }
 
 function handleSessionEnd(data) {
-  // Will be expanded in Task 5 for report card
+  // Session ended — report card will arrive as a separate message
+  stopIdlePopIns();
+  isShowingCard = true;
+}
+
+// --- Report Card ---
+
+let reportCardTimeouts = [];
+
+function clearReportCardTimeouts() {
+  reportCardTimeouts.forEach((t) => clearTimeout(t));
+  reportCardTimeouts = [];
+}
+
+function rcTimeout(fn, delay) {
+  const t = setTimeout(fn, delay);
+  reportCardTimeouts.push(t);
+  return t;
+}
+
+function showReportCard(data) {
+  clearReportCardTimeouts();
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  container.innerHTML = "";
+
+  // Hide nickname bar and bottom ticker
+  const nicknameBar = document.getElementById("nickname-bar");
+  const bottomTicker = document.querySelector(".bottom-ticker");
+  if (nicknameBar) nicknameBar.style.display = "none";
+  if (bottomTicker) bottomTicker.style.display = "none";
+
+  // Create report card container
+  const card = document.createElement("div");
+  card.className = "report-card";
+  container.appendChild(card);
+
+  // t=0s: Header slams in
+  const header = document.createElement("div");
+  header.className = "report-header slam-in";
+  header.textContent = "TRUTH REPORT CARD";
+  card.appendChild(header);
+
+  // t=2s: Nickname bounces in
+  rcTimeout(() => {
+    const nicknameSection = document.createElement("div");
+    nicknameSection.className = "report-nickname bounce-in";
+    nicknameSection.textContent = "AWARDED TO:";
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "name";
+    nameSpan.textContent = data.nickname || "CHALLENGER";
+    nicknameSection.appendChild(nameSpan);
+    card.appendChild(nicknameSection);
+  }, 2000);
+
+  // t=5s: Grade slams in huge
+  rcTimeout(() => {
+    const gradeEl = document.createElement("div");
+    gradeEl.className = "report-grade slam-in";
+    gradeEl.textContent = data.grade || "F";
+    card.appendChild(gradeEl);
+
+    const jokeEl = document.createElement("div");
+    jokeEl.className = "grade-joke bounce-in";
+    jokeEl.textContent = data.gradeJoke || "";
+    card.appendChild(jokeEl);
+  }, 5000);
+
+  // t=8s: Stats appear one by one (300ms stagger)
+  const stats = data.stats || {};
+  const statLines = [
+    { label: "CLAIMS DETECTED", value: stats.claimCount || 0 },
+    { label: "DEBUNKED", value: stats.debunkedCount || 0 },
+    { label: "MISLEADING", value: stats.misleadingCount || 0 },
+    { label: "BROKEN RECORDS", value: stats.loopBreakerCount || 0 },
+    { label: "MOM JOKES", value: stats.momJokeCount || 0 },
+  ];
+
+  rcTimeout(() => {
+    const statsContainer = document.createElement("div");
+    statsContainer.className = "report-stats";
+    card.appendChild(statsContainer);
+
+    statLines.forEach((stat, i) => {
+      rcTimeout(() => {
+        const line = document.createElement("div");
+        line.className = "stat-line bounce-in";
+        const labelSpan = document.createElement("span");
+        labelSpan.textContent = stat.label;
+        const valueSpan = document.createElement("span");
+        valueSpan.className = "stat-value";
+        valueSpan.textContent = stat.value;
+        line.appendChild(labelSpan);
+        line.appendChild(valueSpan);
+        statsContainer.appendChild(line);
+      }, i * 300);
+    });
+  }, 8000);
+
+  // t=14s: Superlatives bounce in one at a time (2s each)
+  const superlatives = data.superlatives || [];
+  superlatives.forEach((text, i) => {
+    rcTimeout(() => {
+      const sup = document.createElement("div");
+      sup.className = "superlative bounce-in";
+      sup.textContent = text;
+      card.appendChild(sup);
+    }, 14000 + i * 2000);
+  });
+
+  // t=22s: Closing one-liner
+  rcTimeout(() => {
+    const closer = document.createElement("div");
+    closer.className = "report-closer bounce-in";
+    closer.textContent = data.closer || "";
+    card.appendChild(closer);
+  }, 22000);
+
+  // t=26s: Hold for 8 seconds (screenshot moment)
+  // t=34s: Fade out
+  rcTimeout(() => {
+    card.classList.add("fade-out");
+    rcTimeout(() => {
+      container.innerHTML = "";
+      isShowingCard = false;
+      // Restore nickname bar and ticker
+      if (nicknameBar) nicknameBar.style.display = "flex";
+      if (bottomTicker) bottomTicker.style.display = "flex";
+      startIdlePopIns();
+      if (typeof showAdScreen === "function") {
+        showAdScreen();
+      }
+    }, 1000);
+  }, 34000);
 }
 
 // --- Stub Functions (implemented in later tasks) ---
@@ -567,6 +706,21 @@ document.addEventListener("keydown", (e) => {
       humor: "Correlation \u2260 causation. Unless you\u2019re a Facebook researcher.",
       humor_style: "sarcastic",
       source: "Lancet, 2014 (RETRACTED)"
+    });
+  }
+  if (e.key === "r" || e.key === "R") {
+    showReportCard({
+      nickname: "DR. YOUTUBE",
+      nicknameHistory: ["CHALLENGER", "THE GOOGLER", "DR. YOUTUBE"],
+      grade: "F-",
+      gradeJoke: "Lower than snake belly in a wagon rut",
+      superlatives: [
+        "Most Creative Misuse of Statistics",
+        "Lifetime Achievement in Ignoring Peer Review",
+        "Gold Medal in Moving the Goalposts"
+      ],
+      closer: "Today's debate brought to you by: Confirmation Bias",
+      stats: { claimCount: 14, debunkedCount: 11, misleadingCount: 3, loopBreakerCount: 4, momJokeCount: 3 }
     });
   }
   if (e.key === "l" || e.key === "L") {

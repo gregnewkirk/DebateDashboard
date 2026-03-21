@@ -456,3 +456,102 @@ body {
   border-radius: 8px;
   letter-spacing: 0.08em;
 }
+
+/* ===========================================
+   TRUTH REPORT CARD
+   =========================================== */
+.report-card {
+  width: 100%;
+  max-width: 960px;
+  padding: 2vh 4vw;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5vh;
+}
+
+.report-card .report-header {
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--red);
+  letter-spacing: 0.1em;
+  border-bottom: 3px solid var(--red);
+  padding-bottom: 1vh;
+  width: 100%;
+}
+
+.report-card .report-nickname {
+  font-size: clamp(1.2rem, 3vw, 2.2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+  opacity: 0.8;
+}
+
+.report-card .report-nickname .name {
+  color: var(--gold);
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  display: block;
+  font-weight: 900;
+}
+
+.report-card .report-grade {
+  font-size: clamp(5rem, 15vw, 10rem);
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(233, 69, 96, 0.5);
+}
+
+.report-card .grade-joke {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+}
+
+.report-card .report-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+  width: 100%;
+}
+
+.report-card .stat-line {
+  font-size: clamp(1rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3vh 2vw;
+}
+
+.report-card .stat-line .stat-value {
+  color: var(--red);
+  font-weight: 900;
+}
+
+.report-card .superlative {
+  font-size: clamp(1rem, 2.8vw, 1.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 1vh 3vw;
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  width: 90%;
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.report-card .report-closer {
+  font-size: clamp(1.1rem, 2.8vw, 1.8rem);
+  color: var(--gold);
+  font-style: italic;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+  margin-top: 1vh;
+}
