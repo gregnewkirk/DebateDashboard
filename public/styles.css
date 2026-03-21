@@ -583,3 +583,41 @@ body {
   text-shadow: 0 0 60px rgba(233, 69, 96, 0.6);
   text-align: center;
 }
+
+/* ===========================================
+   AD SCREEN (ScienceAndFreedom.com)
+   =========================================== */
+.ad-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, #0a0a1a 0%, #111133 50%, #0a0a1a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  gap: 3vh;
+}
+
+.ad-screen .ad-url {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--white);
+  letter-spacing: 0.08em;
+  text-align: center;
+  line-height: 1.2;
+  animation: pulse-kf 3s ease-in-out infinite;
+}
+
+.ad-screen .ad-tagline {
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: system-ui, sans-serif;
+}

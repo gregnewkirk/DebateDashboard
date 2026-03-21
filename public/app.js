@@ -172,6 +172,14 @@ function stopSessionTimer() {
 }
 
 function handleSessionStart() {
+  // Clear ad screen if showing
+  dismissAdScreen();
+  // Restore banner and ticker
+  const topBanner = document.querySelector(".top-banner");
+  const bottomTicker = document.querySelector(".bottom-ticker");
+  if (topBanner) topBanner.style.display = "flex";
+  if (bottomTicker) bottomTicker.style.display = "flex";
+
   // Stop idle pop-ins during animation
   stopIdlePopIns();
   isShowingCard = true;
@@ -337,13 +345,7 @@ function showReportCard(data) {
     rcTimeout(() => {
       container.innerHTML = "";
       isShowingCard = false;
-      // Restore nickname bar and ticker
-      if (nicknameBar) nicknameBar.style.display = "flex";
-      if (bottomTicker) bottomTicker.style.display = "flex";
-      startIdlePopIns();
-      if (typeof showAdScreen === "function") {
-        showAdScreen();
-      }
+      showAdScreen();
     }, 1000);
   }, 34000);
 }
@@ -763,6 +765,76 @@ function showMomJokePileOn(data) {
   }, 15000);
 }
 
+// --- Ad Screen ---
+
+function showAdScreen() {
+  // Clear main content
+  const container = document.getElementById("main-content");
+  if (container) container.innerHTML = "";
+
+  // Hide nickname bar, bottom ticker, and top banner
+  const nicknameBar = document.getElementById("nickname-bar");
+  const bottomTicker = document.querySelector(".bottom-ticker");
+  const topBanner = document.querySelector(".top-banner");
+  if (nicknameBar) nicknameBar.style.display = "none";
+  if (bottomTicker) bottomTicker.style.display = "none";
+  if (topBanner) topBanner.style.display = "none";
+
+  // Stop idle pop-ins
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  // Create full-screen overlay
+  const overlay = document.createElement("div");
+  overlay.className = "ad-screen";
+  overlay.id = "ad-screen";
+
+  const url = document.createElement("div");
+  url.className = "ad-url";
+  url.textContent = "SCIENCEANDFREEDOM.COM";
+
+  const tagline = document.createElement("div");
+  tagline.className = "ad-tagline";
+  tagline.textContent = "FACTS. FREEDOM. NO BS.";
+
+  overlay.appendChild(url);
+  overlay.appendChild(tagline);
+  document.body.appendChild(overlay);
+}
+
+function dismissAdScreen() {
+  const overlay = document.getElementById("ad-screen");
+  if (overlay) overlay.remove();
+}
+
+function returnToStandby() {
+  // Dismiss ad screen if showing
+  dismissAdScreen();
+
+  // Clear main content
+  const container = document.getElementById("main-content");
+  if (container) container.innerHTML = "";
+
+  // Restore top banner
+  const topBanner = document.querySelector(".top-banner");
+  if (topBanner) topBanner.style.display = "flex";
+
+  // Restore bottom ticker
+  const bottomTicker = document.querySelector(".bottom-ticker");
+  if (bottomTicker) bottomTicker.style.display = "flex";
+
+  // Hide nickname bar (standby = no active session)
+  const nicknameBar = document.getElementById("nickname-bar");
+  if (nicknameBar) nicknameBar.style.display = "none";
+
+  // Stop session timer
+  stopSessionTimer();
+
+  // Resume idle pop-ins
+  isShowingCard = false;
+  startIdlePopIns();
+}
+
 // --- Debug Keyboard Shortcuts ---
 document.addEventListener("keydown", (e) => {
   if (e.key === "d" || e.key === "D") {
@@ -789,6 +861,12 @@ document.addEventListener("keydown", (e) => {
       closer: "Today's debate brought to you by: Confirmation Bias",
       stats: { claimCount: 14, debunkedCount: 11, misleadingCount: 3, loopBreakerCount: 4, momJokeCount: 3 }
     });
+  }
+  if (e.key === "a" || e.key === "A") {
+    showAdScreen();
+  }
+  if (e.key === "Escape") {
+    returnToStandby();
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
