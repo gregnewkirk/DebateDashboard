@@ -6,7 +6,8 @@ const { WebSocketServer } = require('ws');
 const { analyzeTranscript } = require('./llm');
 const { trackTranscript, getRecentKeywords } = require('./repetition');
 const { flashLight } = require('./shelly');
-const { startSession, endSession, isActive, logEvent, incrementStat, getSession } = require('./session');
+const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname } = require('./session');
+const { generateNickname } = require('./nickname');
 
 const CONFIG = {
   PORT: process.env.PORT || 8080,
@@ -17,6 +18,7 @@ const CONFIG = {
 
 const PORT = CONFIG.PORT;
 const recentTopics = [];
+let claimsSinceLastNickname = 0;
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -121,6 +123,17 @@ wss.on('connection', (ws) => {
               } else if (verdict === 'MISLEADING') {
                 incrementStat('misleadingCount');
               }
+            }
+
+            // Nickname evolution: every 3 claims, generate a new nickname
+            claimsSinceLastNickname++;
+            if (claimsSinceLastNickname >= 3) {
+              claimsSinceLastNickname = 0;
+              generateNickname(getSession().allClaims, msg.text).then((newNickname) => {
+                updateNickname(newNickname);
+                broadcast(wss, { type: 'nickname_update', nickname: newNickname });
+                console.log(`[Nickname] Updated to: ${newNickname}`);
+              });
             }
 
             console.log('[Shelly] Flashing light for new fact-check');

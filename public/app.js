@@ -83,6 +83,15 @@ function connectWebSocket() {
         case "loop_breaker":
           showLoopBreaker(msg);
           break;
+        case "nickname_update":
+          updateNicknameDisplay(msg.nickname);
+          break;
+        case "session_start":
+          handleSessionStart();
+          break;
+        case "session_end":
+          handleSessionEnd(msg.data);
+          break;
         default:
           console.log("[WS] Unknown message type:", msg.type);
       }
@@ -99,6 +108,34 @@ function connectWebSocket() {
   ws.addEventListener("error", (err) => {
     console.error("[WS] Error:", err);
   });
+}
+
+// --- Nickname Display ---
+
+function updateNicknameDisplay(nickname) {
+  const bar = document.getElementById("nickname-bar");
+  const el = document.getElementById("nickname");
+  if (!bar || !el) return;
+
+  bar.style.display = "flex";
+  el.textContent = nickname;
+
+  // Slam-in animation
+  el.classList.remove("slam-in");
+  // Force reflow to restart animation
+  void el.offsetWidth;
+  el.classList.add("slam-in");
+}
+
+function handleSessionStart() {
+  const bar = document.getElementById("nickname-bar");
+  const el = document.getElementById("nickname");
+  if (bar) bar.style.display = "flex";
+  if (el) el.textContent = "CHALLENGER";
+}
+
+function handleSessionEnd(data) {
+  // Will be expanded in Task 5 for report card
 }
 
 // --- Stub Functions (implemented in later tasks) ---
