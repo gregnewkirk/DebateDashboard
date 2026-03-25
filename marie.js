@@ -124,7 +124,7 @@ RULES:
 // ============================================================
 
 // Stop command — kills TTS immediately
-const STOP_TRIGGERS = ['marie stop', 'stop marie', 'marie shut up', 'marie quiet'];
+const STOP_TRIGGERS = ['marie stop', 'stop marie', 'marie shut up', 'marie quiet', 'curie stop', 'stop curie', 'professor stop', 'stop professor'];
 
 // Science content triggers — Marie pulls from the 1298-item content library
 const SCIENCE_TRIGGERS = {
@@ -141,9 +141,12 @@ const PROMPT_TRIGGERS = ['debate prompts', 'what are the prompts', 'read the pro
 // Direct address — always triggers (includes Whisper misspellings of "Marie")
 const DIRECT_TRIGGERS = [
   'marie', 'hey marie', 'what do you think marie',
-  // Whisper misspellings of Marie
-  'barbra', 'barba', 'barbera', 'barber', 'barbaric',
-  'bar bar', 'barbar', 'barbaro', 'marie', 'marieh',
+  'curie', 'professor curie', 'madame curie', 'madam curie',
+  'hey curie', 'professor', 'hey professor',
+  // Whisper misspellings of Marie/Curie
+  'murray', 'mary', 'mari', 'maree', 'mori', 'marie',
+  'curry', 'curie', 'curi', 'queery', 'query', 'kuri',
+  'marie curie', 'mary curie', 'murray curie',
   // General address
   'what do you think', 'what say you', 'your thoughts',
   'talk to me', 'say something', 'what about you',

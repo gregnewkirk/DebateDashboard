@@ -170,7 +170,7 @@ async function transcribeChunk(wavPath) {
       '--output_format', 'txt',
       '--output_dir', outDir,
       '--fp16', 'False',
-      '--initial_prompt', 'Dr. Greg debates live with Marie Curie, the AI co-host. Marie fact-checks vaccines, flat earth, GMOs, evolution, climate change, MAHA, RFK, mRNA, VAERS, ivermectin, myocarditis, and conspiracy theories.',
+      '--initial_prompt', 'Dr. Greg debates live with Marie Curie, the AI co-host. Professor Curie, Marie, Curie. Marie fact-checks vaccines, flat earth, GMOs, evolution, climate change, MAHA, RFK, mRNA, VAERS, ivermectin, myocarditis, and conspiracy theories. Hey Marie. Hey Curie. Professor Curie.',
     ], {
       timeout: 30000,
       maxBuffer: 1024 * 1024,
