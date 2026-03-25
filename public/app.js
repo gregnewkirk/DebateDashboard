@@ -72,6 +72,86 @@ function connectWebSocket() {
         case "payment":
           showPaymentAlert(msg);
           break;
+        case "tts_ready":
+          console.log("[WS] tts_ready received:", msg.audioUrl);
+          if (msg.audioUrl) {
+            try {
+              Marie.speak(msg.audioUrl, msg.text || '');
+            } catch (err) {
+              console.error("[WS] Marie.speak FAILED:", err);
+            }
+          }
+          break;
+        case "marie_stop":
+          console.log("[WS] Marie STOP");
+          Marie.stop();
+          Marie.hideContainer();
+          window._promptCycleActive = false; // stop prompt cycle too
+          break;
+        case "start_prompt_cycle":
+          startPromptCycle();
+          break;
+        case "marie_speak":
+          console.log("[WS] marie_speak received:", msg.text?.substring(0, 50), msg.audioUrl);
+          if (typeof DevBar !== 'undefined') DevBar.logEvent('MARIE', msg.text?.substring(0, 60) || 'no text');
+          if (msg.audioUrl) {
+            try {
+              Marie.speak(msg.audioUrl, msg.text || '');
+            } catch (err) {
+              console.error("[WS] Marie.speak FAILED:", err);
+              if (typeof DevBar !== 'undefined') DevBar.logEvent('ERROR', err.message);
+            }
+          } else {
+            // Text-only fallback (TTS failed)
+            Marie.showContainer();
+            const speechEl = document.getElementById('marie-speech');
+            if (speechEl) speechEl.textContent = (msg.text || '').toUpperCase();
+            setTimeout(() => Marie.hideContainer(), 6000);
+          }
+          break;
+        // === NEW FEATURE MESSAGE HANDLERS ===
+        case "bingo_update":
+          updateBingoBoard(msg);
+          break;
+        case "bingo_hit":
+          animateBingoHit(msg);
+          break;
+        case "bingo_row":
+          showBingoComplete(msg);
+          break;
+        case "credibility_update":
+          updateCredibilityMeter(msg);
+          break;
+        case "mood_update":
+          updateMoodIndicator(msg);
+          break;
+        case "conspiracy_graph_update":
+          updateConspiracyGraph(msg);
+          break;
+        case "challenger_entrance":
+          showChallengerEntrance(msg);
+          break;
+        case "theme_change":
+          applyDynamicTheme(msg);
+          break;
+        case "prediction":
+          showPrediction(msg);
+          break;
+        case "audience_question":
+          showAudienceQuestion(msg);
+          break;
+        case "highlights":
+          showHighlights(msg);
+          break;
+        case "guest_scientist":
+          showGuestScientist(msg);
+          break;
+        case "quiz":
+          showQuiz(msg);
+          break;
+        case "quiz_reveal":
+          revealQuizAnswer(msg);
+          break;
         default:
           console.log("[WS] Unknown message type:", msg.type);
       }
@@ -148,6 +228,7 @@ function handleSessionStart() {
   // Stop idle pop-ins during animation
   stopIdlePopIns();
   isShowingCard = true;
+  SFX.sessionStart();
 
   const container = document.getElementById("main-content");
   if (container) clearContainer(container);
@@ -202,6 +283,7 @@ function showReportCard(data) {
   clearReportCardTimeouts();
   stopIdlePopIns();
   isShowingCard = true;
+  SFX.reportCard();
 
   const container = document.getElementById("main-content");
   if (!container) return;
@@ -309,6 +391,7 @@ function showReportCard(data) {
 function showFactCard(data) {
   stopIdlePopIns();
   isShowingCard = true;
+  SFX.factCheck();
 
   const container = document.getElementById("main-content");
   if (!container) return;
@@ -386,6 +469,7 @@ function showFactCard(data) {
   setTimeout(() => {
     verdictBlock.style.opacity = "";
     verdictBlock.classList.add("slam-in");
+    SFX.verdict();
   }, 300);
 
   setTimeout(() => {
@@ -422,6 +506,7 @@ function showFactCard(data) {
 function showLoopBreaker(data) {
   stopIdlePopIns();
   isShowingCard = true;
+  SFX.loopBreaker();
   const container = document.getElementById("main-content");
   if (!container) return;
   clearContainer(container);
@@ -589,7 +674,9 @@ function startSpeechRecognition() {
   recognition.addEventListener("result", (event) => {
     for (let i = event.resultIndex; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
-        transcriptBuffer += event.results[i][0].transcript + " ";
+        const finalText = event.results[i][0].transcript;
+        transcriptBuffer += finalText + " ";
+        onSpeechHeard(finalText);
         maybeFlush();
       }
     }
@@ -648,6 +735,9 @@ function showDebatePrompt() {
   el.textContent = prompt;
   container.appendChild(el);
 
+  // Prompts cycle SILENTLY on screen — Marie does NOT read them
+  // She only reads them when explicitly asked ("what are the debate prompts")
+
   // Display for 12 seconds, then fade out
   setTimeout(() => {
     el.classList.add("fade-out");
@@ -684,6 +774,7 @@ function showMomJokePileOn(data) {
   stopIdlePopIns();
   isShowingCard = true;
   momJokeCount++;
+  SFX.momJoke();
 
   const container = document.getElementById("main-content");
   if (!container) return;
@@ -800,65 +891,1155 @@ function returnToStandby() {
   startIdlePopIns();
 }
 
-// --- Payment Alert ---
+// --- Payment Alert (Full-Screen, Persistent Until Escape) ---
 
 function showPaymentAlert(data) {
-  // Gold flash overlay
+  SFX.donation();
+  // Full-screen gold flash
   const flashOverlay = document.createElement("div");
   flashOverlay.className = "payment-overlay";
   document.body.appendChild(flashOverlay);
 
   setTimeout(() => {
     if (flashOverlay.parentNode) flashOverlay.remove();
-  }, 500);
+  }, 600);
 
-  // Payment alert card
+  // Full-screen persistent donation alert
   const alertEl = document.createElement("div");
-  alertEl.className = "payment-alert bounce-in";
+  alertEl.className = "payment-fullscreen";
+  alertEl.id = "payment-fullscreen";
 
-  const sourceEl = document.createElement("div");
-  sourceEl.className = "payment-source";
-  sourceEl.textContent = (data.source || "DONATION").toUpperCase();
+  const thankYou = document.createElement("div");
+  thankYou.className = "payment-thankyou slam-in";
+  thankYou.textContent = "THANK YOU";
 
   const nameEl = document.createElement("div");
-  nameEl.className = "payment-name";
-  nameEl.textContent = data.name || "ANONYMOUS";
+  nameEl.className = "payment-name slam-in";
+  // First name only — protect donor privacy on livestream
+  nameEl.textContent = (data.name || "ANONYMOUS").trim().split(/\s+/)[0].toUpperCase();
 
   const amountEl = document.createElement("div");
-  amountEl.className = "payment-amount";
+  amountEl.className = "payment-amount bounce-in";
   amountEl.textContent = data.amount || "";
 
-  alertEl.appendChild(sourceEl);
+  const sourceEl = document.createElement("div");
+  sourceEl.className = "payment-source bounce-in";
+  sourceEl.textContent = "VIA " + (data.source || "DONATION").toUpperCase();
+
+  alertEl.appendChild(thankYou);
   alertEl.appendChild(nameEl);
   alertEl.appendChild(amountEl);
+  alertEl.appendChild(sourceEl);
 
   if (data.message) {
     const msgEl = document.createElement("div");
-    msgEl.className = "payment-message";
-    msgEl.textContent = data.message;
+    msgEl.className = "payment-message bounce-in";
+    msgEl.textContent = '"' + data.message + '"';
     alertEl.appendChild(msgEl);
   }
 
+  // Dismiss hint at bottom
+  const hint = document.createElement("div");
+  hint.className = "payment-dismiss-hint";
+  hint.textContent = "";
+  alertEl.appendChild(hint);
+
   document.body.appendChild(alertEl);
 
-  // Hold 8s, then fade out
+  // Hidden dismiss button at the very bottom — only you can see/reach it
+  const dismissBtn = document.createElement("div");
+  dismissBtn.className = "payment-dismiss-btn";
+  dismissBtn.textContent = "DISMISS";
+  dismissBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dismissPaymentAlert();
+  });
+  alertEl.appendChild(dismissBtn);
+
+  // Pulse animation on the amount — keeps it alive visually
   setTimeout(() => {
-    alertEl.classList.add("fade-out");
+    amountEl.classList.add("pulse");
+  }, 1500);
+
+  // NO auto-dismiss — persists until click, Escape, or page refresh
+}
+
+function dismissPaymentAlert() {
+  const el = document.getElementById("payment-fullscreen");
+  if (el) {
+    el.classList.add("fade-out");
     setTimeout(() => {
-      if (alertEl.parentNode) alertEl.remove();
+      if (el.parentNode) el.remove();
+    }, 500);
+  }
+}
+
+// --- Soundcheck / Pre-Show Test (press T) ---
+
+let soundcheckActive = false;
+let lastSpeechHeard = "";
+
+// Hook into speech recognition to capture test audio
+function onSpeechHeard(text) {
+  lastSpeechHeard = text;
+  // If soundcheck is showing, update the mic test live
+  const micPreview = document.getElementById("soundcheck-mic-preview");
+  if (micPreview) {
+    micPreview.textContent = '"' + text.slice(0, 80) + '..."';
+    micPreview.style.color = "var(--gold)";
+  }
+  const micStatus = document.getElementById("soundcheck-mic");
+  if (micStatus) {
+    micStatus.textContent = "✅ MIC: HEARING YOU";
+    micStatus.style.color = "#00ff00";
+  }
+}
+
+async function showSoundcheck() {
+  if (soundcheckActive) {
+    dismissSoundcheck();
+    return;
+  }
+
+  soundcheckActive = true;
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  // Soundcheck panel
+  const panel = document.createElement("div");
+  panel.className = "soundcheck-panel";
+  panel.id = "soundcheck-panel";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "soundcheck-header slam-in";
+  header.textContent = "SOUNDCHECK";
+  panel.appendChild(header);
+
+  const subheader = document.createElement("div");
+  subheader.className = "soundcheck-subheader";
+  subheader.textContent = "PRE-SHOW SYSTEM TEST";
+  panel.appendChild(subheader);
+
+  // Status lines — will be populated by results
+  const statusLines = [
+    { id: "soundcheck-ws", label: "WEBSOCKET", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-mic", label: "MICROPHONE", initial: "⏳ SPEAK TO TEST..." },
+    { id: "soundcheck-llm", label: "LLM (OPENCLAW)", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-red", label: "SHELLY RED", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-green", label: "SHELLY GREEN", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-email", label: "EMAIL MONITOR", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-cache", label: "FACT CACHE", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-mood", label: "MOOD SYSTEM", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-cred", label: "CREDIBILITY METER", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-bingo", label: "CONSPIRACY BINGO", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-theme", label: "THEME ENGINE", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-graph", label: "CONSPIRACY GRAPH", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-hall", label: "HALL OF SHAME", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-predict", label: "CLAIM PREDICTOR", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-learn", label: "LEARNING SYSTEM", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-guests", label: "GUEST SCIENTISTS", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-audience", label: "AUDIENCE SYSTEM", initial: "⏳ CHECKING..." },
+    { id: "soundcheck-highlights", label: "HIGHLIGHTS GEN", initial: "⏳ CHECKING..." },
+  ];
+
+  const statusContainer = document.createElement("div");
+  statusContainer.className = "soundcheck-statuses";
+
+  statusLines.forEach((line, i) => {
+    const row = document.createElement("div");
+    row.className = "soundcheck-row";
+    row.style.animationDelay = (i * 0.1) + "s";
+
+    const label = document.createElement("span");
+    label.className = "soundcheck-label";
+    label.textContent = line.label;
+
+    const status = document.createElement("span");
+    status.className = "soundcheck-status";
+    status.id = line.id;
+    status.textContent = line.initial;
+
+    row.appendChild(label);
+    row.appendChild(status);
+    statusContainer.appendChild(row);
+  });
+
+  panel.appendChild(statusContainer);
+
+  // Mic preview line
+  const micPreview = document.createElement("div");
+  micPreview.className = "soundcheck-mic-preview";
+  micPreview.id = "soundcheck-mic-preview";
+  micPreview.textContent = "(say something to test mic)";
+  panel.appendChild(micPreview);
+
+  // Test sequence status area
+  const testSection = document.createElement("div");
+  testSection.className = "soundcheck-test-section";
+  testSection.id = "soundcheck-test-section";
+  const testHeader = document.createElement("div");
+  testHeader.className = "soundcheck-test-header";
+  testHeader.textContent = "AUTOMATION TEST";
+  testSection.appendChild(testHeader);
+  const testLog = document.createElement("div");
+  testLog.className = "soundcheck-test-log";
+  testLog.id = "soundcheck-test-log";
+  testLog.textContent = "⏳ WAITING FOR CHECKS...";
+  testSection.appendChild(testLog);
+  panel.appendChild(testSection);
+
+  // Dismiss hint
+  const hint = document.createElement("div");
+  hint.className = "soundcheck-hint";
+  hint.textContent = "PRESS T AGAIN OR ESC TO CLOSE";
+  panel.appendChild(hint);
+
+  container.appendChild(panel);
+
+  // --- Run checks ---
+
+  // WebSocket — instant check
+  const wsEl = document.getElementById("soundcheck-ws");
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    wsEl.textContent = "✅ CONNECTED";
+    wsEl.style.color = "#00ff00";
+  } else {
+    wsEl.textContent = "❌ DISCONNECTED";
+    wsEl.style.color = "#ff4444";
+  }
+
+  // Mic — check server-side mic status (mic is on the server now, not browser)
+  const micEl = document.getElementById("soundcheck-mic");
+  try {
+    const statusRes = await fetch("/api/status");
+    const status = await statusRes.json();
+    const mic = status.mic || {};
+    if (mic.active) {
+      micEl.textContent = `✅ SERVER MIC: ${mic.mode || 'ACTIVE'} (${mic.transcripts} transcripts)`;
+      micEl.style.color = mic.transcripts > 0 ? "#00ff00" : "#ffdd00";
+      if (mic.lastHeard) {
+        const micPreview = document.getElementById("soundcheck-mic-preview");
+        if (micPreview) {
+          micPreview.textContent = '"' + mic.lastHeard + '"';
+          micPreview.style.color = "var(--gold)";
+        }
+      }
+    } else {
+      micEl.textContent = "❌ SERVER MIC NOT ACTIVE";
+      micEl.style.color = "#ff4444";
+    }
+  } catch {
+    micEl.textContent = "❌ CANNOT REACH SERVER";
+    micEl.style.color = "#ff4444";
+  }
+
+  // Server-side checks via /api/soundcheck
+  try {
+    const res = await fetch("/api/soundcheck");
+    const data = await res.json();
+
+    // LLM
+    const llmEl = document.getElementById("soundcheck-llm");
+    if (data.llm?.status === "ok") {
+      llmEl.textContent = "✅ " + data.llm.model.toUpperCase() + " (" + data.llm.latency_ms + "ms)";
+      llmEl.style.color = "#00ff00";
+    } else {
+      llmEl.textContent = "❌ " + (data.llm?.message || "UNREACHABLE");
+      llmEl.style.color = "#ff4444";
+    }
+
+    // Shelly Red
+    const redEl = document.getElementById("soundcheck-red");
+    if (data.shelly_red?.status === "ok") {
+      redEl.textContent = "✅ CONNECTED (" + data.shelly_red.ip + ")";
+      redEl.style.color = "#00ff00";
+    } else {
+      redEl.textContent = "❌ " + (data.shelly_red?.ip || "") + " UNREACHABLE";
+      redEl.style.color = "#ff4444";
+    }
+
+    // Shelly Green
+    const greenEl = document.getElementById("soundcheck-green");
+    if (data.shelly_green?.status === "ok") {
+      greenEl.textContent = "✅ CONNECTED (" + data.shelly_green.ip + ")";
+      greenEl.style.color = "#00ff00";
+    } else {
+      greenEl.textContent = "❌ " + (data.shelly_green?.ip || "") + " UNREACHABLE";
+      greenEl.style.color = "#ff4444";
+    }
+
+    // Email
+    const emailEl = document.getElementById("soundcheck-email");
+    if (data.email?.status === "configured") {
+      emailEl.textContent = "✅ " + data.email.user;
+      emailEl.style.color = "#00ff00";
+    } else {
+      emailEl.textContent = "⚠️ NOT CONFIGURED";
+      emailEl.style.color = "#ffdd00";
+    }
+
+    // Fact Cache
+    const cacheEl = document.getElementById("soundcheck-cache");
+    if (data.fact_cache?.status === "ok") {
+      cacheEl.textContent = "✅ " + data.fact_cache.categories + " TOPICS, " + data.fact_cache.cards + " CARDS";
+      cacheEl.style.color = "#00ff00";
+    } else {
+      cacheEl.textContent = "❌ NOT LOADED";
+      cacheEl.style.color = "#ff4444";
+    }
+
+    // === ALL 13 FEATURE SYSTEMS ===
+    const systems = [
+      { id: "soundcheck-mood", key: "mood", label: "MOOD SYSTEM", ok: d => `${d.label} (energy: ${d.energy})` },
+      { id: "soundcheck-cred", key: "credibility", label: "CREDIBILITY METER", ok: d => `${d.value}%` },
+      { id: "soundcheck-bingo", key: "bingo", label: "CONSPIRACY BINGO", ok: d => `${d.hits}/${d.squares} SQUARES` },
+      { id: "soundcheck-theme", key: "theme", label: "THEME ENGINE", ok: d => d.name || 'DEFAULT' },
+      { id: "soundcheck-graph", key: "conspiracy_graph", label: "CONSPIRACY GRAPH", ok: d => `${d.nodes} NODES, ${d.edges} EDGES` },
+      { id: "soundcheck-hall", key: "hall_of_shame", label: "HALL OF SHAME", ok: d => `${d.entries} PAST CHALLENGERS` },
+      { id: "soundcheck-predict", key: "predictor", label: "CLAIM PREDICTOR", ok: d => `${d.chains} CHAINS` },
+      { id: "soundcheck-learn", key: "learning", label: "LEARNING SYSTEM", ok: () => 'TRACKING' },
+      { id: "soundcheck-guests", key: "guests", label: "GUEST SCIENTISTS", ok: d => `${d.available} AVAILABLE` },
+      { id: "soundcheck-audience", key: "audience", label: "AUDIENCE PARTICIPATION", ok: () => 'READY' },
+      { id: "soundcheck-highlights", key: "highlights", label: "HIGHLIGHTS GENERATOR", ok: () => 'READY' },
+    ];
+
+    for (const sys of systems) {
+      const el = document.getElementById(sys.id);
+      if (!el) continue;
+      const sysData = data[sys.key];
+      if (sysData?.status === "ok") {
+        el.textContent = "✅ " + sys.ok(sysData);
+        el.style.color = "#00ff00";
+      } else {
+        el.textContent = "❌ NOT LOADED";
+        el.style.color = "#ff4444";
+      }
+    }
+  } catch (err) {
+    // Server unreachable
+    ["soundcheck-llm", "soundcheck-red", "soundcheck-green", "soundcheck-email", "soundcheck-cache"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = "❌ SERVER ERROR";
+        el.style.color = "#ff4444";
+      }
+    });
+  }
+
+  // --- AUTOMATION TEST SEQUENCE ---
+  await runAutomationTest();
+}
+
+async function runAutomationTest() {
+  const log = document.getElementById("soundcheck-test-log");
+  if (!log) return;
+
+  function logLine(text, color) {
+    const line = document.createElement("div");
+    line.textContent = text;
+    line.style.color = color || "#ffffff";
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  log.textContent = "";
+  logLine("▶ STARTING AUTOMATION TEST...", "var(--gold)");
+
+  // Step 1: Flash Shelly lights via server
+  logLine("⏳ FLASHING SHELLY LIGHTS...", "#ffdd00");
+  try {
+    const lightRes = await fetch("/api/soundcheck/test", { method: "POST" });
+    const lightData = await lightRes.json();
+
+    if (lightData.shelly_red === "flashed") {
+      logLine("✅ RED LIGHT FLASHED", "#00ff00");
+    } else {
+      logLine("❌ RED LIGHT: " + lightData.shelly_red, "#ff4444");
+    }
+    if (lightData.shelly_green === "flashed") {
+      logLine("✅ GREEN LIGHT FLASHED", "#00ff00");
+    } else {
+      logLine("❌ GREEN LIGHT: " + lightData.shelly_green, "#ff4444");
+    }
+    if (lightData.llm === "ok") {
+      logLine("✅ LLM RESPONSE: " + lightData.llm_latency_ms + "ms", "#00ff00");
+    } else {
+      logLine("❌ LLM: " + lightData.llm, "#ff4444");
+    }
+  } catch (err) {
+    logLine("❌ LIGHT TEST FAILED: " + err.message, "#ff4444");
+  }
+
+  // Step 2: Test fact card (3s display)
+  logLine("⏳ TEST FACT CARD IN 2s...", "#ffdd00");
+  await new Promise(r => setTimeout(r, 2000));
+
+  // Temporarily show a test card — but put soundcheck back after
+  const container = document.getElementById("main-content");
+  const soundcheckPanel = document.getElementById("soundcheck-panel");
+  if (soundcheckPanel) soundcheckPanel.style.display = "none";
+
+  showFactCard({
+    claim: "TEST: EARTH IS FLAT",
+    verdict: "FALSE",
+    fact: "SOUNDCHECK — IF YOU CAN READ THIS, CARDS ARE WORKING",
+    humor: "THIS IS A TEST. THIS IS ONLY A TEST.",
+    source: "SOUNDCHECK SYSTEM"
+  });
+
+  // Wait for card to display, then bring soundcheck back
+  await new Promise(r => setTimeout(r, 5000));
+
+  if (container) clearContainer(container);
+  if (soundcheckPanel) {
+    container.appendChild(soundcheckPanel);
+    soundcheckPanel.style.display = "";
+  }
+
+  // Step 3: Test payment popup (3s display)
+  logLine("✅ FACT CARD: RENDERED", "#00ff00");
+  logLine("⏳ TEST DONATION POPUP IN 2s...", "#ffdd00");
+  await new Promise(r => setTimeout(r, 2000));
+
+  showPaymentAlert({
+    source: "SOUNDCHECK",
+    name: "TEST DONOR",
+    amount: "$99.99",
+    message: "IF YOU CAN READ THIS, DONATIONS WORK"
+  });
+
+  await new Promise(r => setTimeout(r, 4000));
+  dismissPaymentAlert();
+
+  logLine("✅ DONATION POPUP: RENDERED", "#00ff00");
+  logLine("", "");
+  // Step 4: Sound effects test
+  logLine("⏳ TESTING SOUND EFFECTS...", "#ffdd00");
+  await SFX.testAll();
+  logLine("✅ SOUND EFFECTS: ALL PLAYED", "#00ff00");
+
+  // Step 5: Marie TTS test
+  logLine("", "");
+  logLine("⏳ TESTING MARIE TTS...", "#ffdd00");
+  try {
+    const rosRes = await fetch("/api/marie/test", { method: "POST" });
+    const rosData = await rosRes.json();
+    if (rosData.ok && rosData.audioUrl) {
+      logLine("✅ MARIE TTS: GENERATED " + rosData.audioUrl, "#00ff00");
+      logLine("⏳ PLAYING MARIE...", "#ffdd00");
+      // The server broadcast tts_ready which triggers Marie.speak via WebSocket
+      // But also play directly as backup
+      await Marie.speak(rosData.audioUrl, "CLAIM: VACCINES CAUSE AUTISM. VERDICT: DEBUNKED.");
+      logLine("✅ MARIE: SPOKE!", "#00ff00");
+    } else {
+      logLine("❌ MARIE TTS: " + (rosData.error || "FAILED"), "#ff4444");
+    }
+  } catch (err) {
+    logLine("❌ MARIE TTS: " + err.message, "#ff4444");
+  }
+
+  // Step 6: Marie conversation test
+  logLine("", "");
+  logLine("⏳ TESTING MARIE CONVERSATION...", "#ffdd00");
+  try {
+    const convRes = await fetch("/api/marie/speak", { method: "POST" });
+    const convData = await convRes.json();
+    if (convData.ok && convData.audioUrl) {
+      logLine("✅ MARIE SAYS: " + convData.text, "#00ff00");
+      await Marie.speak(convData.audioUrl, convData.text);
+      logLine("✅ MARIE CONVERSATION: WORKING", "#00ff00");
+    } else {
+      logLine("❌ MARIE CONVERSATION: " + (convData.error || "FAILED"), "#ff4444");
+    }
+  } catch (err) {
+    logLine("❌ MARIE CONVERSATION: " + err.message, "#ff4444");
+  }
+
+  logLine("", "");
+  logLine("✅ ALL TESTS COMPLETE", "#00ff00");
+  logLine("PRESS T OR ESC TO EXIT", "rgba(255,255,255,0.3)");
+}
+
+function dismissSoundcheck() {
+  soundcheckActive = false;
+  const container = document.getElementById("main-content");
+  if (container) clearContainer(container);
+  isShowingCard = false;
+  startIdlePopIns();
+}
+
+// --- Debate Prompt Cycle (Marie reads them) ---
+
+async function startPromptCycle() {
+  stopIdlePopIns();
+  isShowingCard = true;
+  window._promptCycleActive = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+
+  for (let i = 0; i < DEBATE_PROMPTS.length; i++) {
+    if (!window._promptCycleActive) break; // stopped by "marie stop"
+
+    const prompt = DEBATE_PROMPTS[i];
+    clearContainer(container);
+
+    // Show prompt full screen — BIG text
+    const el = document.createElement("div");
+    el.className = "debate-prompt slam-in";
+    el.textContent = prompt;
+    container.appendChild(el);
+
+    // Tell server to have Marie read this one (uses pre-cached TTS = instant)
+    fetch("/api/debate-prompt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    }).catch(() => {});
+
+    // Fast — 3 seconds per prompt, no dead air
+    await new Promise(r => setTimeout(r, 3000));
+
+    if (!window._promptCycleActive) break;
+
+    // Instant swap
+    el.classList.add("fade-out");
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  // Done cycling
+  window._promptCycleActive = false;
+  if (container) clearContainer(container);
+  isShowingCard = false;
+  startIdlePopIns();
+}
+
+// ===========================================
+// FEATURE #1: CONSPIRACY BINGO BOARD
+// ===========================================
+
+let bingoState = { squares: [], hits: [] };
+
+function initBingoBoard() {
+  let board = document.getElementById("bingo-board");
+  if (board) return board;
+  board = document.createElement("div");
+  board.id = "bingo-board";
+  board.className = "bingo-board";
+  document.body.appendChild(board);
+  return board;
+}
+
+function updateBingoBoard(data) {
+  bingoState = data;
+  const board = initBingoBoard();
+  board.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "bingo-header";
+  header.textContent = "CONSPIRACY BINGO";
+  board.appendChild(header);
+
+  const grid = document.createElement("div");
+  grid.className = "bingo-grid";
+
+  (data.squares || []).forEach((sq, i) => {
+    const cell = document.createElement("div");
+    cell.className = "bingo-cell" + ((data.hits || []).includes(i) ? " hit" : "");
+    cell.textContent = sq;
+    grid.appendChild(cell);
+  });
+
+  board.appendChild(grid);
+  board.style.display = "block";
+}
+
+function animateBingoHit(data) {
+  const cells = document.querySelectorAll(".bingo-cell");
+  if (cells[data.index]) {
+    cells[data.index].classList.add("hit", "slam-in");
+    SFX.factCheck();
+  }
+}
+
+function showBingoComplete(data) {
+  const board = document.getElementById("bingo-board");
+  if (!board) return;
+  const banner = document.createElement("div");
+  banner.className = "bingo-complete slam-in";
+  banner.textContent = "BINGO!";
+  board.appendChild(banner);
+  SFX.reportCard();
+}
+
+// ===========================================
+// FEATURE #2: CREDIBILITY METER
+// ===========================================
+
+let credibilityValue = 50;
+
+function initCredibilityMeter() {
+  let meter = document.getElementById("credibility-meter");
+  if (meter) return meter;
+  meter = document.createElement("div");
+  meter.id = "credibility-meter";
+  meter.className = "credibility-meter";
+  meter.innerHTML = `
+    <div class="cred-label">CREDIBILITY</div>
+    <div class="cred-bar-bg">
+      <div class="cred-bar-fill" id="cred-bar-fill" style="width:50%"></div>
+    </div>
+    <div class="cred-value" id="cred-value">50%</div>
+  `;
+  document.body.appendChild(meter);
+  return meter;
+}
+
+function updateCredibilityMeter(data) {
+  const meter = initCredibilityMeter();
+  const targetVal = Math.max(0, Math.min(100, data.value || 0));
+  const fill = document.getElementById("cred-bar-fill");
+  const valueEl = document.getElementById("cred-value");
+
+  // Animate the transition
+  const startVal = credibilityValue;
+  const diff = targetVal - startVal;
+  const duration = 1000;
+  const startTime = Date.now();
+
+  function animate() {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const current = Math.round(startVal + diff * eased);
+
+    if (fill) {
+      fill.style.width = current + "%";
+      // Color shifts: green > 60, yellow 30-60, red < 30
+      if (current > 60) fill.style.background = "#00cc44";
+      else if (current > 30) fill.style.background = "#FFD700";
+      else fill.style.background = "#BF0A30";
+    }
+    if (valueEl) valueEl.textContent = current + "%";
+
+    if (progress < 1) requestAnimationFrame(animate);
+    else credibilityValue = targetVal;
+  }
+  animate();
+
+  meter.style.display = "flex";
+
+  // Flash if dropped below threshold
+  if (targetVal < 20 && credibilityValue >= 20) {
+    meter.classList.add("shake");
+    setTimeout(() => meter.classList.remove("shake"), 500);
+  }
+}
+
+// ===========================================
+// FEATURE #3: MARIE MOOD INDICATOR
+// ===========================================
+
+const MOOD_COLORS = {
+  curious: "#4488ff",
+  amused: "#FFD700",
+  frustrated: "#BF0A30",
+  furious: "#ff0000",
+  impressed: "#00cc44",
+  bored: "#888888",
+  excited: "#ff8800",
+  fierce: "#ff00ff",
+};
+
+function updateMoodIndicator(data) {
+  let indicator = document.getElementById("mood-indicator");
+  if (!indicator) {
+    indicator = document.createElement("div");
+    indicator.id = "mood-indicator";
+    indicator.className = "mood-indicator";
+    document.body.appendChild(indicator);
+  }
+
+  const color = MOOD_COLORS[data.mood] || "#FFD700";
+  indicator.textContent = (data.label || data.mood || "").toUpperCase();
+  indicator.style.borderColor = color;
+  indicator.style.color = color;
+  indicator.style.display = "block";
+
+  // Pulse on mood change
+  indicator.classList.remove("bounce-in");
+  void indicator.offsetWidth;
+  indicator.classList.add("bounce-in");
+
+  // Update Marie avatar glow
+  const avatar = document.getElementById("marie-avatar");
+  if (avatar) {
+    avatar.style.filter = `drop-shadow(0 0 15px ${color})`;
+  }
+}
+
+// ===========================================
+// FEATURE #4: CONSPIRACY NETWORK GRAPH
+// ===========================================
+
+let graphCanvas = null;
+let graphNodes = [];
+let graphEdges = [];
+
+function updateConspiracyGraph(data) {
+  graphNodes = data.nodes || [];
+  graphEdges = data.edges || [];
+
+  if (!graphCanvas) {
+    graphCanvas = document.createElement("canvas");
+    graphCanvas.id = "conspiracy-graph-canvas";
+    graphCanvas.className = "conspiracy-graph-canvas";
+    graphCanvas.width = 1080;
+    graphCanvas.height = 400;
+    document.body.appendChild(graphCanvas);
+  }
+
+  drawGraph();
+}
+
+function drawGraph() {
+  if (!graphCanvas || graphNodes.length === 0) return;
+  const ctx = graphCanvas.getContext("2d");
+  ctx.clearRect(0, 0, 1080, 400);
+
+  // Position nodes in a circle
+  const cx = 540, cy = 200, radius = 150;
+  const positions = graphNodes.map((n, i) => {
+    const angle = (i / graphNodes.length) * Math.PI * 2 - Math.PI / 2;
+    return { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, label: n.label, weight: n.weight || 1 };
+  });
+
+  // Draw edges
+  ctx.strokeStyle = "rgba(191, 10, 48, 0.4)";
+  ctx.lineWidth = 2;
+  for (const edge of graphEdges) {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (from && to) {
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+    }
+  }
+
+  // Draw nodes
+  for (const pos of positions) {
+    const r = 8 + pos.weight * 4;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = "#BF0A30";
+    ctx.fill();
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#FFFFFF";
+    ctx.font = "bold 14px Oswald";
+    ctx.textAlign = "center";
+    ctx.fillText(pos.label, pos.x, pos.y - r - 6);
+  }
+
+  graphCanvas.style.display = "block";
+}
+
+// ===========================================
+// FEATURE #5: CHALLENGER ENTRANCE
+// ===========================================
+
+function showChallengerEntrance(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+  SFX.sessionStart();
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  // Full entrance screen
+  const entrance = document.createElement("div");
+  entrance.className = "challenger-entrance";
+
+  const announce = document.createElement("div");
+  announce.className = "entrance-announce bounce-in";
+  announce.textContent = "ENTERING THE ARENA";
+
+  const intro = document.createElement("div");
+  intro.className = "entrance-intro slam-in";
+  intro.textContent = data.intro || "A NEW CHALLENGER APPROACHES";
+
+  const nickname = document.createElement("div");
+  nickname.className = "entrance-nickname slam-in";
+  nickname.textContent = (data.nickname || "CHALLENGER").toUpperCase();
+
+  entrance.appendChild(announce);
+  container.appendChild(entrance);
+
+  // Stagger animations
+  setTimeout(() => entrance.appendChild(intro), 1500);
+  setTimeout(() => entrance.appendChild(nickname), 3000);
+
+  // Fade out after 6 seconds → session starts
+  setTimeout(() => {
+    entrance.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      handleSessionStart();
     }, 1000);
+  }, 6000);
+}
+
+// ===========================================
+// FEATURE #6: DYNAMIC THEMES
+// ===========================================
+
+function applyDynamicTheme(data) {
+  const root = document.documentElement;
+  if (data.primary) root.style.setProperty("--deep", data.primary);
+  if (data.accent) root.style.setProperty("--gold", data.accent);
+  if (data.danger) root.style.setProperty("--red", data.danger);
+
+  // Add theme class for CSS-level changes
+  document.body.className = document.body.className.replace(/theme-\S+/g, "");
+  if (data.name) document.body.classList.add("theme-" + data.name.toLowerCase().replace(/\s+/g, "-"));
+}
+
+// ===========================================
+// FEATURE #7: PREDICTIVE CLAIM DETECTION
+// ===========================================
+
+function showPrediction(data) {
+  let el = document.getElementById("prediction-banner");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "prediction-banner";
+    el.className = "prediction-banner";
+    document.body.appendChild(el);
+  }
+
+  el.textContent = "MARIE PREDICTS: " + (data.predicted || "").toUpperCase();
+  el.style.display = "block";
+  el.classList.remove("slide-in");
+  void el.offsetWidth;
+  el.classList.add("slide-in");
+
+  // Auto-hide after 8s
+  setTimeout(() => {
+    el.classList.add("fade-out");
+    setTimeout(() => {
+      el.style.display = "none";
+      el.classList.remove("fade-out");
+    }, 500);
   }, 8000);
+}
+
+// ===========================================
+// FEATURE #8: AUDIENCE PARTICIPATION
+// ===========================================
+
+function showAudienceQuestion(data) {
+  let overlay = document.getElementById("audience-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "audience-overlay";
+    overlay.className = "audience-overlay";
+    document.body.appendChild(overlay);
+  }
+
+  overlay.innerHTML = "";
+  const badge = document.createElement("div");
+  badge.className = "audience-badge bounce-in";
+  badge.textContent = "AUDIENCE ASKS";
+
+  const question = document.createElement("div");
+  question.className = "audience-question slam-in";
+  question.textContent = (data.question || "").toUpperCase();
+
+  const from = document.createElement("div");
+  from.className = "audience-from";
+  from.textContent = "— " + (data.from || "VIEWER").toUpperCase();
+
+  overlay.appendChild(badge);
+  overlay.appendChild(question);
+  overlay.appendChild(from);
+  overlay.style.display = "flex";
+
+  // Auto-hide after 12s
+  setTimeout(() => {
+    overlay.classList.add("fade-out");
+    setTimeout(() => {
+      overlay.style.display = "none";
+      overlay.classList.remove("fade-out");
+    }, 500);
+  }, 12000);
+}
+
+// ===========================================
+// FEATURE #9: POST-SHOW HIGHLIGHTS
+// ===========================================
+
+function showHighlights(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const panel = document.createElement("div");
+  panel.className = "highlights-panel";
+
+  const header = document.createElement("div");
+  header.className = "highlights-header slam-in";
+  header.textContent = "SHOW HIGHLIGHTS";
+  panel.appendChild(header);
+
+  const items = data.highlights || [];
+  items.forEach((item, i) => {
+    setTimeout(() => {
+      const line = document.createElement("div");
+      line.className = "highlights-item bounce-in";
+      line.textContent = item;
+      panel.appendChild(line);
+    }, 1500 + i * 1200);
+  });
+
+  // Best one-liner
+  if (data.bestLine) {
+    setTimeout(() => {
+      const best = document.createElement("div");
+      best.className = "highlights-best slam-in";
+      best.textContent = '"' + data.bestLine + '"';
+      panel.appendChild(best);
+    }, 1500 + items.length * 1200 + 2000);
+  }
+
+  container.appendChild(panel);
+
+  // Fade after all shown + 10s hold
+  const totalTime = 1500 + items.length * 1200 + 12000;
+  setTimeout(() => {
+    panel.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      showAdScreen();
+    }, 1000);
+  }, totalTime);
+}
+
+// ===========================================
+// FEATURE #10: GUEST SCIENTIST INTRO
+// ===========================================
+
+function showGuestScientist(data) {
+  let overlay = document.getElementById("guest-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "guest-overlay";
+    overlay.className = "guest-overlay";
+    document.body.appendChild(overlay);
+  }
+
+  overlay.innerHTML = "";
+
+  const badge = document.createElement("div");
+  badge.className = "guest-badge bounce-in";
+  badge.textContent = "CALLING IN BACKUP";
+
+  const name = document.createElement("div");
+  name.className = "guest-name slam-in";
+  name.textContent = (data.name || "").toUpperCase();
+
+  const title = document.createElement("div");
+  title.className = "guest-title";
+  title.textContent = (data.title || "").toUpperCase();
+
+  const specialty = document.createElement("div");
+  specialty.className = "guest-specialty";
+  specialty.textContent = (data.specialty || "").toUpperCase();
+
+  overlay.appendChild(badge);
+  setTimeout(() => overlay.appendChild(name), 1000);
+  setTimeout(() => overlay.appendChild(title), 2000);
+  setTimeout(() => overlay.appendChild(specialty), 2500);
+
+  overlay.style.display = "flex";
+  SFX.sessionStart();
+
+  // Auto-hide after 8s
+  setTimeout(() => {
+    overlay.classList.add("fade-out");
+    setTimeout(() => {
+      overlay.style.display = "none";
+      overlay.classList.remove("fade-out");
+    }, 500);
+  }, 8000);
+}
+
+// ===========================================
+// MARIE-HOSTED QUIZ SYSTEM
+// ===========================================
+
+let quizTimerInterval = null;
+let quizData = null;
+
+function showQuiz(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+  if (quizTimerInterval) clearInterval(quizTimerInterval);
+  quizData = data;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  // Quiz card
+  const card = document.createElement("div");
+  card.className = "quiz-card";
+  card.id = "quiz-card";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "quiz-header slam-in";
+  header.textContent = "POP QUIZ";
+  card.appendChild(header);
+
+  // Question
+  const question = document.createElement("div");
+  question.className = "quiz-question bounce-in";
+  question.textContent = (data.question || "").toUpperCase();
+  card.appendChild(question);
+
+  // Options
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "quiz-options";
+  const labels = ["A", "B", "C", "D"];
+  (data.options || []).forEach((opt, i) => {
+    const optEl = document.createElement("div");
+    optEl.className = "quiz-option bounce-in";
+    optEl.id = "quiz-option-" + i;
+    optEl.style.animationDelay = (0.3 + i * 0.15) + "s";
+    const labelEl = document.createElement("span");
+    labelEl.className = "quiz-option-label";
+    labelEl.textContent = labels[i];
+    const textEl = document.createElement("span");
+    textEl.className = "quiz-option-text";
+    textEl.textContent = (opt || "").toUpperCase();
+    optEl.appendChild(labelEl);
+    optEl.appendChild(textEl);
+    optionsContainer.appendChild(optEl);
+  });
+  card.appendChild(optionsContainer);
+
+  // Timer
+  const timerWrap = document.createElement("div");
+  timerWrap.className = "quiz-timer-wrap";
+  const timerBar = document.createElement("div");
+  timerBar.className = "quiz-timer-bar";
+  timerBar.id = "quiz-timer-bar";
+  timerWrap.appendChild(timerBar);
+  const timerText = document.createElement("div");
+  timerText.className = "quiz-timer-text";
+  timerText.id = "quiz-timer-text";
+  timerText.textContent = (data.seconds || 20) + "";
+  timerWrap.appendChild(timerText);
+  card.appendChild(timerWrap);
+
+  container.appendChild(card);
+
+  // Countdown
+  let remaining = data.seconds || 20;
+  const total = remaining;
+  quizTimerInterval = setInterval(() => {
+    remaining--;
+    const pct = (remaining / total) * 100;
+    const bar = document.getElementById("quiz-timer-bar");
+    const text = document.getElementById("quiz-timer-text");
+    if (bar) bar.style.width = pct + "%";
+    if (text) text.textContent = remaining;
+
+    // Color shift as time runs out
+    if (bar) {
+      if (remaining <= 5) bar.style.background = "var(--red)";
+      else if (remaining <= 10) bar.style.background = "var(--gold)";
+    }
+
+    // Timer shake at 5s
+    if (remaining === 5) {
+      const wrap = document.querySelector(".quiz-timer-wrap");
+      if (wrap) wrap.classList.add("shake");
+    }
+
+    if (remaining <= 0) {
+      clearInterval(quizTimerInterval);
+      quizTimerInterval = null;
+      // Server will send quiz_reveal
+    }
+  }, 1000);
+}
+
+function revealQuizAnswer(data) {
+  if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
+
+  const answerIndex = data.answer;
+  SFX.verdict();
+
+  // Highlight correct answer
+  const options = document.querySelectorAll(".quiz-option");
+  options.forEach((opt, i) => {
+    if (i === answerIndex) {
+      opt.classList.add("quiz-correct", "slam-in");
+    } else {
+      opt.classList.add("quiz-wrong");
+    }
+  });
+
+  // Show explanation
+  const card = document.getElementById("quiz-card");
+  if (card && data.explanation) {
+    const explainEl = document.createElement("div");
+    explainEl.className = "quiz-explanation bounce-in";
+    explainEl.textContent = (data.explanation || "").toUpperCase();
+    card.appendChild(explainEl);
+  }
+
+  // Hold 12 seconds then fade
+  setTimeout(() => {
+    if (card) card.classList.add("fade-out");
+    setTimeout(() => {
+      const container = document.getElementById("main-content");
+      if (container) clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 12000);
 }
 
 // --- Debug Keyboard Shortcuts ---
 document.addEventListener("keydown", (e) => {
   if (e.key === "d" || e.key === "D") {
-    showFactCard({
-      claim: "VACCINES CAUSE AUTISM",
-      verdict: "DEBUNKED",
-      fact: "THE ORIGINAL 1998 WAKEFIELD STUDY WAS RETRACTED FOR FRAUD. DOZENS OF STUDIES WITH MILLIONS OF CHILDREN FOUND ZERO LINK.",
-      humor: "IMAGINE TRUSTING SOMEONE WHO LOST THEIR MEDICAL LICENSE OVER THOUSANDS OF ACTUAL SCIENTISTS.",
-      source: "LANCET RETRACTION (2010); TAYLOR ET AL., VACCINE, 2014"
+    // Trigger through server so Marie TTS fires too
+    fetch("/api/marie/test", { method: "POST" }).catch(() => {
+      // Fallback to local-only if server unreachable
+      showFactCard({
+        claim: "VACCINES CAUSE AUTISM",
+        verdict: "DEBUNKED",
+        fact: "THE ORIGINAL 1998 WAKEFIELD STUDY WAS RETRACTED FOR FRAUD.",
+        humor: "IMAGINE TRUSTING SOMEONE WHO LOST THEIR MEDICAL LICENSE.",
+        source: "LANCET RETRACTION (2010)"
+      });
     });
   }
   if (e.key === "r" || e.key === "R") {
@@ -879,6 +2060,7 @@ document.addEventListener("keydown", (e) => {
     showAdScreen();
   }
   if (e.key === "Escape") {
+    dismissPaymentAlert();
     returnToStandby();
   }
   if (e.key === "p" || e.key === "P") {
@@ -889,6 +2071,28 @@ document.addEventListener("keydown", (e) => {
       amount: "$5.00",
       message: "LOVE THE STREAM!"
     });
+  }
+  if (e.key === "t" || e.key === "T") {
+    showSoundcheck();
+  }
+  if (e.key === "q" || e.key === "Q") {
+    // Trigger quiz via server (Marie hosts it)
+    fetch("/api/quiz", { method: "POST" }).catch(() => {});
+  }
+  if (e.key === "b" || e.key === "B") {
+    // Toggle bingo board visibility
+    const board = document.getElementById("bingo-board");
+    if (board) board.style.display = board.style.display === "none" ? "block" : "none";
+  }
+  if (e.key === "g" || e.key === "G") {
+    // Toggle conspiracy graph
+    const graph = document.getElementById("conspiracy-graph-canvas");
+    if (graph) graph.style.display = graph.style.display === "none" ? "block" : "none";
+  }
+  if (e.key === "c" || e.key === "C") {
+    // Toggle credibility meter
+    const meter = document.getElementById("credibility-meter");
+    if (meter) meter.style.display = meter.style.display === "none" ? "flex" : "none";
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
@@ -905,5 +2109,6 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
   startIdlePopIns();
-  startSpeechRecognition();
+  // Browser mic disabled — mic is server-side via UDP stream from Windows PC
+  // startSpeechRecognition();
 });

@@ -85,6 +85,35 @@
   <span>ACTIVE</span>
 </div>
 
+<!-- MARIE CURIE — AI CO-HOST: TOP-HALF TAKEOVER (Design #5) -->
+<div class="marie-container" id="marie-container" style="display:none;">
+  <!-- Gold accent line at very top -->
+  <div class="marie-top-accent"></div>
+
+  <!-- Tag line -->
+  <div class="marie-tag">MARIE CURIE</div>
+
+  <!-- DNA Helix Spectrogram — this IS her visual identity -->
+  <canvas class="marie-waveform" id="marie-canvas" width="960" height="280"></canvas>
+
+  <!-- Speech text — large, readable, centered -->
+  <div class="marie-speech" id="marie-speech"></div>
+
+  <!-- Subtle subtitle -->
+  <div class="marie-subtitle">AI CO-HOST</div>
+
+  <!-- Bottom gold border that separates Marie from dashboard content below -->
+  <div class="marie-bottom-border"></div>
+</div>
+
+<!-- DISMISS BUTTON (hidden from viewers, bottom of screen) -->
+<div class="dismiss-zone" id="dismiss-zone" onclick="dismissPaymentAlert(); returnToStandby();">
+  <span>TAP TO DISMISS</span>
+</div>
+
+<script src="sfx.js"></script>
+<script src="marie.js"></script>
 <script src="app.js"></script>
+<script src="devbar.js"></script>
 </body>
 </html>

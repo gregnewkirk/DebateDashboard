@@ -1,3 +1,14 @@
+/**
+ * Shelly Plug Light Automation
+ *
+ * Two Shelly Plugs, each powering a different colored light:
+ * - SHELLY_IP         = RED light (conspiracy/fact-check)
+ * - SHELLY_IP_PAYMENTS = GREEN light (donation received)
+ *
+ * Just plug a red bulb/strip into one, green into the other.
+ * The plugs only do on/off — the color comes from the bulb itself.
+ */
+
 const SHELLY_IP = process.env.SHELLY_IP || '192.168.1.100';
 const SHELLY_IP_PAYMENTS = process.env.SHELLY_IP_PAYMENTS || '192.168.1.101';
 
@@ -5,40 +16,94 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-async function flashLight(times = 3, intervalMs = 300) {
+async function shellyOn(ip) {
+  try {
+    await fetch(`http://${ip}/relay/0?turn=on`);
+  } catch {}
+}
+
+async function shellyOff(ip) {
+  try {
+    await fetch(`http://${ip}/relay/0?turn=off`);
+  } catch {}
+}
+
+let redTimer = null;
+let greenTimer = null;
+
+/**
+ * Flash RED plug — conspiracy detected.
+ */
+async function flashLight(times = 3, intervalMs = 1500) {
+  if (redTimer) clearTimeout(redTimer);
   try {
     for (let i = 0; i < times; i++) {
-      await fetch(`http://${SHELLY_IP}/relay/0?turn=on`);
+      await shellyOn(SHELLY_IP);
       await sleep(intervalMs);
-      await fetch(`http://${SHELLY_IP}/relay/0?turn=off`);
+      await shellyOff(SHELLY_IP);
       await sleep(intervalMs);
     }
-    // Leave light on after flashing
-    await fetch(`http://${SHELLY_IP}/relay/0?turn=on`);
+    await shellyOn(SHELLY_IP);
+    // Guaranteed off — clears any previous timer first
+    redTimer = setTimeout(() => {
+      shellyOff(SHELLY_IP);
+      redTimer = null;
+    }, 18000);
   } catch (err) {
-    console.warn('[Shelly] Failed to flash light:', err.message);
+    console.warn('[Shelly] Red light flash failed:', err.message);
   }
 }
 
-async function flashPaymentLight(times = 5, intervalMs = 200) {
-  // Same pattern but uses SHELLY_IP_PAYMENTS
-  // More flashes, faster interval — celebratory feel
+/**
+ * Flash GREEN plug — donation received.
+ */
+async function flashPaymentLight(times = 4, intervalMs = 1200) {
+  if (greenTimer) clearTimeout(greenTimer);
   try {
     for (let i = 0; i < times; i++) {
-      await fetch(`http://${SHELLY_IP_PAYMENTS}/relay/0?turn=on`);
+      await shellyOn(SHELLY_IP_PAYMENTS);
       await sleep(intervalMs);
-      await fetch(`http://${SHELLY_IP_PAYMENTS}/relay/0?turn=off`);
+      await shellyOff(SHELLY_IP_PAYMENTS);
       await sleep(intervalMs);
     }
-    await fetch(`http://${SHELLY_IP_PAYMENTS}/relay/0?turn=on`);
+    await shellyOn(SHELLY_IP_PAYMENTS);
+    greenTimer = setTimeout(() => {
+      shellyOff(SHELLY_IP_PAYMENTS);
+      greenTimer = null;
+    }, 15000);
   } catch (err) {
-    console.warn('[Shelly] Payment light flash failed:', err.message);
+    console.warn('[Shelly] Green light flash failed:', err.message);
   }
 }
 
+/**
+ * Flash BOTH — report card finale.
+ * Alternates red and green for dramatic effect.
+ */
 async function flashAllLights() {
-  // Flash BOTH lights simultaneously — for report card finale
-  await Promise.all([flashLight(5, 200), flashPaymentLight(5, 200)]);
+  try {
+    for (let i = 0; i < 6; i++) {
+      if (i % 2 === 0) {
+        await Promise.all([shellyOn(SHELLY_IP), shellyOff(SHELLY_IP_PAYMENTS)]);
+      } else {
+        await Promise.all([shellyOff(SHELLY_IP), shellyOn(SHELLY_IP_PAYMENTS)]);
+      }
+      await sleep(1200);
+    }
+    // End with both on
+    await Promise.all([shellyOn(SHELLY_IP), shellyOn(SHELLY_IP_PAYMENTS)]);
+  } catch (err) {
+    console.warn('[Shelly] Flash all failed:', err.message);
+  }
 }
 
-module.exports = { flashLight, flashPaymentLight, flashAllLights };
+/**
+ * Both lights off.
+ */
+async function lightsOff() {
+  if (redTimer) { clearTimeout(redTimer); redTimer = null; }
+  if (greenTimer) { clearTimeout(greenTimer); greenTimer = null; }
+  await Promise.all([shellyOff(SHELLY_IP), shellyOff(SHELLY_IP_PAYMENTS)]);
+}
+
+module.exports = { flashLight, flashPaymentLight, flashAllLights, lightsOff };

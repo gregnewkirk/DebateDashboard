@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>MARIE DISPLAY CONCEPTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --navy: #002868; --red: #BF0A30; --white: #FFFFFF;
+  --gold: #FFD700; --deep: #000e2a; --dark-navy: #001a44;
+}
+body {
+  font-family: 'Oswald', sans-serif;
+  background: #111;
+  color: var(--white);
+  text-transform: uppercase;
+}
+.concept {
+  width: 1080px;
+  height: 640px;
+  position: relative;
+  overflow: hidden;
+  margin: 20px auto;
+  border: 3px solid var(--gold);
+  background: var(--deep);
+}
+.concept-label {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--red);
+  color: white;
+  padding: 4px 16px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  z-index: 99;
+  border-radius: 4px;
+}
+
+/* Shared SVG for all concepts */
+svg.ros-svg {
+  filter: drop-shadow(0 0 20px rgba(255,215,0,0.5));
+}
+
+/* ============================================
+   CONCEPT 1: TOP BANNER — WIDE HORIZONTAL
+   ============================================ */
+.c1 {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 40px;
+  background: linear-gradient(180deg, var(--deep) 0%, rgba(0,14,42,0.97) 80%, transparent 100%);
+}
+.c1 .avatar { width: 200px; height: 200px; flex-shrink: 0; }
+.c1 .info { flex: 1; }
+.c1 .name { font-size: 48px; font-weight: 900; color: var(--gold); letter-spacing: 6px; }
+.c1 .sub { font-size: 18px; color: rgba(255,255,255,0.4); letter-spacing: 10px; }
+.c1 .waveform { width: 100%; height: 60px; background: rgba(255,215,0,0.1); border-radius: 8px; margin-top: 10px; display: flex; align-items: end; gap: 3px; padding: 8px; }
+.c1 .bar { width: 8px; background: var(--gold); border-radius: 2px; animation: wave 0.8s ease-in-out infinite; }
+.c1 .bar:nth-child(odd) { animation-delay: 0.2s; }
+.c1 .speech { font-size: 28px; font-weight: 700; margin-top: 12px; line-height: 1.3; }
+
+/* ============================================
+   CONCEPT 2: CENTERED PORTRAIT — MASSIVE
+   ============================================ */
+.c2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(180deg, var(--deep) 0%, rgba(0,14,42,0.97) 100%);
+}
+.c2 .avatar { width: 300px; height: 300px; }
+.c2 .name { font-size: 42px; font-weight: 900; color: var(--gold); letter-spacing: 8px; }
+.c2 .sub { font-size: 16px; color: rgba(255,255,255,0.3); letter-spacing: 12px; }
+.c2 .speech { font-size: 32px; font-weight: 700; text-align: center; max-width: 90%; }
+.c2 .ring { position: absolute; width: 340px; height: 340px; border: 3px solid var(--gold); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -65%); opacity: 0.2; animation: ring-pulse 2s ease-in-out infinite; }
+
+/* ============================================
+   CONCEPT 3: LEFT SIDEBAR — PERSISTENT
+   ============================================ */
+.c3 {
+  display: flex;
+}
+.c3 .sidebar {
+  width: 280px;
+  height: 100%;
+  background: rgba(0,14,42,0.95);
+  border-right: 3px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 15px;
+  gap: 10px;
+}
+.c3 .avatar { width: 220px; height: 220px; }
+.c3 .name { font-size: 28px; font-weight: 900; color: var(--gold); letter-spacing: 4px; }
+.c3 .sub { font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 8px; }
+.c3 .waveform-circle { width: 200px; height: 200px; border: 3px solid rgba(255,215,0,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.c3 .speech-sidebar { font-size: 18px; text-align: center; color: rgba(255,255,255,0.8); padding: 10px; line-height: 1.4; }
+.c3 .main-area { flex: 1; padding: 40px; display: flex; align-items: center; justify-content: center; }
+.c3 .fact-placeholder { font-size: 48px; font-weight: 900; color: var(--gold); letter-spacing: 6px; }
+
+/* ============================================
+   CONCEPT 4: BOTTOM TICKER — NEWS ANCHOR STYLE
+   ============================================ */
+.c4 {
+  display: flex;
+  flex-direction: column;
+}
+.c4 .main-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+.c4 .fact-placeholder { font-size: 52px; font-weight: 900; color: var(--gold); text-align: center; }
+.c4 .ticker {
+  height: 160px;
+  background: var(--navy);
+  border-top: 4px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 30px;
+}
+.c4 .avatar { width: 120px; height: 120px; flex-shrink: 0; }
+.c4 .ticker-content { flex: 1; }
+.c4 .ticker-name { font-size: 22px; color: var(--gold); letter-spacing: 6px; font-weight: 900; }
+.c4 .ticker-speech { font-size: 26px; font-weight: 700; line-height: 1.3; }
+.c4 .ticker-wave { display: flex; gap: 2px; align-items: end; height: 40px; }
+.c4 .bar { width: 4px; background: var(--gold); border-radius: 1px; }
+
+/* ============================================
+   CONCEPT 5: CIRCULAR ORB — FLOATING
+   ============================================ */
+.c5 { position: relative; }
+.c5 .orb {
+  position: absolute;
+  top: 40px; right: 40px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, var(--navy), var(--deep));
+  border: 4px solid var(--gold);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 0 60px rgba(255,215,0,0.2), inset 0 0 40px rgba(255,215,0,0.05);
+  animation: orb-float 3s ease-in-out infinite;
+}
+.c5 .avatar { width: 140px; height: 140px; }
+.c5 .orb-name { font-size: 18px; color: var(--gold); letter-spacing: 6px; font-weight: 900; }
+.c5 .orb-speech {
+  position: absolute;
+  bottom: 80px; left: 40px; right: 40px;
+  font-size: 30px; font-weight: 700;
+  text-align: center;
+  padding: 20px;
+  background: rgba(0,14,42,0.9);
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+}
+.c5 .main-area { padding: 80px 40px; }
+.c5 .fact-placeholder { font-size: 48px; font-weight: 900; color: var(--white); }
+
+/* ============================================
+   CONCEPT 6: DNA HELIX SPECTROGRAM
+   ============================================ */
+.c6 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: linear-gradient(180deg, var(--deep) 0%, var(--dark-navy) 100%);
+}
+.c6 .avatar { width: 260px; height: 260px; }
+.c6 .dna-wave {
+  width: 800px; height: 100px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+}
+.c6 .dna-bar { width: 6px; border-radius: 3px; background: var(--gold); }
+.c6 .dna-bar:nth-child(even) { background: var(--red); }
+.c6 .name { font-size: 40px; font-weight: 900; color: var(--gold); letter-spacing: 8px; }
+.c6 .speech { font-size: 28px; text-align: center; max-width: 85%; }
+
+/* ============================================
+   CONCEPT 7: SPLIT SCREEN — PHOTO 51 MOTIF
+   ============================================ */
+.c7 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+.c7 .left {
+  background: var(--deep);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-right: 4px solid var(--gold);
+}
+.c7 .avatar { width: 240px; height: 240px; }
+.c7 .name { font-size: 32px; color: var(--gold); letter-spacing: 6px; font-weight: 900; }
+.c7 .x-pattern {
+  position: absolute;
+  width: 100%; height: 100%;
+  opacity: 0.05;
+}
+.c7 .right {
+  background: var(--dark-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  gap: 20px;
+}
+.c7 .speech { font-size: 32px; font-weight: 700; text-align: center; line-height: 1.3; }
+.c7 .waveform { width: 90%; height: 60px; background: rgba(255,215,0,0.08); border-radius: 8px; }
+
+/* ============================================
+   CONCEPT 8: MINIMAL — JUST WAVEFORM + TEXT
+   ============================================ */
+.c8 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.c8 .mini-tag { font-size: 16px; color: var(--gold); letter-spacing: 12px; opacity: 0.5; }
+.c8 .big-wave {
+  width: 900px; height: 120px;
+  display: flex; gap: 3px; align-items: center; justify-content: center;
+}
+.c8 .bar { width: 8px; background: var(--gold); border-radius: 4px; }
+.c8 .speech { font-size: 40px; font-weight: 900; text-align: center; max-width: 85%; line-height: 1.2; }
+.c8 .credit { font-size: 16px; color: rgba(255,255,255,0.2); letter-spacing: 8px; }
+
+/* ============================================
+   CONCEPT 9: HUD OVERLAY — ALWAYS VISIBLE
+   ============================================ */
+.c9 { position: relative; }
+.c9 .hud-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 80px;
+  background: rgba(0,14,42,0.8);
+  border-bottom: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+}
+.c9 .avatar { width: 60px; height: 60px; }
+.c9 .hud-name { font-size: 20px; color: var(--gold); letter-spacing: 4px; font-weight: 900; }
+.c9 .hud-wave { flex: 1; height: 40px; display: flex; gap: 2px; align-items: end; }
+.c9 .bar { width: 3px; background: var(--gold); border-radius: 1px; }
+.c9 .hud-mood { font-size: 14px; color: #00ff88; letter-spacing: 4px; }
+.c9 .main-area { padding: 120px 40px 40px; display: flex; align-items: center; justify-content: center; }
+.c9 .speech-overlay {
+  position: absolute;
+  bottom: 60px; left: 60px; right: 60px;
+  font-size: 30px; font-weight: 700;
+  text-align: center;
+  padding: 16px;
+  background: rgba(0,14,42,0.85);
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+}
+
+/* ============================================
+   CONCEPT 10: HOLOGRAM — FULL SCREEN TAKEOVER
+   ============================================ */
+.c10 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: radial-gradient(ellipse at center, rgba(0,40,104,0.3) 0%, var(--deep) 70%);
+}
+.c10 .holo-ring { width: 380px; height: 380px; border: 2px solid rgba(255,215,0,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; animation: ring-pulse 3s ease-in-out infinite; }
+.c10 .holo-ring-inner { width: 340px; height: 340px; border: 1px solid rgba(255,215,0,0.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.c10 .avatar { width: 300px; height: 300px; filter: drop-shadow(0 0 40px rgba(255,215,0,0.4)); }
+.c10 .name { font-size: 50px; color: var(--gold); letter-spacing: 10px; font-weight: 900; text-shadow: 0 0 30px rgba(255,215,0,0.4); }
+.c10 .speech { font-size: 34px; text-align: center; max-width: 85%; font-weight: 700; }
+.c10 .scan-line { position: absolute; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent); animation: scan 2s linear infinite; }
+
+@keyframes wave { 0%,100%{height:20px} 50%{height:50px} }
+@keyframes orb-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes ring-pulse { 0%,100%{transform:translate(-50%,-65%) scale(1);opacity:0.2} 50%{transform:translate(-50%,-65%) scale(1.03);opacity:0.35} }
+@keyframes scan { 0%{top:0} 100%{top:100%} }
+</style>
+</head>
+<body>
+
+<!-- CONCEPT 1: TOP BANNER -->
+<div class="concept c1">
+  <div class="concept-label">1 — TOP BANNER</div>
+  <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><line x1="30" y1="20" x2="170" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><line x1="170" y1="20" x2="30" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L90 100 L100 95 L110 100 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700" letter-spacing="2">MARIE</text></svg></div>
+  <div class="info">
+    <div class="name">MARIE CURIE</div>
+    <div class="sub">AI CO-HOST</div>
+    <div class="waveform">
+      <div class="bar" style="height:30px"></div><div class="bar" style="height:45px"></div><div class="bar" style="height:20px"></div><div class="bar" style="height:50px"></div><div class="bar" style="height:35px"></div><div class="bar" style="height:55px"></div><div class="bar" style="height:25px"></div><div class="bar" style="height:40px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:50px"></div><div class="bar" style="height:20px"></div><div class="bar" style="height:45px"></div><div class="bar" style="height:35px"></div><div class="bar" style="height:55px"></div><div class="bar" style="height:28px"></div><div class="bar" style="height:42px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:48px"></div><div class="bar" style="height:22px"></div><div class="bar" style="height:38px"></div>
+    </div>
+    <div class="speech">THE ORIGINAL WAKEFIELD STUDY WAS RETRACTED FOR FRAUD. NEXT.</div>
+  </div>
+</div>
+
+<!-- CONCEPT 2: CENTERED PORTRAIT -->
+<div class="concept c2">
+  <div class="concept-label">2 — CENTERED PORTRAIT</div>
+  <div class="ring"></div>
+  <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><line x1="30" y1="20" x2="170" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><line x1="170" y1="20" x2="30" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L90 100 L100 95 L110 100 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700" letter-spacing="2">MARIE</text></svg></div>
+  <div class="name">MARIE CURIE</div>
+  <div class="sub">AI CO-HOST</div>
+  <div class="speech">CREDIBILITY LEVEL: FRISBEE SCIENCE.</div>
+</div>
+
+<!-- CONCEPT 3: LEFT SIDEBAR -->
+<div class="concept c3">
+  <div class="concept-label">3 — LEFT SIDEBAR</div>
+  <div class="sidebar">
+    <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L90 100 L100 95 L110 100 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700" letter-spacing="2">MARIE</text></svg></div>
+    <div class="name">MARIE</div>
+    <div class="sub">AI CO-HOST</div>
+    <div class="speech-sidebar">EVEN ANCIENT GREEKS FIGURED THIS OUT WITHOUT WIFI.</div>
+  </div>
+  <div class="main-area">
+    <div class="fact-placeholder">FACT CHECK CONTENT HERE</div>
+  </div>
+</div>
+
+<!-- CONCEPT 4: BOTTOM TICKER -->
+<div class="concept c4">
+  <div class="concept-label">4 — BOTTOM TICKER</div>
+  <div class="main-area"><div class="fact-placeholder">DEBUNKED</div></div>
+  <div class="ticker">
+    <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700">MARIE</text></svg></div>
+    <div class="ticker-content">
+      <div class="ticker-name">MARIE CURIE</div>
+      <div class="ticker-speech">THE WAKEFIELD STUDY WAS RETRACTED FOR FRAUD.</div>
+    </div>
+    <div class="ticker-wave">
+      <div class="bar" style="height:15px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:20px"></div><div class="bar" style="height:35px"></div><div class="bar" style="height:25px"></div><div class="bar" style="height:38px"></div><div class="bar" style="height:18px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONCEPT 5: FLOATING ORB -->
+<div class="concept c5">
+  <div class="concept-label">5 — FLOATING ORB</div>
+  <div class="orb">
+    <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/></svg></div>
+    <div class="orb-name">MARIE</div>
+  </div>
+  <div class="main-area"><div class="fact-placeholder" style="font-size:36px; color:var(--white);">FACT CHECK CONTENT</div></div>
+  <div class="orb-speech">PEER REVIEW ISN'T OPTIONAL.</div>
+</div>
+
+<!-- CONCEPT 6: DNA HELIX SPECTROGRAM -->
+<div class="concept c6">
+  <div class="concept-label">6 — DNA HELIX WAVE</div>
+  <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><line x1="30" y1="20" x2="170" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><line x1="170" y1="20" x2="30" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700">MARIE</text></svg></div>
+  <div class="dna-wave">
+    <div class="dna-bar" style="height:20px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:90px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:20px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:90px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:20px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:90px"></div><div class="dna-bar" style="height:80px"></div><div class="dna-bar" style="height:60px"></div><div class="dna-bar" style="height:40px"></div><div class="dna-bar" style="height:20px"></div>
+  </div>
+  <div class="name">MARIE CURIE</div>
+  <div class="speech">IMAGINE TRUSTING A YOUTUBE DOCUMENTARY OVER GENOMICS.</div>
+</div>
+
+<!-- CONCEPT 7: SPLIT SCREEN -->
+<div class="concept c7">
+  <div class="concept-label">7 — SPLIT SCREEN</div>
+  <div class="left">
+    <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><line x1="30" y1="20" x2="170" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><line x1="170" y1="20" x2="30" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700">MARIE</text></svg></div>
+    <div class="name">MARIE</div>
+  </div>
+  <div class="right">
+    <div class="waveform" style="display:flex;gap:3px;align-items:end;padding:8px;background:rgba(255,215,0,0.05);">
+      <div style="width:6px;height:30px;background:var(--gold);border-radius:2px;"></div><div style="width:6px;height:50px;background:var(--gold);border-radius:2px;"></div><div style="width:6px;height:35px;background:var(--gold);border-radius:2px;"></div><div style="width:6px;height:55px;background:var(--gold);border-radius:2px;"></div><div style="width:6px;height:25px;background:var(--gold);border-radius:2px;"></div><div style="width:6px;height:45px;background:var(--gold);border-radius:2px;"></div>
+    </div>
+    <div class="speech">SHIPS VANISH HULL-FIRST OVER THE HORIZON. OBSERVED FOR 2,500 YEARS.</div>
+  </div>
+</div>
+
+<!-- CONCEPT 8: MINIMAL WAVEFORM -->
+<div class="concept c8">
+  <div class="concept-label">8 — MINIMAL WAVEFORM</div>
+  <div class="mini-tag">MARIE CURIE</div>
+  <div class="big-wave">
+    <div class="bar" style="height:20px"></div><div class="bar" style="height:50px"></div><div class="bar" style="height:80px"></div><div class="bar" style="height:110px"></div><div class="bar" style="height:90px"></div><div class="bar" style="height:70px"></div><div class="bar" style="height:100px"></div><div class="bar" style="height:60px"></div><div class="bar" style="height:40px"></div><div class="bar" style="height:80px"></div><div class="bar" style="height:110px"></div><div class="bar" style="height:90px"></div><div class="bar" style="height:50px"></div><div class="bar" style="height:70px"></div><div class="bar" style="height:100px"></div><div class="bar" style="height:40px"></div><div class="bar" style="height:60px"></div><div class="bar" style="height:90px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:50px"></div>
+  </div>
+  <div class="speech">GPS, SATELLITE IMAGERY, AND TIME ZONES ALL REQUIRE A SPHERE.</div>
+  <div class="credit">AI CO-HOST</div>
+</div>
+
+<!-- CONCEPT 9: HUD OVERLAY -->
+<div class="concept c9">
+  <div class="concept-label">9 — HUD OVERLAY</div>
+  <div class="hud-top">
+    <div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/></svg></div>
+    <div class="hud-name">MARIE</div>
+    <div class="hud-wave">
+      <div class="bar" style="height:15px"></div><div class="bar" style="height:25px"></div><div class="bar" style="height:35px"></div><div class="bar" style="height:20px"></div><div class="bar" style="height:30px"></div><div class="bar" style="height:18px"></div><div class="bar" style="height:28px"></div><div class="bar" style="height:38px"></div><div class="bar" style="height:22px"></div>
+    </div>
+    <div class="hud-mood">AMUSED</div>
+  </div>
+  <div class="main-area"><div style="font-size:52px;font-weight:900;color:var(--gold);">FACT CHECK CONTENT</div></div>
+  <div class="speech-overlay">EVEN ANCIENT GREEKS FIGURED THIS OUT WITHOUT WIFI.</div>
+</div>
+
+<!-- CONCEPT 10: HOLOGRAM -->
+<div class="concept c10">
+  <div class="concept-label">10 — HOLOGRAM</div>
+  <div class="scan-line"></div>
+  <div class="holo-ring"><div class="holo-ring-inner"><div class="avatar"><svg class="ros-svg" viewBox="0 0 200 200"><circle cx="100" cy="85" r="75" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/><circle cx="100" cy="85" r="55" fill="none" stroke="#FFD700" stroke-width="1.5" opacity="0.2"/><line x1="30" y1="20" x2="170" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><line x1="170" y1="20" x2="30" y2="150" stroke="#FFD700" stroke-width="2" opacity="0.15"/><ellipse cx="100" cy="60" rx="28" ry="32" fill="#FFFFFF" stroke="#FFD700" stroke-width="3"/><path d="M72 55 Q70 30 85 25 Q100 20 115 25 Q130 30 128 55" fill="none" stroke="#FFD700" stroke-width="3"/><path d="M78 88 L90 100 L100 95 L110 100 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><path d="M78 88 L65 160 L135 160 L122 88" fill="none" stroke="#FFFFFF" stroke-width="3"/><rect x="55" y="170" width="90" height="24" rx="4" fill="#002868" stroke="#FFD700" stroke-width="2"/><text x="100" y="187" text-anchor="middle" fill="#FFD700" font-family="Oswald" font-size="14" font-weight="700">MARIE</text></svg></div></div></div>
+  <div class="name">MARIE CURIE</div>
+  <div class="speech">SCIENCE CHOSE THE EMOJI WISELY.</div>
+</div>
+
+</body>
+</html>

@@ -1,5 +1,5 @@
-const LLM_URL = 'http://localhost:3000/v1/chat/completions';
-const MODEL = 'qwen2.5';
+const LLM_URL = process.env.LLM_URL || 'http://localhost:3000/v1/chat/completions';
+const MODEL = process.env.LLM_MODEL || 'nemotron-3-nan-4b';
 const TEMPERATURE = 0.8;
 
 const SYSTEM_PROMPT = `You are a real-time fact-checker for live debates. Analyze transcripts for anti-science claims about: vaccines, evolution, climate change, COVID, GMOs.

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>MARIE V2 — SPECTROGRAM IDENTITY</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --navy: #002868; --red: #BF0A30; --white: #FFFFFF;
+  --gold: #FFD700; --deep: #000e2a; --dark-navy: #001a44;
+}
+body {
+  font-family: 'Oswald', sans-serif;
+  background: #111;
+  color: var(--white);
+  text-transform: uppercase;
+}
+.concept {
+  width: 1080px;
+  height: 1920px;
+  position: relative;
+  overflow: hidden;
+  margin: 40px auto;
+  border: 3px solid var(--gold);
+  background: var(--deep);
+}
+.concept-label {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--red);
+  color: white;
+  padding: 6px 20px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  z-index: 99;
+  border-radius: 4px;
+}
+
+/* ============================================
+   CONCEPT A: SPECTROGRAM-AS-IDENTITY
+   The waveform IS Marie. DNA double-helix
+   shaped audio visualizer. Fact check card
+   below with her commentary integrated.
+   ============================================ */
+
+.ca .marie-zone {
+  width: 1080px;
+  height: 360px;
+  background: linear-gradient(180deg, var(--deep) 0%, rgba(0,14,42,0.97) 85%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* DNA-shaped spectrogram */
+.ca .dna-spec {
+  width: 900px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.ca .spec-strand {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  position: absolute;
+}
+
+.ca .spec-strand.top { top: 10px; }
+.ca .spec-strand.bottom { bottom: 10px; }
+
+.ca .spec-bar {
+  width: 8px;
+  border-radius: 4px;
+  transition: height 0.15s ease;
+}
+
+.ca .spec-strand.top .spec-bar { background: var(--gold); }
+.ca .spec-strand.bottom .spec-bar { background: var(--red); opacity: 0.7; }
+
+/* Connecting rungs between strands (like DNA base pairs) */
+.ca .spec-rungs {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+}
+.ca .rung {
+  width: 2px;
+  height: 40px;
+  background: rgba(255,215,0,0.12);
+  transform: rotate(15deg);
+}
+.ca .rung:nth-child(even) { transform: rotate(-15deg); height: 35px; }
+
+.ca .ros-tag {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 12px;
+  opacity: 0.6;
+}
+
+.ca .ros-speech {
+  font-size: 36px;
+  font-weight: 800;
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.25;
+  color: var(--white);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Fact check card below Marie */
+.ca .fact-zone {
+  padding: 30px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ca .claim-bar {
+  background: var(--red);
+  padding: 20px 30px;
+  border-left: 8px solid var(--gold);
+}
+.ca .claim-label { font-size: 20px; color: var(--gold); letter-spacing: 8px; font-weight: 700; }
+.ca .claim-text { font-size: 42px; font-weight: 900; margin-top: 8px; }
+
+.ca .verdict-big {
+  font-size: 100px;
+  font-weight: 900;
+  text-align: center;
+  color: var(--red);
+  letter-spacing: 12px;
+  text-shadow: 0 0 40px rgba(191,10,48,0.3);
+  padding: 20px 0;
+}
+
+.ca .evidence-section {
+  display: flex;
+  gap: 20px;
+}
+
+.ca .evidence-main {
+  flex: 2;
+  background: rgba(0,40,104,0.3);
+  border: 3px solid rgba(255,215,0,0.2);
+  border-radius: 8px;
+  padding: 24px;
+}
+.ca .evidence-label { font-size: 18px; color: var(--gold); letter-spacing: 6px; margin-bottom: 8px; }
+.ca .evidence-text { font-size: 30px; font-weight: 700; line-height: 1.3; }
+
+.ca .marie-commentary {
+  flex: 1;
+  background: rgba(255,215,0,0.05);
+  border: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ca .rc-label { font-size: 16px; color: var(--gold); letter-spacing: 6px; }
+.ca .rc-text { font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.3; font-style: italic; }
+
+.ca .citation-bar {
+  background: rgba(0,14,42,0.8);
+  border: 2px solid rgba(255,215,0,0.15);
+  border-radius: 6px;
+  padding: 16px 24px;
+}
+.ca .cite-label { font-size: 14px; color: var(--gold); letter-spacing: 6px; margin-bottom: 6px; }
+.ca .cite-text { font-size: 20px; color: rgba(255,255,255,0.7); line-height: 1.4; font-weight: 500; }
+.ca .cite-doi { font-size: 16px; color: rgba(255,215,0,0.5); margin-top: 4px; }
+
+.ca .humor-bar {
+  background: rgba(191,10,48,0.15);
+  border-left: 6px solid var(--red);
+  padding: 16px 24px;
+  font-size: 28px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+}
+
+/* ============================================
+   CONCEPT B: PHOTO 51 X-RAY SPECTROGRAM
+   The spectrogram forms an X pattern (like
+   the famous Photo 51). Minimal, scientific.
+   ============================================ */
+
+.cb .marie-zone {
+  width: 1080px;
+  height: 400px;
+  background: linear-gradient(180deg, var(--deep) 0%, rgba(0,14,42,0.97) 85%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+}
+
+.cb .x-spec {
+  width: 400px;
+  height: 280px;
+  position: relative;
+}
+
+/* X-pattern formed by audio bars */
+.cb .x-arm {
+  position: absolute;
+  display: flex;
+  gap: 3px;
+  align-items: end;
+}
+
+.cb .x-arm.tl { top: 0; left: 0; transform: rotate(-45deg); transform-origin: bottom left; }
+.cb .x-arm.tr { top: 0; right: 0; transform: rotate(45deg); transform-origin: bottom right; }
+.cb .x-arm.bl { bottom: 0; left: 0; transform: rotate(45deg); transform-origin: top left; }
+.cb .x-arm.br { bottom: 0; right: 0; transform: rotate(-45deg); transform-origin: top right; }
+
+.cb .x-bar {
+  width: 6px;
+  border-radius: 3px;
+  background: var(--gold);
+  opacity: 0.7;
+}
+
+/* Central glow */
+.cb .x-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.4), transparent);
+}
+
+.cb .ros-tag {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 14px;
+  opacity: 0.5;
+}
+.cb .ros-sub { font-size: 14px; color: rgba(255,255,255,0.2); letter-spacing: 10px; }
+.cb .ros-speech {
+  font-size: 34px;
+  font-weight: 800;
+  text-align: center;
+  max-width: 85%;
+  line-height: 1.25;
+  padding: 0 40px;
+}
+
+.cb .fact-zone { padding: 30px 40px; display: flex; flex-direction: column; gap: 20px; }
+.cb .claim-bar { background: var(--red); padding: 20px 30px; border-left: 8px solid var(--gold); }
+.cb .claim-label { font-size: 20px; color: var(--gold); letter-spacing: 8px; }
+.cb .claim-text { font-size: 42px; font-weight: 900; margin-top: 8px; }
+.cb .verdict-big { font-size: 100px; font-weight: 900; text-align: center; color: var(--red); letter-spacing: 12px; padding: 10px 0; }
+.cb .evidence-text { font-size: 30px; font-weight: 700; line-height: 1.3; padding: 0 20px; }
+.cb .citation-bar { background: rgba(0,14,42,0.8); border: 2px solid rgba(255,215,0,0.15); border-radius: 6px; padding: 16px 24px; }
+.cb .cite-label { font-size: 14px; color: var(--gold); letter-spacing: 6px; margin-bottom: 6px; }
+.cb .cite-text { font-size: 20px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+
+/* ============================================
+   CONCEPT C: PULSE RING — HEARTBEAT STYLE
+   Concentric rings that pulse with audio.
+   Clean, modern, almost medical monitor.
+   ============================================ */
+
+.cc .marie-zone {
+  width: 1080px;
+  height: 320px;
+  background: linear-gradient(180deg, var(--deep) 0%, rgba(0,14,42,0.97) 85%, transparent 100%);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 0 40px;
+  position: relative;
+}
+
+.cc .pulse-rings {
+  width: 240px;
+  height: 240px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.cc .ring {
+  position: absolute;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.cc .ring-1 { width: 240px; height: 240px; opacity: 0.15; animation: pulse-ring 2s ease-in-out infinite; }
+.cc .ring-2 { width: 190px; height: 190px; opacity: 0.25; animation: pulse-ring 2s ease-in-out 0.3s infinite; }
+.cc .ring-3 { width: 140px; height: 140px; opacity: 0.4; animation: pulse-ring 2s ease-in-out 0.6s infinite; }
+.cc .ring-core {
+  position: absolute;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--gold), transparent);
+  opacity: 0.6;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse-ring 1s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.08); }
+}
+
+.cc .info-panel { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.cc .ros-tag { font-size: 20px; color: var(--gold); letter-spacing: 10px; }
+.cc .ecg-line { width: 100%; height: 50px; border-bottom: 2px solid rgba(255,215,0,0.15); position: relative; overflow: hidden; }
+.cc .ecg-trace { position: absolute; bottom: 0; height: 100%; width: 100%; }
+.cc .ros-speech { font-size: 32px; font-weight: 800; line-height: 1.25; }
+
+.cc .fact-zone { padding: 20px 40px; display: flex; flex-direction: column; gap: 16px; }
+.cc .claim-bar { background: var(--red); padding: 16px 24px; border-left: 8px solid var(--gold); }
+.cc .claim-label { font-size: 18px; color: var(--gold); letter-spacing: 8px; }
+.cc .claim-text { font-size: 38px; font-weight: 900; margin-top: 6px; }
+.cc .verdict-big { font-size: 90px; font-weight: 900; text-align: center; color: var(--red); letter-spacing: 10px; }
+
+.cc .two-col { display: flex; gap: 16px; }
+.cc .col-evidence { flex: 3; background: rgba(0,40,104,0.3); border: 3px solid rgba(255,215,0,0.2); border-radius: 8px; padding: 20px; }
+.cc .col-marie { flex: 2; background: rgba(255,215,0,0.05); border: 3px solid var(--gold); border-radius: 8px; padding: 20px; }
+.cc .col-label { font-size: 16px; color: var(--gold); letter-spacing: 6px; margin-bottom: 8px; }
+.cc .col-text-lg { font-size: 28px; font-weight: 700; line-height: 1.3; }
+.cc .col-text-gold { font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.3; font-style: italic; }
+
+.cc .citation-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.cc .cite-box {
+  flex: 1;
+  background: rgba(0,14,42,0.8);
+  border: 2px solid rgba(255,215,0,0.15);
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+.cc .cite-journal { font-size: 16px; color: var(--gold); font-weight: 700; }
+.cc .cite-detail { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+
+.cc .humor-strip {
+  background: rgba(191,10,48,0.15);
+  border-left: 6px solid var(--red);
+  padding: 14px 20px;
+  font-size: 26px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+}
+
+</style>
+</head>
+<body>
+
+<!-- CONCEPT A: DNA SPECTROGRAM + INTEGRATED FACT CHECK -->
+<div class="concept ca">
+  <div class="concept-label">A — DNA SPECTROGRAM</div>
+
+  <div class="marie-zone">
+    <div class="ros-tag">MARIE CURIE</div>
+    <div class="dna-spec">
+      <div class="spec-rungs">
+        <div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div><div class="rung"></div>
+      </div>
+      <div class="spec-strand top" style="display:flex;gap:5px;align-items:end;">
+        <div class="spec-bar" style="height:20px"></div><div class="spec-bar" style="height:35px"></div><div class="spec-bar" style="height:55px"></div><div class="spec-bar" style="height:75px"></div><div class="spec-bar" style="height:90px"></div><div class="spec-bar" style="height:80px"></div><div class="spec-bar" style="height:60px"></div><div class="spec-bar" style="height:45px"></div><div class="spec-bar" style="height:30px"></div><div class="spec-bar" style="height:50px"></div><div class="spec-bar" style="height:70px"></div><div class="spec-bar" style="height:85px"></div><div class="spec-bar" style="height:95px"></div><div class="spec-bar" style="height:75px"></div><div class="spec-bar" style="height:55px"></div><div class="spec-bar" style="height:40px"></div><div class="spec-bar" style="height:25px"></div><div class="spec-bar" style="height:45px"></div><div class="spec-bar" style="height:65px"></div><div class="spec-bar" style="height:80px"></div><div class="spec-bar" style="height:90px"></div><div class="spec-bar" style="height:70px"></div><div class="spec-bar" style="height:50px"></div><div class="spec-bar" style="height:35px"></div><div class="spec-bar" style="height:20px"></div>
+      </div>
+      <div class="spec-strand bottom" style="display:flex;gap:5px;align-items:start;">
+        <div class="spec-bar" style="height:25px"></div><div class="spec-bar" style="height:40px"></div><div class="spec-bar" style="height:60px"></div><div class="spec-bar" style="height:80px"></div><div class="spec-bar" style="height:70px"></div><div class="spec-bar" style="height:50px"></div><div class="spec-bar" style="height:35px"></div><div class="spec-bar" style="height:55px"></div><div class="spec-bar" style="height:75px"></div><div class="spec-bar" style="height:90px"></div><div class="spec-bar" style="height:85px"></div><div class="spec-bar" style="height:65px"></div><div class="spec-bar" style="height:45px"></div><div class="spec-bar" style="height:30px"></div><div class="spec-bar" style="height:50px"></div><div class="spec-bar" style="height:70px"></div><div class="spec-bar" style="height:85px"></div><div class="spec-bar" style="height:75px"></div><div class="spec-bar" style="height:55px"></div><div class="spec-bar" style="height:40px"></div><div class="spec-bar" style="height:25px"></div><div class="spec-bar" style="height:45px"></div><div class="spec-bar" style="height:65px"></div><div class="spec-bar" style="height:80px"></div><div class="spec-bar" style="height:30px"></div>
+      </div>
+    </div>
+    <div class="ros-speech">"THE ORIGINAL WAKEFIELD STUDY WAS RETRACTED FOR FRAUD. NEXT."</div>
+  </div>
+
+  <div class="fact-zone">
+    <div class="claim-bar">
+      <div class="claim-label">CLAIM</div>
+      <div class="claim-text">VACCINES CAUSE AUTISM</div>
+    </div>
+
+    <div class="verdict-big">DEBUNKED</div>
+
+    <div class="evidence-section">
+      <div class="evidence-main">
+        <div class="evidence-label">EVIDENCE</div>
+        <div class="evidence-text">THE 1998 STUDY BY ANDREW WAKEFIELD WAS RETRACTED BY THE LANCET IN 2010. WAKEFIELD LOST HIS MEDICAL LICENSE. OVER 1.2 MILLION CHILDREN STUDIED — ZERO LINK FOUND.</div>
+      </div>
+      <div class="marie-commentary">
+        <div class="rc-label">MARIE SAYS</div>
+        <div class="rc-text">"IMAGINE TRUSTING SOMEONE WHO LOST THEIR MEDICAL LICENSE OVER THOUSANDS OF ACTUAL SCIENTISTS."</div>
+      </div>
+    </div>
+
+    <div class="citation-bar">
+      <div class="cite-label">WORKS CITED</div>
+      <div class="cite-text">Taylor LE, Swerdfeger AL, Eslick GD. "Vaccines are not associated with autism: An evidence-based meta-analysis." Vaccine. 2014;32(29):3623-3629.</div>
+      <div class="cite-doi">DOI: 10.1016/j.vaccine.2014.04.085 | PMID: 24814559</div>
+    </div>
+
+    <div class="humor-bar">"CREDIBILITY LEVEL: FRISBEE SCIENCE" — MARIE</div>
+  </div>
+</div>
+
+<!-- CONCEPT B: PHOTO 51 X-RAY PATTERN -->
+<div class="concept cb">
+  <div class="concept-label">B — PHOTO 51 X-RAY</div>
+
+  <div class="marie-zone">
+    <div class="x-spec">
+      <div class="x-arm tl" style="display:flex;gap:4px;align-items:end;">
+        <div class="x-bar" style="height:15px"></div><div class="x-bar" style="height:30px"></div><div class="x-bar" style="height:50px"></div><div class="x-bar" style="height:70px"></div><div class="x-bar" style="height:85px"></div><div class="x-bar" style="height:100px"></div><div class="x-bar" style="height:80px"></div>
+      </div>
+      <div class="x-arm tr" style="display:flex;gap:4px;align-items:end;">
+        <div class="x-bar" style="height:80px"></div><div class="x-bar" style="height:100px"></div><div class="x-bar" style="height:85px"></div><div class="x-bar" style="height:70px"></div><div class="x-bar" style="height:50px"></div><div class="x-bar" style="height:30px"></div><div class="x-bar" style="height:15px"></div>
+      </div>
+      <div class="x-arm bl" style="display:flex;gap:4px;align-items:start;">
+        <div class="x-bar" style="height:15px"></div><div class="x-bar" style="height:30px"></div><div class="x-bar" style="height:50px"></div><div class="x-bar" style="height:70px"></div><div class="x-bar" style="height:85px"></div><div class="x-bar" style="height:100px"></div><div class="x-bar" style="height:80px"></div>
+      </div>
+      <div class="x-arm br" style="display:flex;gap:4px;align-items:start;">
+        <div class="x-bar" style="height:80px"></div><div class="x-bar" style="height:100px"></div><div class="x-bar" style="height:85px"></div><div class="x-bar" style="height:70px"></div><div class="x-bar" style="height:50px"></div><div class="x-bar" style="height:30px"></div><div class="x-bar" style="height:15px"></div>
+      </div>
+      <div class="x-center"></div>
+    </div>
+    <div class="ros-tag">MARIE CURIE</div>
+    <div class="ros-sub">PHOTO 51 AI CO-HOST</div>
+    <div class="ros-speech">"SHIPS VANISH HULL-FIRST OVER THE HORIZON. OBSERVED FOR 2,500 YEARS."</div>
+  </div>
+
+  <div class="fact-zone">
+    <div class="claim-bar">
+      <div class="claim-label">CLAIM</div>
+      <div class="claim-text">EARTH IS FLAT</div>
+    </div>
+    <div class="verdict-big">FALSE</div>
+    <div class="evidence-text">EARTH IS AN OBLATE SPHEROID — CONFIRMED BY EVERY SPACE AGENCY ON EARTH. GPS, SATELLITE IMAGERY, AND TIME ZONES ALL REQUIRE A SPHERE.</div>
+    <div class="citation-bar">
+      <div class="cite-label">WORKS CITED</div>
+      <div class="cite-text">Eratosthenes of Cyrene, 240 BCE — First measurement of Earth's circumference using shadow angles. NASA Geodesy: WGS84 Earth ellipsoid model.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONCEPT C: PULSE RINGS + TWO-COLUMN FACT CHECK -->
+<div class="concept cc">
+  <div class="concept-label">C — PULSE RINGS + TWO-COL</div>
+
+  <div class="marie-zone">
+    <div class="pulse-rings">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <div class="ring-core"></div>
+    </div>
+    <div class="info-panel">
+      <div class="ros-tag">MARIE CURIE</div>
+      <div class="ecg-line">
+        <svg class="ecg-trace" viewBox="0 0 600 50" preserveAspectRatio="none">
+          <polyline points="0,25 50,25 60,10 70,40 80,25 120,25 130,5 140,45 150,25 200,25 210,8 220,42 230,25 280,25 290,12 300,38 310,25 360,25 370,7 380,43 390,25 440,25 450,10 460,40 470,25 520,25 530,8 540,42 550,25 600,25" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="ros-speech">"THE EVIDENCE SPEAKS FOR ITSELF. BUT APPARENTLY SOME PEOPLE NEED IT LOUDER."</div>
+    </div>
+  </div>
+
+  <div class="fact-zone">
+    <div class="claim-bar">
+      <div class="claim-label">CLAIM</div>
+      <div class="claim-text">MRNA VACCINES ARE GENE THERAPY</div>
+    </div>
+
+    <div class="verdict-big">FALSE</div>
+
+    <div class="two-col">
+      <div class="col-evidence">
+        <div class="col-label">EVIDENCE</div>
+        <div class="col-text-lg">MRNA NEVER ENTERS THE NUCLEUS. IT CANNOT ALTER YOUR DNA. IT DEGRADES WITHIN DAYS. GENE THERAPY MODIFIES GENES — MRNA VACCINES DO NOT.</div>
+      </div>
+      <div class="col-marie">
+        <div class="col-label">MARIE SAYS</div>
+        <div class="col-text-gold">"AS SOMEONE NAMED AFTER THE SCIENTIST WHO HELPED DISCOVER DNA'S STRUCTURE — TRUST ME, THIS ISN'T GENE THERAPY."</div>
+      </div>
+    </div>
+
+    <div class="citation-row">
+      <div class="cite-box">
+        <div class="cite-journal">NATURE REVIEWS IMMUNOLOGY</div>
+        <div class="cite-detail">Pardi N, et al. "mRNA vaccines — a new era." 2018;18:261-279. DOI: 10.1038/nri.2017.136</div>
+      </div>
+      <div class="cite-box">
+        <div class="cite-journal">NEW ENGLAND JOURNAL OF MEDICINE</div>
+        <div class="cite-detail">Polack FP, et al. "Safety and Efficacy of BNT162b2." 2020;383:2603-2615. DOI: 10.1056/NEJMoa2034577</div>
+      </div>
+    </div>
+
+    <div class="humor-strip">"READING A RECIPE DOESN'T REWRITE THE COOKBOOK." — MARIE</div>
+  </div>
+</div>
+
+</body>
+</html>

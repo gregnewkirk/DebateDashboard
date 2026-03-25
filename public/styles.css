@@ -730,7 +730,8 @@ body {
   100% { opacity: 0; }
 }
 
-.payment-alert {
+/* Full-screen persistent donation alert — stays until ESC */
+.payment-fullscreen {
   position: fixed;
   top: 0; left: 0;
   width: 1080px; height: 1920px;
@@ -738,42 +739,96 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 40px;
   z-index: 1500;
-  background: linear-gradient(180deg, var(--deep) 0%, var(--dark-navy) 50%, var(--deep) 100%);
+  background: linear-gradient(180deg, #003300 0%, var(--deep) 40%, #003300 100%);
+  border: 6px solid var(--gold);
 }
 
-.payment-alert .payment-source {
-  font-size: 28px;
+.payment-fullscreen .payment-thankyou {
+  font-size: 80px;
+  font-weight: 900;
   letter-spacing: 12px;
   color: var(--gold);
-  opacity: 0.6;
-  font-weight: 600;
+  text-shadow: 0 0 60px rgba(255,215,0,0.4);
 }
 
-.payment-alert .payment-name {
-  font-size: 64px;
-  font-weight: 900;
-  color: var(--gold);
-  letter-spacing: 6px;
-  text-shadow: 0 0 40px rgba(255,215,0,0.3);
-}
-
-.payment-alert .payment-amount {
-  font-size: 140px;
+.payment-fullscreen .payment-name {
+  font-size: 100px;
   font-weight: 900;
   color: var(--white);
-  text-shadow: 0 0 50px rgba(255,255,255,0.2);
+  letter-spacing: 8px;
+  text-shadow: 0 0 50px rgba(255,255,255,0.3);
+  line-height: 1.1;
+}
+
+.payment-fullscreen .payment-amount {
+  font-size: 160px;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 80px rgba(255,215,0,0.5);
   line-height: 1;
 }
 
-.payment-alert .payment-message {
+.payment-fullscreen .payment-amount.pulse {
+  animation: amount-pulse 2s ease-in-out infinite;
+}
+
+@keyframes amount-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+
+.payment-fullscreen .payment-source {
   font-size: 32px;
-  font-weight: 500;
+  letter-spacing: 14px;
+  color: var(--gold);
+  opacity: 0.5;
+  font-weight: 600;
+}
+
+.payment-fullscreen .payment-message {
+  font-size: 36px;
+  font-weight: 600;
   font-style: italic;
-  color: rgba(255,255,255,0.6);
-  max-width: 80%;
+  color: rgba(255,255,255,0.7);
+  max-width: 85%;
   text-align: center;
+  border-top: 2px solid rgba(255,215,0,0.3);
+  padding-top: 30px;
+}
+
+.payment-dismiss-hint {
+  position: absolute;
+  bottom: 60px;
+  font-size: 22px;
+  letter-spacing: 6px;
+  color: rgba(255,255,255,0);
+  font-weight: 400;
+}
+
+/* Hidden dismiss button — bottom of screen, only visible up close */
+.payment-dismiss-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  letter-spacing: 4px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 2001;
+}
+
+.payment-dismiss-btn:hover {
+  color: rgba(255,255,255,0.3);
+  background: rgba(0,0,0,0.3);
 }
 
 /* ===========================================
@@ -822,16 +877,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 72px;
+  font-size: 120px;
   font-weight: 900;
   text-align: center;
-  color: var(--white);
-  letter-spacing: 4px;
-  line-height: 1.1;
-  padding: 20px 60px;
+  color: var(--gold);
+  letter-spacing: 6px;
+  line-height: 1.15;
+  padding: 40px 80px;
   height: 100%;
-  text-shadow: 3px 3px 0 var(--deep), 0 0 40px rgba(255,215,0,0.15);
+  width: 100%;
+  text-shadow: 4px 4px 0 var(--deep), 0 0 60px rgba(255,215,0,0.2);
   position: relative;
+  border-top: 4px solid rgba(255,215,0,0.3);
+  border-bottom: 4px solid rgba(255,215,0,0.3);
 }
 
 /* Gold accent bar on left */
@@ -917,6 +975,284 @@ body {
   animation: shake-kf 0.4s ease-in-out;
 }
 
+/* ===========================================
+   SOUNDCHECK — PRE-SHOW SYSTEM TEST
+   =========================================== */
+.soundcheck-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px 30px;
+  width: 100%;
+}
+
+.soundcheck-header {
+  font-size: 70px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 8px;
+  text-shadow: 0 0 40px rgba(255,215,0,0.3);
+}
+
+.soundcheck-subheader {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 10px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 20px;
+}
+
+.soundcheck-statuses {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.soundcheck-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  animation: bounce-in-kf 0.4s ease-out both;
+}
+
+.soundcheck-label {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 3px;
+}
+
+.soundcheck-status {
+  font-size: 26px;
+  font-weight: 600;
+  color: #ffdd00;
+  text-align: right;
+  max-width: 55%;
+}
+
+.soundcheck-mic-preview {
+  font-size: 28px;
+  font-weight: 500;
+  font-style: italic;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+  padding: 20px;
+  border: 2px dashed rgba(255,215,0,0.2);
+  border-radius: 8px;
+  width: 90%;
+  min-height: 60px;
+  margin-top: 10px;
+}
+
+.soundcheck-test-section {
+  width: 100%;
+  margin-top: 20px;
+  border-top: 2px solid rgba(255,215,0,0.2);
+  padding-top: 20px;
+}
+
+.soundcheck-test-header {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.soundcheck-test-log {
+  background: rgba(0,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.6;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.soundcheck-hint {
+  font-size: 22px;
+  letter-spacing: 6px;
+  color: rgba(255,255,255,0.15);
+  margin-top: 20px;
+}
+
+/* ===========================================
+   MARIE CURIE — TOP-HALF TAKEOVER (Design #5)
+   Smooth slide-in from top, DNA spectrogram identity,
+   clear visual break from the dashboard below.
+   =========================================== */
+.marie-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1080px;
+  height: 880px; /* Top half of 1920 portrait + overlap */
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: linear-gradient(180deg,
+    var(--deep) 0%,
+    rgba(0,14,42,0.99) 60%,
+    rgba(0,14,42,0.95) 85%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transform: translateY(-100%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* Smooth slide-in from top */
+.marie-container.entering {
+  animation: marie-slide-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes marie-slide-in {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Smooth slide-out back to top */
+.marie-container.exiting {
+  animation: marie-slide-out 0.6s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes marie-slide-out {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Gold accent line at very top — first thing you see */
+.marie-top-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    var(--gold) 20%,
+    var(--gold) 80%,
+    transparent 95%
+  );
+  box-shadow: 0 2px 20px rgba(255,215,0,0.3);
+}
+
+/* Tag line — "MARIE CURIE" */
+.marie-tag {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 16px;
+  text-shadow: 0 0 30px rgba(255,215,0,0.2);
+  margin-top: 30px;
+}
+
+/* DNA Helix Spectrogram — THE visual identity */
+.marie-waveform {
+  width: 960px;
+  height: 280px;
+  border-radius: 4px;
+}
+
+/* Speech text — LARGE, readable alongside fact cards */
+.marie-speech {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--white);
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  padding: 10px 50px;
+  min-height: 50px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+}
+
+/* Subtitle — subtle */
+.marie-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 14px;
+  color: rgba(255,255,255,0.2);
+  margin-top: -10px;
+}
+
+/* Gold bottom border — clear visual break from dashboard below */
+.marie-bottom-border {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    var(--gold) 15%,
+    var(--gold) 85%,
+    transparent 95%
+  );
+  box-shadow: 0 0 30px rgba(255,215,0,0.15), 0 4px 15px rgba(0,0,0,0.5);
+}
+
+/* Legacy compat — hide if somehow present */
+.marie-avatar { display: none; }
+.marie-name { display: none; }
+
+/* Dismiss zone — bottom of screen, hidden from viewers */
+.dismiss-zone {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 1080px;
+  height: 80px;
+  z-index: 2001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.dismiss-zone:active {
+  opacity: 0.3;
+}
+
+.dismiss-zone span {
+  font-size: 18px;
+  letter-spacing: 6px;
+  color: rgba(255,255,255,0.1);
+}
+
 /* glow-red — threat glow */
 @keyframes glow-red-kf {
   0%, 100% { box-shadow: 0 0 10px rgba(191,10,48,0.2); }
@@ -935,4 +1271,448 @@ body {
 }
 .bounce-in {
   animation: bounce-in-kf 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ===========================================
+   CONSPIRACY BINGO BOARD
+   =========================================== */
+.bingo-board {
+  position: fixed;
+  bottom: 200px;
+  left: 40px;
+  width: 400px;
+  z-index: 500;
+  background: rgba(0,14,42,0.92);
+  border: 3px solid var(--gold);
+  border-radius: 12px;
+  padding: 12px;
+  display: none;
+}
+
+.bingo-header {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  text-align: center;
+  letter-spacing: 6px;
+  margin-bottom: 8px;
+}
+
+.bingo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.bingo-cell {
+  background: var(--dark-navy);
+  border: 2px solid rgba(255,215,0,0.2);
+  border-radius: 4px;
+  padding: 6px 2px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+
+.bingo-cell.hit {
+  background: var(--red);
+  border-color: var(--gold);
+  color: var(--white);
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.bingo-complete {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--gold);
+  text-shadow: 0 0 40px rgba(255,215,0,0.6);
+  letter-spacing: 12px;
+}
+
+/* ===========================================
+   CREDIBILITY METER
+   =========================================== */
+.credibility-meter {
+  position: fixed;
+  right: 40px;
+  top: 320px;
+  width: 300px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 500;
+  background: rgba(0,14,42,0.85);
+  border: 3px solid var(--gold);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cred-label {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 8px;
+}
+
+.cred-bar-bg {
+  width: 100%;
+  height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(255,215,0,0.3);
+}
+
+.cred-bar-fill {
+  height: 100%;
+  background: #00cc44;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cred-value {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--white);
+}
+
+/* ===========================================
+   MOOD INDICATOR
+   =========================================== */
+.mood-indicator {
+  position: fixed;
+  left: 40px;
+  top: 320px;
+  display: none;
+  padding: 10px 24px;
+  border: 3px solid var(--gold);
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  background: rgba(0,14,42,0.85);
+  z-index: 500;
+}
+
+/* ===========================================
+   CONSPIRACY NETWORK GRAPH
+   =========================================== */
+.conspiracy-graph-canvas {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 1080px;
+  height: 400px;
+  display: none;
+  z-index: 400;
+  pointer-events: none;
+}
+
+/* ===========================================
+   CHALLENGER ENTRANCE
+   =========================================== */
+.challenger-entrance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  min-height: 600px;
+  text-align: center;
+}
+
+.entrance-announce {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 12px;
+}
+
+.entrance-intro {
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  max-width: 90%;
+  line-height: 1.3;
+}
+
+.entrance-nickname {
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 0 40px rgba(191,10,48,0.5);
+  letter-spacing: 8px;
+}
+
+/* ===========================================
+   PREDICTION BANNER
+   =========================================== */
+.prediction-banner {
+  position: fixed;
+  top: 280px;
+  left: 0;
+  width: 1080px;
+  display: none;
+  text-align: center;
+  padding: 16px;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--gold);
+  background: rgba(0,14,42,0.9);
+  border-top: 3px solid var(--gold);
+  border-bottom: 3px solid var(--gold);
+  letter-spacing: 4px;
+  z-index: 600;
+}
+
+/* ===========================================
+   AUDIENCE OVERLAY
+   =========================================== */
+.audience-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 1080px; height: 1920px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  z-index: 1200;
+  background: rgba(0,14,42,0.95);
+}
+
+.audience-badge {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 12px;
+  border: 3px solid var(--gold);
+  padding: 8px 30px;
+  border-radius: 8px;
+}
+
+.audience-question {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--white);
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.2;
+}
+
+.audience-from {
+  font-size: 28px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 6px;
+}
+
+/* ===========================================
+   HIGHLIGHTS PANEL
+   =========================================== */
+.highlights-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.highlights-header {
+  font-size: 60px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 8px;
+}
+
+.highlights-item {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--white);
+  text-align: center;
+  max-width: 90%;
+  border-bottom: 2px solid rgba(255,215,0,0.2);
+  padding-bottom: 12px;
+}
+
+.highlights-best {
+  font-size: 36px;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--gold);
+  text-align: center;
+  max-width: 90%;
+  margin-top: 20px;
+}
+
+/* ===========================================
+   GUEST SCIENTIST OVERLAY
+   =========================================== */
+.guest-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 1080px; height: 1920px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1300;
+  background: rgba(0,40,104,0.95);
+  border: 6px solid var(--gold);
+}
+
+.guest-badge {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 10px;
+}
+
+.guest-name {
+  font-size: 70px;
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 0 30px rgba(255,215,0,0.3);
+  letter-spacing: 6px;
+}
+
+.guest-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 4px;
+}
+
+.guest-specialty {
+  font-size: 24px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 6px;
+}
+
+/* ===========================================
+   MARIE QUIZ SYSTEM
+   =========================================== */
+.quiz-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+  width: 100%;
+}
+
+.quiz-header {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 12px;
+  text-shadow: 0 0 30px rgba(255,215,0,0.3);
+}
+
+.quiz-question {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--white);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 95%;
+  padding: 20px 0;
+  border-top: 3px solid rgba(255,215,0,0.3);
+  border-bottom: 3px solid rgba(255,215,0,0.3);
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 95%;
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(0,40,104,0.6);
+  border: 3px solid rgba(255,215,0,0.2);
+  border-radius: 10px;
+  transition: all 0.4s;
+}
+
+.quiz-option-label {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--gold);
+  min-width: 50px;
+  text-align: center;
+}
+
+.quiz-option-text {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.quiz-option.quiz-correct {
+  background: rgba(0,180,60,0.4);
+  border-color: #00cc44;
+  box-shadow: 0 0 20px rgba(0,204,68,0.3);
+}
+
+.quiz-option.quiz-correct .quiz-option-label {
+  color: #00ff44;
+}
+
+.quiz-option.quiz-wrong {
+  opacity: 0.25;
+}
+
+.quiz-timer-wrap {
+  width: 90%;
+  position: relative;
+  height: 40px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid rgba(255,215,0,0.3);
+  margin-top: 10px;
+}
+
+.quiz-timer-bar {
+  height: 100%;
+  width: 100%;
+  background: #00cc44;
+  border-radius: 17px;
+  transition: width 1s linear, background 0.5s;
+}
+
+.quiz-timer-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--white);
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
+}
+
+.quiz-explanation {
+  font-size: 26px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.3;
+  padding-top: 16px;
+  border-top: 2px solid rgba(255,215,0,0.2);
 }

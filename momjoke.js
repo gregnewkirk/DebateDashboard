@@ -1,5 +1,5 @@
-const LLM_URL = 'http://localhost:3000/v1/chat/completions';
-const MODEL = 'qwen2.5';
+const LLM_URL = process.env.LLM_URL || 'http://localhost:3000/v1/chat/completions';
+const MODEL = process.env.LLM_MODEL || 'nemotron-3-nan-4b';
 
 const MOM_JOKE_PATTERNS = [
   /your mom/i,
