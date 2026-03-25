@@ -22,6 +22,8 @@ const DONATION_POOL = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_don
 const CONVERSATIONS = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_conversations.json'), 'utf8'));
 const SCIENCE_RESPONSES_RAW = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_science_responses.json'), 'utf8'));
 const SCIENCE_RESPONSES = SCIENCE_RESPONSES_RAW.science_responses || SCIENCE_RESPONSES_RAW;
+const BIOGRAPHY_RAW = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_biography.json'), 'utf8'));
+const BIOGRAPHY = BIOGRAPHY_RAW.biography_interjections || BIOGRAPHY_RAW;
 const conversationGroups = CONVERSATIONS.conversations || CONVERSATIONS;
 const donationResponses = DONATION_POOL.donation_responses || DONATION_POOL;
 // Load science content for Marie to reference
@@ -40,9 +42,10 @@ const totalResponses = Object.values(RESPONSES).reduce((a, b) => a + b.length, 0
 const totalConvos = conversationGroups.reduce((a, g) => a + g.responses.length, 0);
 const totalSciResponses = Object.values(SCIENCE_RESPONSES).reduce((a, b) => a + b.length, 0);
 const totalScience = Object.values(SCIENCE).reduce((a, b) => a + (b?.length || 0), 0);
-const grandTotal = totalResponses + totalConvos + totalSciResponses;
+const totalBio = Object.values(BIOGRAPHY).reduce((a, b) => a + b.length, 0);
+const grandTotal = totalResponses + totalConvos + totalSciResponses + totalBio;
 console.log(`[Marie] Loaded ${grandTotal} pre-written responses:`);
-console.log(`  ${totalResponses} situational + ${totalConvos} conversational + ${totalSciResponses} science-derived`);
+console.log(`  ${totalResponses} situational + ${totalConvos} conversational + ${totalSciResponses} science-derived + ${totalBio} biography`);
 console.log(`  + ${totalScience} raw science content items`);
 
 // Cooldowns
@@ -289,6 +292,73 @@ function getResponsePool(mode, context = {}) {
   // Humor goes in both modes
   pools.push(...(SCIENCE_RESPONSES.humor || []));
   pools.push(...(SCIENCE_RESPONSES.connections || []));
+
+  // ============================================================
+  // BIOGRAPHY INTERJECTIONS — Marie's real life, triggered by context
+  // ============================================================
+  const transcript = (context.transcript || '').toLowerCase();
+  const claim = (context.lastClaim || '').toLowerCase();
+  const combined = transcript + ' ' + claim;
+
+  // Radiation / nuclear / 5G / EMF
+  if (/radiat|nuclear|5g|emf|microwave|x.ray|chernobyl|fukushima/.test(combined))
+    pools.push(...(BIOGRAPHY.radiation_and_nuclear || []));
+
+  // Women in science / misogyny
+  if (/woman|women|girl|female|gender|sexis|misogyn|patriar|she can.t/.test(combined))
+    pools.push(...(BIOGRAPHY.women_in_science || []));
+
+  // Nobel / credentials / authority
+  if (/nobel|credential|authority|qualif|expert|who are you|just an ai/.test(combined))
+    pools.push(...(BIOGRAPHY.nobel_prize || []));
+
+  // Immigration / nationality
+  if (/immigra|nation|border|polish|french|foreigner|citizen/.test(combined))
+    pools.push(...(BIOGRAPHY.immigration_and_identity || []));
+
+  // Hardship / dismissal / "science is easy"
+  if (/easy|hard work|lazy|effort|fund|money|grant|shed|lab/.test(combined))
+    pools.push(...(BIOGRAPHY.perseverance_and_hardship || []));
+
+  // Peer review / methodology / "do your own research"
+  if (/do your own research|peer review|method|evidence|data|prove|study/.test(combined))
+    pools.push(...(BIOGRAPHY.peer_review_and_evidence || []));
+
+  // Education
+  if (/educat|school|universi|learn|teach|literat|sorbonne/.test(combined))
+    pools.push(...(BIOGRAPHY.education_and_learning || []));
+
+  // Big Pharma / medicine
+  if (/pharma|big pharma|medicin|treat|cancer|therapy|profit|patent/.test(combined))
+    pools.push(...(BIOGRAPHY.big_pharma_and_medicine || []));
+
+  // Government conspiracy
+  if (/govern|cover.up|conspir|surveil|deep state|control/.test(combined))
+    pools.push(...(BIOGRAPHY.government_and_conspiracy || []));
+
+  // Risk / death / sacrifice
+  if (/risk|danger|death|die|sacrifice|side effect|harm/.test(combined))
+    pools.push(...(BIOGRAPHY.death_and_sacrifice || []));
+
+  // Family
+  if (/family|kid|child|daughter|son|husband|wife|mother|father/.test(combined))
+    pools.push(...(BIOGRAPHY.family_and_legacy || []));
+
+  // Chemistry / elements
+  if (/element|chem|periodic|atom|isotope|polonium|radium/.test(combined))
+    pools.push(...(BIOGRAPHY.chemistry_and_elements || []));
+
+  // War / patriotism / service
+  if (/war|military|patriot|serv|troop|veteran|wwi|wwii/.test(combined))
+    pools.push(...(BIOGRAPHY.war_and_service || []));
+
+  // Being underestimated
+  if (/can.t do|not real|fake|stupid|dumb|idiot|underestim/.test(combined))
+    pools.push(...(BIOGRAPHY.being_underestimated || []));
+
+  // Fun personal facts — sprinkle in during solo/banter
+  if (mode === 'solo')
+    pools.push(...(BIOGRAPHY.fun_personal_facts || []));
 
   return pools;
 }
