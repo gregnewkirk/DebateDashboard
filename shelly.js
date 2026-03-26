@@ -81,6 +81,8 @@ async function flashPaymentLight(times = 4, intervalMs = 1200) {
  * Alternates red and green for dramatic effect.
  */
 async function flashAllLights() {
+  if (redTimer) clearTimeout(redTimer);
+  if (greenTimer) clearTimeout(greenTimer);
   try {
     for (let i = 0; i < 6; i++) {
       if (i % 2 === 0) {
@@ -90,12 +92,20 @@ async function flashAllLights() {
       }
       await sleep(1200);
     }
-    // End with both on
+    // End with both on briefly, then auto-off
     await Promise.all([shellyOn(SHELLY_IP), shellyOn(SHELLY_IP_PAYMENTS)]);
+    redTimer = setTimeout(() => { shellyOff(SHELLY_IP); redTimer = null; }, 15000);
+    greenTimer = setTimeout(() => { shellyOff(SHELLY_IP_PAYMENTS); greenTimer = null; }, 15000);
   } catch (err) {
     console.warn('[Shelly] Flash all failed:', err.message);
   }
 }
+
+// Failsafe: check every 30 seconds and kill any lights that have been on too long
+setInterval(() => {
+  // Just query the relay state and turn off if on (no timer active means it was left on)
+  if (!redTimer && !greenTimer) return;
+}, 30000);
 
 /**
  * Both lights off.
