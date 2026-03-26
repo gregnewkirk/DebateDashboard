@@ -62,6 +62,9 @@ let marieConvoTimer = null;
 
 function marieStartSpeaking(durationMs = 12000) {
   marieSpeaking = true;
+  // CRITICAL: Mute mic while Marie speaks — her TTS output feeds back through
+  // the Wave Link Stream and Whisper picks it up, causing infinite loops
+  muteMic(durationMs + 3000); // Extra 3s buffer for audio to fully stop
   if (marieSpeakingTimer) clearTimeout(marieSpeakingTimer);
   marieSpeakingTimer = setTimeout(() => { marieSpeaking = false; }, durationMs);
 }

@@ -149,6 +149,24 @@ function isWhisperNoise(text) {
   ];
   if (exactNoise.includes(lower)) return true;
 
+  // Marie's own TTS output feeding back through the mic
+  // These are phrases Whisper picks up from Marie speaking
+  const marieFeedback = [
+    'the ai co-host', 'ai co-host', 'co-host',
+    'dr. greg debates live with marie curie',
+    'dr greg debates live with marie curie',
+    'dr. greg debates', 'marie curie the ai',
+    'asterisk checks her radiation badge asterisk',
+    'asterisk', 'checks her radiation badge',
+    'liberty demands truth', 'patriotism requires vaccines',
+  ];
+  if (marieFeedback.some(phrase => lower.includes(phrase))) return true;
+
+  // Whisper often parrots the initial_prompt — reject anything that sounds
+  // like the dashboard title, subtitle, or Marie's self-description
+  if (lower.includes('dr. greg debates') || lower.includes('dr greg debates')) return true;
+  if (lower.includes('the ai co') || lower.includes('ai co-host')) return true;
+
   // Too short to be real speech
   if (lower.split(/\s+/).length < 3) return true;
 
