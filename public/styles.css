@@ -1825,3 +1825,24 @@ body {
 .tb-btn.tb-toggle {
   font-size: 13px;
 }
+
+.toolbar-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(191,10,48,0.6);
+  border: 2px solid rgba(191,10,48,0.8);
+  border-radius: 6px;
+  color: white;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10000;
+}
+.toolbar-close:hover {
+  background: rgba(191,10,48,0.9);
+}

@@ -7,7 +7,7 @@ const { WebSocketServer } = require('ws');
 const { analyzeTranscript } = require('./llm');
 const { findCachedCard, getCacheStats } = require('./factcache');
 const { trackTranscript, getRecentKeywords } = require('./repetition');
-const { flashLight, flashPaymentLight, flashAllLights } = require('./shelly');
+const { flashLight, flashPaymentLight, flashAllLights, lightsOff } = require('./shelly');
 const { startSession, endSession, isActive, logEvent, incrementStat, getSession, updateNickname, saveSessionLog } = require('./session');
 const { generateNickname } = require('./nickname');
 const { detectMomJoke, generatePileOn } = require('./momjoke');
@@ -626,7 +626,6 @@ const server = http.createServer(async (req, res) => {
 
     // Turn both off after test
     await new Promise(r => setTimeout(r, 1000));
-    const { lightsOff } = require('./shelly');
     await lightsOff();
 
     // Quick LLM test — generate a one-liner
