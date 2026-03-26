@@ -1716,3 +1716,112 @@ body {
   padding-top: 16px;
   border-top: 2px solid rgba(255,215,0,0.2);
 }
+
+/* ===========================================
+   SLIDE-OUT TOOLBAR — Left edge
+   =========================================== */
+.toolbar-tab {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 80px;
+  background: rgba(0,14,42,0.9);
+  border: 2px solid var(--gold);
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  color: var(--gold);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9999;
+  transition: opacity 0.3s;
+}
+.toolbar-tab:hover { opacity: 1; }
+.toolbar-tab.open { opacity: 0; pointer-events: none; }
+
+.toolbar {
+  position: fixed;
+  left: -220px;
+  top: 0;
+  width: 220px;
+  height: 100%;
+  background: rgba(0,10,30,0.96);
+  border-right: 3px solid var(--gold);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 10px;
+  gap: 6px;
+  overflow-y: auto;
+  transition: left 0.25s ease;
+}
+.toolbar.open { left: 0; }
+
+.toolbar-header {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 8px;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(255,215,0,0.3);
+}
+
+.toolbar-section {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,215,0,0.4);
+  letter-spacing: 6px;
+  margin-top: 4px;
+}
+
+.toolbar-divider {
+  height: 1px;
+  background: rgba(255,215,0,0.15);
+  margin: 2px 0;
+}
+
+.tb-btn {
+  background: rgba(0,40,104,0.6);
+  border: 2px solid rgba(255,215,0,0.3);
+  border-radius: 6px;
+  color: var(--white);
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.tb-btn:hover {
+  background: rgba(0,40,104,0.9);
+  border-color: var(--gold);
+}
+.tb-btn:active {
+  transform: scale(0.97);
+}
+.tb-btn.tb-reset {
+  background: rgba(191,10,48,0.6);
+  border-color: rgba(191,10,48,0.8);
+  color: var(--white);
+}
+.tb-btn.tb-reset:hover {
+  background: rgba(191,10,48,0.9);
+}
+.tb-btn.tb-green {
+  background: rgba(0,100,0,0.5);
+  border-color: rgba(0,200,0,0.4);
+}
+.tb-btn.tb-green:hover {
+  background: rgba(0,100,0,0.8);
+  border-color: rgba(0,200,0,0.7);
+}
+.tb-btn.tb-toggle {
+  font-size: 13px;
+}

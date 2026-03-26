@@ -111,6 +111,36 @@
   <span>TAP TO DISMISS</span>
 </div>
 
+<!-- SLIDE-OUT TOOLBAR — hidden tab on left edge, slides out on hover/click -->
+<div class="toolbar-tab" id="toolbar-tab" onclick="toggleToolbar()">&#9654;</div>
+<div class="toolbar" id="toolbar">
+  <div class="toolbar-header">CONTROLS</div>
+  <button class="tb-btn tb-reset" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'q'}))">&#9724; RESET ALL</button>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-section">SESSION</div>
+  <button class="tb-btn tb-green" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'s'}))">&#9654; START SESSION</button>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-section">MARIE</div>
+  <button class="tb-btn" onclick="fetch('/api/marie/stop',{method:'POST'})">&#9632; STOP MARIE</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'d'}))">&#9733; FACT CHECK</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'z'}))">&#10067; POP QUIZ</button>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-section">CARDS</div>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'p'}))">&#128176; DONATION</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'r'}))">&#128203; REPORT CARD</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'l'}))">&#128260; LOOP BREAKER</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'a'}))">&#128250; AD SCREEN</button>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-section">OVERLAYS</div>
+  <button class="tb-btn tb-toggle" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'b'}))">&#127922; BINGO</button>
+  <button class="tb-btn tb-toggle" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'c'}))">&#128200; CREDIBILITY</button>
+  <button class="tb-btn tb-toggle" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'g'}))">&#128280; GRAPH</button>
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-section">SYSTEM</div>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'t'}))">&#128295; SOUNDCHECK</button>
+  <button class="tb-btn" onclick="fetch('/api/lights/off',{method:'POST'})">&#128161; LIGHTS OFF</button>
+</div>
+
 <script src="sfx.js"></script>
 <script src="marie.js"></script>
 <script src="app.js"></script>

@@ -307,12 +307,23 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/marie/stop') {
     marieStopSpeaking();
     broadcast(wss, { type: 'marie_stop' });
+    // Kill ALL lights
+    lightsOff().catch(() => {});
     // Also end any active session to stop fact-checking
     if (isActive()) {
       endSession();
       console.log('[Session] Ended via ALL STOP');
     }
-    console.log('[Marie] ALL STOP');
+    console.log('[Marie] ALL STOP — lights off');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Lights off
+  if (req.method === 'POST' && req.url === '/api/lights/off') {
+    lightsOff().catch(() => {});
+    console.log('[Shelly] All lights off');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;

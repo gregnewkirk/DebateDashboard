@@ -2155,6 +2155,29 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// --- Slide-out Toolbar ---
+function toggleToolbar() {
+  const toolbar = document.getElementById("toolbar");
+  const tab = document.getElementById("toolbar-tab");
+  const isOpen = toolbar.classList.contains("open");
+  toolbar.classList.toggle("open");
+  tab.classList.toggle("open");
+  // Click outside to close
+  if (!isOpen) {
+    setTimeout(() => {
+      document.addEventListener("click", closeToolbarOutside, { once: true });
+    }, 100);
+  }
+}
+function closeToolbarOutside(e) {
+  const toolbar = document.getElementById("toolbar");
+  const tab = document.getElementById("toolbar-tab");
+  if (toolbar && !toolbar.contains(e.target) && e.target !== tab) {
+    toolbar.classList.remove("open");
+    tab.classList.remove("open");
+  }
+}
+
 // --- Init ---
 document.addEventListener("DOMContentLoaded", () => {
   connectWebSocket();
