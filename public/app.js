@@ -910,6 +910,25 @@ function dismissAdScreen() {
 
 function returnToStandby() {
   dismissAdScreen();
+  dismissPaymentAlert();
+
+  // Dismiss all full-page overlays
+  const overlayIds = [
+    "bingo-board", "credibility-meter", "graph-overlay",
+    "guest-overlay", "audience-overlay", "prediction-banner",
+    "soundcheck-panel",
+  ];
+  for (const id of overlayIds) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  }
+
+  // Stop Marie
+  if (typeof Marie !== 'undefined') {
+    Marie.stop();
+    Marie.hideContainer();
+  }
+  window._promptCycleActive = false;
 
   const container = document.getElementById("main-content");
   if (container) clearContainer(container);
@@ -919,6 +938,7 @@ function returnToStandby() {
   if (el) el.textContent = "AWAITING TARGET";
 
   stopSessionTimer();
+  if (typeof dismissSoundcheck === 'function') dismissSoundcheck();
 
   isShowingCard = false;
   startIdlePopIns();
@@ -2708,32 +2728,9 @@ document.addEventListener("keydown", (e) => {
     showAdScreen();
   }
   if (e.key === "q" || e.key === "Q") {
-    // Q = quit/reset everything back to home
-    dismissPaymentAlert();
-    dismissSoundcheck();
-    Marie.stop();
-    Marie.hideContainer();
-    window._promptCycleActive = false;
-    // Hide all overlays
-    const bingo = document.getElementById("bingo-board");
-    if (bingo) bingo.style.display = "none";
-    const cred = document.getElementById("credibility-meter");
-    if (cred) cred.style.display = "none";
-    const graph = document.getElementById("conspiracy-graph-canvas");
-    if (graph) graph.style.display = "none";
-    const mood = document.getElementById("mood-indicator");
-    if (mood) mood.style.display = "none";
-    const pred = document.getElementById("prediction-banner");
-    if (pred) pred.style.display = "none";
-    const audience = document.getElementById("audience-overlay");
-    if (audience) audience.style.display = "none";
-    const guest = document.getElementById("guest-overlay");
-    if (guest) guest.style.display = "none";
-    const adScreen = document.getElementById("ad-screen");
-    if (adScreen) adScreen.remove();
-    // Tell server to stop EVERYTHING — Marie, session, all state
+    // Q = NUCLEAR RESET — kill everything, return to standby
     fetch("/api/marie/stop", { method: "POST" }).catch(() => {});
-    fetch("/api/session/end", { method: "POST" }).catch(() => {});
+    fetch("/api/lights/off", { method: "POST" }).catch(() => {});
     returnToStandby();
   }
   if (e.key === "p" || e.key === "P") {
