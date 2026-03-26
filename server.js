@@ -15,7 +15,7 @@ const { onFactCheck, onLoopBreaker, onMomJoke, onPayment, onSessionStart, onSess
 const { startEmailMonitor } = require('./emailmonitor');
 const { initTTS, generateSpeech } = require('./tts');
 const { initCache, getCachedAudio, startPreRendering, getCacheStats: getTTSCacheStats } = require('./tts_cache');
-const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough } = require('./marie');
+const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse } = require('./marie');
 const { startMicListener, getMicStatus, muteMic, isMuted } = require('./mic');
 const { processEvent: moodEvent, getMood, resetMood } = require('./mood');
 const { resetCredibility, processClaimResult, processLoopBreaker: credLoopBreaker, getCredibility, getCredibilityComment } = require('./credibility');
@@ -234,8 +234,8 @@ const server = http.createServer(async (req, res) => {
         boostRecentResponses(); // Donation = audience liked what was happening
         broadcast(wss, { type: 'mood', ...getMood() });
 
-        // Marie TTS for donation (async, sends tts_ready when done)
-        const donationText = `Thank you ${payment.name}! ${payment.amount}! You're amazing!`;
+        // Marie TTS for donation — uses 1000-line Opus-quality pool
+        const donationText = getDonationResponse(payment.name, payment.amount);
         smartTTS(donationText).then(audioUrl => {
           marieStartSpeaking(); broadcast(wss, { type: 'tts_ready', audioUrl, text: donationText });
         }).catch(err => console.warn('[TTS] Donation speech failed:', err.message));
@@ -457,41 +457,51 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      const seconds = 20;
+      const seconds = 30;
+      const q = quiz.question;
+      const opts = quiz.options;
+      const answerText_full = quiz.answer;
+      const explanation = quiz.explanation;
+      const answerIndex = opts.indexOf(answerText_full);
 
-      // Marie reads the question
-      const introText = `Pop quiz! ${quiz.q}`;
+      // Build Marie's full quiz intro with voting instructions
+      const optionLabels = ['A', 'B', 'C', 'D'];
+      const optionList = opts.map((opt, i) => `${optionLabels[i]}, ${opt}`).join('. ');
+      const introText = `Pop quiz time! ${q}. Your options are: ${optionList}. Type your answer in chat. You have ${seconds} seconds. Go!`;
+
       const audioUrl = await smartTTS(introText);
-      marieStartSpeaking();
+      marieStartSpeaking(15000);
       broadcast(wss, { type: 'marie_speak', text: introText, audioUrl });
 
-      // Send quiz to clients
+      // Send quiz card to clients
       broadcast(wss, {
         type: 'quiz',
-        question: quiz.q,
-        options: quiz.o,
+        question: q,
+        options: opts,
         seconds,
       });
 
       // After countdown, reveal answer + Marie reads explanation
       setTimeout(async () => {
+        const correctLetter = answerIndex >= 0 ? optionLabels[answerIndex] : 'the correct answer';
+
         broadcast(wss, {
           type: 'quiz_reveal',
-          answer: quiz.a,
-          explanation: quiz.e,
+          answer: answerIndex,
+          explanation: explanation,
         });
 
-        // Marie reads the answer
-        const answerText = `The answer is ${quiz.o[quiz.a]}. ${quiz.e}`;
+        // Marie announces the answer clearly
+        const revealText = `Time's up! The answer is ${correctLetter}, ${answerText_full}. ${explanation}`;
         try {
-          const revealAudio = await smartTTS(answerText);
+          const revealAudio = await smartTTS(revealText);
           marieStartSpeaking();
-          broadcast(wss, { type: 'marie_speak', text: answerText, audioUrl: revealAudio });
+          broadcast(wss, { type: 'marie_speak', text: revealText, audioUrl: revealAudio });
         } catch {}
-      }, (seconds + 2) * 1000); // +2s buffer for TTS intro to finish
+      }, (seconds + 3) * 1000);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, question: quiz.q }));
+      res.end(JSON.stringify({ ok: true, question: q }));
     } catch (err) {
       if (!res.headersSent) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -841,8 +851,8 @@ async function processTranscript(text) {
                 break;
               }
               case 'quiz': {
-                const quiz = getRandomQuiz();
-                speechText = quiz ? `Here's one: ${quiz.question}. The answer is ${quiz.answer}. ${quiz.explanation}` : "I'm out of quiz questions. Impressive.";
+                const qz = getRandomQuiz();
+                speechText = qz ? `Here's one: ${qz.question}. The answer is ${qz.answer}. ${qz.explanation}` : "I'm out of quiz questions. Impressive.";
                 break;
               }
               case 'breakthrough': {

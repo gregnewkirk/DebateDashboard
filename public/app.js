@@ -2059,8 +2059,32 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "a" || e.key === "A") {
     showAdScreen();
   }
-  if (e.key === "Escape") {
+  if (e.key === "q" || e.key === "Q") {
+    // Q = quit/reset everything back to home
     dismissPaymentAlert();
+    dismissSoundcheck();
+    Marie.stop();
+    Marie.hideContainer();
+    window._promptCycleActive = false;
+    // Hide all overlays
+    const bingo = document.getElementById("bingo-board");
+    if (bingo) bingo.style.display = "none";
+    const cred = document.getElementById("credibility-meter");
+    if (cred) cred.style.display = "none";
+    const graph = document.getElementById("conspiracy-graph-canvas");
+    if (graph) graph.style.display = "none";
+    const mood = document.getElementById("mood-indicator");
+    if (mood) mood.style.display = "none";
+    const pred = document.getElementById("prediction-banner");
+    if (pred) pred.style.display = "none";
+    const audience = document.getElementById("audience-overlay");
+    if (audience) audience.style.display = "none";
+    const guest = document.getElementById("guest-overlay");
+    if (guest) guest.style.display = "none";
+    const adScreen = document.getElementById("ad-screen");
+    if (adScreen) adScreen.remove();
+    // Tell server to stop Marie
+    fetch("/api/marie/stop", { method: "POST" }).catch(() => {});
     returnToStandby();
   }
   if (e.key === "p" || e.key === "P") {
@@ -2085,14 +2109,35 @@ document.addEventListener("keydown", (e) => {
     if (board) board.style.display = board.style.display === "none" ? "block" : "none";
   }
   if (e.key === "g" || e.key === "G") {
-    // Toggle conspiracy graph
-    const graph = document.getElementById("conspiracy-graph-canvas");
-    if (graph) graph.style.display = graph.style.display === "none" ? "block" : "none";
+    // Toggle conspiracy graph — create with demo data if doesn't exist
+    let graph = document.getElementById("conspiracy-graph-canvas");
+    if (!graph) {
+      updateConspiracyGraph({
+        nodes: [
+          { label: "VACCINES", weight: 3 },
+          { label: "BIG PHARMA", weight: 2 },
+          { label: "BILL GATES", weight: 1 },
+          { label: "5G", weight: 1 },
+          { label: "FLAT EARTH", weight: 2 },
+        ],
+        edges: [
+          { from: 0, to: 1 }, { from: 1, to: 2 },
+          { from: 2, to: 3 }, { from: 0, to: 3 },
+          { from: 3, to: 4 },
+        ],
+      });
+    } else {
+      graph.style.display = graph.style.display === "none" ? "block" : "none";
+    }
   }
   if (e.key === "c" || e.key === "C") {
-    // Toggle credibility meter
-    const meter = document.getElementById("credibility-meter");
-    if (meter) meter.style.display = meter.style.display === "none" ? "flex" : "none";
+    // Toggle credibility meter — create if doesn't exist
+    let meter = document.getElementById("credibility-meter");
+    if (!meter) {
+      updateCredibilityMeter({ value: 50 });
+    } else {
+      meter.style.display = meter.style.display === "none" ? "flex" : "none";
+    }
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
