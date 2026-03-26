@@ -150,7 +150,6 @@ function isWhisperNoise(text) {
   if (exactNoise.includes(lower)) return true;
 
   // Marie's own TTS output feeding back through the mic
-  // These are phrases Whisper picks up from Marie speaking
   const marieFeedback = [
     'the ai co-host', 'ai co-host', 'co-host',
     'dr. greg debates live with marie curie',
@@ -159,19 +158,37 @@ function isWhisperNoise(text) {
     'asterisk checks her radiation badge asterisk',
     'asterisk', 'checks her radiation badge',
     'liberty demands truth', 'patriotism requires vaccines',
+    'pop quiz time', 'type your answer in chat',
+    'type a, b, or c', 'type a or b in chat',
+    'you have 30 seconds', 'you have 20 seconds',
+    'the answer is', 'time\'s up',
+    'claim:', 'verdict:', 'debunked', 'false.',
+    'broken record', 'they said', 'still false',
+    'instead of electricity', 'afas computer',
+    'ladies simultaneously', 'potentially solving',
+    'most creative', 'misuse of statistics',
   ];
   if (marieFeedback.some(phrase => lower.includes(phrase))) return true;
 
-  // Whisper often parrots the initial_prompt — reject anything that sounds
-  // like the dashboard title, subtitle, or Marie's self-description
+  // Whisper often parrots the initial_prompt
   if (lower.includes('dr. greg debates') || lower.includes('dr greg debates')) return true;
   if (lower.includes('the ai co') || lower.includes('ai co-host')) return true;
+  if (lower.includes('marie curie') && lower.length < 40) return true; // Short Marie reference = feedback
 
   // Too short to be real speech
   if (lower.split(/\s+/).length < 3) return true;
 
   // Repeated characters / gibberish
   if (/(.)\1{4,}/.test(lower)) return true;
+
+  // Whisper hallucination pattern: same short phrase repeated
+  const words = lower.split(/\s+/);
+  if (words.length >= 4) {
+    const half = Math.floor(words.length / 2);
+    const first = words.slice(0, half).join(' ');
+    const second = words.slice(half, half * 2).join(' ');
+    if (first === second) return true; // "thank you thank you" etc
+  }
 
   return false;
 }

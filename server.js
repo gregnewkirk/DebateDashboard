@@ -60,6 +60,94 @@ let marieSpeakingTimer = null;
 let marieInConversation = false; // True when responding to a direct question — blocks prompt cycle
 let marieConvoTimer = null;
 
+// ============================================================
+// ANTI-REPEAT SYSTEM — prevents Marie from looping
+// ============================================================
+const recentBroadcasts = [];       // Last N broadcast texts
+const recentClaimTopics = [];      // Last N claim topics detected
+const MAX_RECENT = 20;
+const REPEAT_WINDOW_MS = 120000;   // 2 minutes
+
+function isDuplicateBroadcast(text) {
+  if (!text) return false;
+  const normalized = text.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+  const now = Date.now();
+
+  // Clean old entries
+  while (recentBroadcasts.length > 0 && now - recentBroadcasts[0].time > REPEAT_WINDOW_MS) {
+    recentBroadcasts.shift();
+  }
+
+  // Check for exact or near-duplicate
+  for (const entry of recentBroadcasts) {
+    const entryNorm = entry.text.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+    // Exact match
+    if (entryNorm === normalized) return true;
+    // 80% overlap (fuzzy match)
+    const words1 = new Set(normalized.split(/\s+/));
+    const words2 = new Set(entryNorm.split(/\s+/));
+    const overlap = [...words1].filter(w => words2.has(w)).length;
+    const similarity = overlap / Math.max(words1.size, words2.size);
+    if (similarity > 0.8) return true;
+  }
+
+  recentBroadcasts.push({ text: normalized, time: now });
+  if (recentBroadcasts.length > MAX_RECENT) recentBroadcasts.shift();
+  return false;
+}
+
+function isDuplicateClaim(topic) {
+  if (!topic) return false;
+  const lower = topic.toLowerCase().trim();
+  const now = Date.now();
+
+  // Clean old entries
+  while (recentClaimTopics.length > 0 && now - recentClaimTopics[0].time > REPEAT_WINDOW_MS) {
+    recentClaimTopics.shift();
+  }
+
+  // Check if this claim topic was already detected
+  for (const entry of recentClaimTopics) {
+    if (entry.topic === lower) return true;
+  }
+
+  recentClaimTopics.push({ topic: lower, time: now });
+  if (recentClaimTopics.length > MAX_RECENT) recentClaimTopics.shift();
+  return false;
+}
+
+function clearRecentHistory() {
+  recentBroadcasts.length = 0;
+  recentClaimTopics.length = 0;
+}
+
+/**
+ * Safe broadcast for Marie's speech — checks for duplicates before sending.
+ * Returns true if sent, false if blocked as duplicate.
+ */
+function marieSafeBroadcast(wss, msgObj) {
+  const text = msgObj.text || '';
+  if (isDuplicateBroadcast(text)) {
+    console.log(`[AntiRepeat] BLOCKED duplicate: "${text.substring(0, 50)}..."`);
+    return false;
+  }
+  broadcast(wss, msgObj);
+  return true;
+}
+
+/**
+ * Safe fact-check broadcast — checks if the claim topic was already covered.
+ */
+function safeBroadcastFactCheck(wss, result) {
+  const claim = result.claim || '';
+  if (isDuplicateClaim(claim)) {
+    console.log(`[AntiRepeat] BLOCKED duplicate claim: "${claim.substring(0, 50)}"`);
+    return false;
+  }
+  broadcast(wss, { type: 'fact_check', ...result });
+  return true;
+}
+
 function marieStartSpeaking(durationMs = 12000) {
   marieSpeaking = true;
   // CRITICAL: Mute mic while Marie speaks — her TTS output feeds back through
@@ -955,8 +1043,10 @@ async function processTranscript(text) {
         }
         } // end TTS busy check
 
-        // Only run fact-check pipeline when session is active
-        if (isActive()) {
+        // Only run fact-check pipeline when a debate session is active
+        // In solo mode, Marie does banter/quizzes but does NOT fact-check
+        // (Greg's casual conversation about science kept triggering false positives)
+        if (isActive() && !marieSpeaking) {
           const loop = trackTranscript(text);
           const loopContext = loop.isLoop ? loop.loopKeyword : null;
 
@@ -1032,24 +1122,31 @@ async function processTranscript(text) {
               }).catch(err => console.warn('[TTS] Loop breaker speech failed:', err.message));
 
             } else {
-              const payload = { type: 'fact_check', ...result };
-              broadcast(wss, payload);
-              onFactCheck(result);
-              logEvent({ type: 'fact_check', data: result });
+              // Anti-repeat: skip if we already covered this claim recently
+              if (isDuplicateClaim(result.claim)) {
+                console.log(`[AntiRepeat] Skipping duplicate claim: "${result.claim}"`);
+              } else {
+                const payload = { type: 'fact_check', ...result };
+                broadcast(wss, payload);
+                onFactCheck(result);
+                logEvent({ type: 'fact_check', data: result });
 
-              // Increment debunked or misleading based on verdict
-              const verdict = (result.verdict || '').toUpperCase();
-              if (verdict === 'FALSE' || verdict === 'DEBUNKED') {
-                incrementStat('debunkedCount');
-              } else if (verdict === 'MISLEADING') {
-                incrementStat('misleadingCount');
+                // Increment debunked or misleading based on verdict
+                const verdict = (result.verdict || '').toUpperCase();
+                if (verdict === 'FALSE' || verdict === 'DEBUNKED') {
+                  incrementStat('debunkedCount');
+                } else if (verdict === 'MISLEADING') {
+                  incrementStat('misleadingCount');
+                }
+
+                // Marie TTS for fact check — also deduplicated
+                const factText = `Claim: ${result.claim}. Verdict: ${result.verdict}. ${result.fact}`;
+                if (!isDuplicateBroadcast(factText)) {
+                  smartTTS(factText).then(audioUrl => {
+                    marieStartSpeaking(); broadcast(wss, { type: 'tts_ready', audioUrl, text: factText });
+                  }).catch(err => console.warn('[TTS] Fact check speech failed:', err.message));
+                }
               }
-
-              // Marie TTS for fact check
-              const factText = `Claim: ${result.claim}. Verdict: ${result.verdict}. ${result.fact}`;
-              smartTTS(factText).then(audioUrl => {
-                marieStartSpeaking(); broadcast(wss, { type: 'tts_ready', audioUrl, text: factText });
-              }).catch(err => console.warn('[TTS] Fact check speech failed:', err.message));
             }
 
             // Nickname evolution: every 3 claims, generate a new nickname
