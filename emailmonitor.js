@@ -30,33 +30,46 @@ const processedUIDs = new Set();
 const PARSERS = [
   {
     source: 'venmo',
-    // Venmo sends from venmo@venmo.com
+    // Venmo sends from venmo@venmo.com or various @venmo.com addresses
     matchSender: (from) => /venmo/i.test(from),
-    // Subject like: "Greg, John Smith paid you $5.00"
-    matchSubject: (subj) => /paid you/i.test(subj),
+    // Broadened: "paid you", "sent you", "received", "payment", "transfer"
+    matchSubject: (subj) => /paid you|sent you|received|payment|transfer|completed/i.test(subj),
     parse: (subject, textBody, htmlBody) => {
       const text = textBody || htmlBody || '';
 
-      // Subject: "Greg, John Smith paid you $5.00"
       let name = 'Someone';
       let amount = '$0';
       let message = '';
 
-      // Extract from subject
-      const subjMatch = subject.match(/,\s*(.+?)\s+paid you\s+(\$[\d,.]+)/i);
-      if (subjMatch) {
-        name = subjMatch[1].trim();
-        amount = subjMatch[2];
+      // Pattern 1: "Greg, John Smith paid you $5.00"
+      const subjMatch1 = subject.match(/,\s*(.+?)\s+paid you\s+(\$[\d,.]+)/i);
+      // Pattern 2: "John Smith sent you $5.00"
+      const subjMatch2 = subject.match(/(.+?)\s+sent you\s+(\$[\d,.]+)/i);
+      // Pattern 3: "You received $5.00 from John Smith"
+      const subjMatch3 = subject.match(/received\s+(\$[\d,.]+)\s+from\s+(.+)/i);
+      // Pattern 4: "$5.00 payment from John Smith"
+      const subjMatch4 = subject.match(/(\$[\d,.]+)\s+(?:payment|transfer)\s+from\s+(.+)/i);
+
+      if (subjMatch1) { name = subjMatch1[1].trim(); amount = subjMatch1[2]; }
+      else if (subjMatch2) { name = subjMatch2[1].trim(); amount = subjMatch2[2]; }
+      else if (subjMatch3) { amount = subjMatch3[1]; name = subjMatch3[2].trim(); }
+      else if (subjMatch4) { amount = subjMatch4[1]; name = subjMatch4[2].trim(); }
+
+      // Fallback: extract any dollar amount from subject or body
+      if (amount === '$0') {
+        const amtMatch = subject.match(/\$[\d,.]+/) || text.match(/\$[\d,.]+/);
+        if (amtMatch) amount = amtMatch[0];
+      }
+
+      // Fallback: extract name from body if not in subject
+      if (name === 'Someone') {
+        const bodyNameMatch = text.match(/(?:from|paid by|sent by)\s+([A-Z][a-z]+ [A-Z][a-z]+)/);
+        if (bodyNameMatch) name = bodyNameMatch[1].trim();
       }
 
       // Try to get the note/message from body
-      // Venmo emails include the payment note
       const noteMatch = text.match(/(?:note|message)[:\s]*[""]?([^"""\n]{1,200})/i);
-      if (noteMatch) {
-        message = noteMatch[1].trim();
-      }
-
-      // Also try simpler pattern — Venmo puts the note prominently
+      if (noteMatch) message = noteMatch[1].trim();
       if (!message) {
         const altNote = text.match(/paid you[\s\S]{0,100}?["""](.+?)["""]/);
         if (altNote) message = altNote[1].trim();
@@ -294,34 +307,48 @@ async function checkForDonations() {
       const textBody = parsed.text || '';
       const htmlBody = parsed.html || '';
 
+      // Log EVERY donation-service email we see (for debugging missed donations)
+      console.log(`[EmailMonitor] New email — From: "${from.substring(0, 40)}" Subject: "${subject.substring(0, 60)}"`);
+
       // Try each parser
+      let matched = false;
       for (const parser of PARSERS) {
-        if (parser.matchSender(from) && parser.matchSubject(subject)) {
-          const donation = parser.parse(subject, textBody, htmlBody);
+        if (parser.matchSender(from)) {
+          if (parser.matchSubject(subject)) {
+            matched = true;
+            const donation = parser.parse(subject, textBody, htmlBody);
 
-          console.log(`[EmailMonitor] 💰 ${donation.source.toUpperCase()}: ${donation.name} — ${donation.amount}`);
-          if (donation.message) {
-            console.log(`[EmailMonitor] Message: "${donation.message}"`);
+            console.log(`[EmailMonitor] 💰 MATCHED ${donation.source.toUpperCase()}: ${donation.name} — ${donation.amount}`);
+            if (donation.message) {
+              console.log(`[EmailMonitor] Message: "${donation.message}"`);
+            }
+
+            // First name only — protect donor privacy on livestream
+            if (donation.name) {
+              donation.name = donation.name.trim().split(/\s+/)[0];
+            }
+
+            // Push to dashboard webhook
+            try {
+              await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(donation),
+              });
+              console.log(`[EmailMonitor] ✅ Pushed to dashboard`);
+            } catch (err) {
+              console.error('[EmailMonitor] ❌ Webhook push failed:', err.message);
+            }
+
+            break; // Only match one parser per email
+          } else {
+            // Sender matched but subject didn't — log it so we can fix the parser
+            console.log(`[EmailMonitor] ⚠️ UNMATCHED ${parser.source.toUpperCase()} email — subject didn't match pattern: "${subject.substring(0, 80)}"`);
           }
-
-          // First name only — protect donor privacy on livestream
-          if (donation.name) {
-            donation.name = donation.name.trim().split(/\s+/)[0];
-          }
-
-          // Push to dashboard webhook
-          try {
-            await fetch(WEBHOOK_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(donation),
-            });
-          } catch (err) {
-            console.error('[EmailMonitor] Webhook push failed:', err.message);
-          }
-
-          break; // Only match one parser per email
         }
+      }
+      if (!matched) {
+        console.log(`[EmailMonitor] ⚠️ No parser matched this email`);
       }
     }
   } catch (err) {

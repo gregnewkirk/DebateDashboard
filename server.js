@@ -417,6 +417,84 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // === STREAM DECK ENDPOINTS ===
+  // All simple POST endpoints for Stream Deck HTTP buttons
+
+  // Reset everything — stop Marie, clear screen, lights off, return to standby
+  if (req.method === 'POST' && req.url === '/api/reset') {
+    marieStopSpeaking();
+    clearRecentHistory();
+    lightsOff().catch(() => {});
+    broadcast(wss, { type: 'marie_stop' });
+    broadcast(wss, { type: 'reset' });
+    console.log('[StreamDeck] RESET ALL');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Ad screen
+  if (req.method === 'POST' && req.url === '/api/adscreen') {
+    broadcast(wss, { type: 'show_ad' });
+    console.log('[StreamDeck] Ad screen');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Report card (test)
+  if (req.method === 'POST' && req.url === '/api/reportcard') {
+    broadcast(wss, {
+      type: 'report_card',
+      nickname: getSession()?.nickname || 'CHALLENGER',
+      grade: 'F',
+      gradeJoke: 'LOWER THAN SNAKE BELLY IN A WAGON RUT',
+      superlatives: ['MOST CREATIVE MISUSE OF STATISTICS', 'LIFETIME ACHIEVEMENT IN IGNORING PEER REVIEW', 'GOLD MEDAL IN MOVING GOALPOSTS'],
+      closer: "TODAY'S DEBATE BROUGHT TO YOU BY: CONFIRMATION BIAS",
+      stats: { claimCount: getSession()?.claimCount || 0, debunkedCount: getSession()?.debunkedCount || 0, misleadingCount: getSession()?.misleadingCount || 0, loopBreakerCount: getSession()?.loopBreakerCount || 0, momJokeCount: getSession()?.momJokeCount || 0 },
+    });
+    flashAllLights().catch(() => {});
+    console.log('[StreamDeck] Report card');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Loop breaker (test)
+  if (req.method === 'POST' && req.url === '/api/loopbreaker') {
+    broadcast(wss, {
+      type: 'loop_breaker',
+      claim: 'NATURAL IMMUNITY',
+      verdict: 'MISLEADING',
+      fact: 'VACCINES TRAIN IMMUNITY WITHOUT THE RISK OF SEVERE DISEASE OR DEATH.',
+      humor: "THE 'JUST GET SICK' STRATEGY — BROUGHT TO YOU BY PEOPLE WHO NEVER TOOK STATISTICS.",
+      source: 'NEJM, 2022',
+    });
+    flashLight().catch(() => {});
+    console.log('[StreamDeck] Loop breaker');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Bingo toggle
+  if (req.method === 'POST' && req.url === '/api/bingo/toggle') {
+    broadcast(wss, { type: 'bingo_toggle' });
+    console.log('[StreamDeck] Bingo toggle');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Credibility toggle
+  if (req.method === 'POST' && req.url === '/api/credibility/toggle') {
+    broadcast(wss, { type: 'credibility_toggle' });
+    console.log('[StreamDeck] Credibility toggle');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
   // Manual session start (S key)
   if (req.method === 'POST' && req.url === '/api/session/start') {
     if (!isActive()) {

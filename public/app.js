@@ -109,6 +109,21 @@ function connectWebSocket() {
             setTimeout(() => Marie.hideContainer(), 6000);
           }
           break;
+        // === STREAM DECK HANDLERS ===
+        case "reset":
+          returnToStandby();
+          break;
+        case "show_ad":
+          showAdScreen();
+          break;
+        case "bingo_toggle":
+          { const b = document.getElementById("bingo-board");
+            if (b) b.style.display = b.style.display === "none" ? "block" : "none"; }
+          break;
+        case "credibility_toggle":
+          { const c = document.getElementById("credibility-meter");
+            if (c) c.style.display = c.style.display === "none" ? "flex" : "none"; }
+          break;
         // === NEW FEATURE MESSAGE HANDLERS ===
         case "bingo_update":
           updateBingoBoard(msg);
