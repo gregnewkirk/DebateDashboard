@@ -724,7 +724,16 @@ function getRandomMyth() {
 function getRandomQuiz() {
   const quizzes = SCIENCE.QUIZZES || [];
   if (quizzes.length === 0) return null;
-  const q = quizzes[Math.floor(Math.random() * quizzes.length)];
+
+  // Filter out quizzes where the answer text appears in the question (gives it away)
+  const valid = quizzes.filter(q => {
+    const answer = (q.o[q.a] || '').toLowerCase();
+    const question = (q.q || '').toLowerCase();
+    return answer.length <= 3 || !question.includes(answer);
+  });
+
+  const pool = valid.length > 0 ? valid : quizzes;
+  const q = pool[Math.floor(Math.random() * pool.length)];
   return { question: q.q, options: q.o, answer: q.o[q.a], explanation: q.e };
 }
 
