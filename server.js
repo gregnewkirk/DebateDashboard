@@ -797,17 +797,23 @@ const server = http.createServer(async (req, res) => {
       const tt = getRandomThisOrThat();
       if (!tt) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
 
-      broadcast(wss, { type: 'this_or_that', question: tt.q, a: tt.a, al: tt.al, b: tt.b, bl: tt.bl, ans: tt.ans, explanation: tt.e, seconds: 20 });
+      const question = tt.question || tt.q;
+      const labelA = tt.al;
+      const labelB = tt.bl;
+      const answer = tt.ans || tt.answer;
+      const explanation = tt.explanation || tt.e;
 
-      const introText = `This or that! ${tt.q}. Option A: ${tt.al}. Option B: ${tt.bl}. Type A or B in chat! You have 20 seconds!`;
+      broadcast(wss, { type: 'this_or_that', question, a: tt.a, al: labelA, b: tt.b, bl: labelB, ans: answer, explanation, seconds: 20 });
+
+      const introText = `This or that! ${question}. Option A: ${labelA}. Option B: ${labelB}. Type A or B in chat! You have 20 seconds!`;
       smartTTS(introText).then(audioUrl => {
         marieStartSpeaking(12000);
         broadcast(wss, { type: 'marie_speak', text: introText, audioUrl });
       }).catch(() => {});
 
       setTimeout(async () => {
-        broadcast(wss, { type: 'this_or_that_reveal', ans: tt.ans, explanation: tt.e });
-        const revealText = `The answer is ${tt.ans}. ${tt.e}`;
+        broadcast(wss, { type: 'this_or_that_reveal', ans: answer, explanation });
+        const revealText = `The answer is ${answer}. ${explanation}`;
         try {
           const audio = await smartTTS(revealText);
           marieStartSpeaking();
@@ -816,7 +822,7 @@ const server = http.createServer(async (req, res) => {
       }, 23000);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, question: tt.q }));
+      res.end(JSON.stringify({ ok: true, question }));
     } catch (err) {
       if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
     }
