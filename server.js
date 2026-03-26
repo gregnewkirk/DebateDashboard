@@ -392,7 +392,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Marie ALL STOP — kill TTS queue and broadcast stop to clients
-  if (req.method === 'POST' && req.url === '/api/marie/stop') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/marie/stop') {
     marieStopSpeaking();
     broadcast(wss, { type: 'marie_stop' });
     // Kill ALL lights
@@ -409,7 +409,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Lights off
-  if (req.method === 'POST' && req.url === '/api/lights/off') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/lights/off') {
     lightsOff().catch(() => {});
     console.log('[Shelly] All lights off');
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -417,11 +417,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // === STREAM DECK URL ALIASES ===
+  // Map /api/streamdeck/* to the real endpoints so Stream Deck buttons work
+  if (req.url.startsWith('/api/streamdeck/') && (req.method === 'POST' || req.method === 'GET')) {
+    const action = req.url.replace('/api/streamdeck/', '');
+    const remap = {
+      'reset': '/api/reset',
+      'donation': '/api/payment',
+      'reportcard': '/api/reportcard',
+      'loopbreaker': '/api/loopbreaker',
+      'ad': '/api/adscreen',
+      'bingo': '/api/bingo/toggle',
+      'credibility': '/api/credibility/toggle',
+      'graph': '/api/graph/toggle',
+      'thisorthat': '/api/thisorthat',
+    };
+    if (remap[action]) {
+      req.url = remap[action];
+      // For donation test, inject test body
+      if (action === 'donation') {
+        req._testBody = JSON.stringify({ source: 'test', name: 'Test Donor', amount: '$5.00', message: 'Stream Deck test' });
+      }
+    }
+  }
+
   // === STREAM DECK ENDPOINTS ===
   // All simple POST endpoints for Stream Deck HTTP buttons
 
   // Reset everything — stop Marie, clear screen, lights off, return to standby
-  if (req.method === 'POST' && req.url === '/api/reset') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/reset') {
     marieStopSpeaking();
     clearRecentHistory();
     lightsOff().catch(() => {});
@@ -434,7 +458,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Ad screen
-  if (req.method === 'POST' && req.url === '/api/adscreen') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/adscreen') {
     broadcast(wss, { type: 'show_ad' });
     console.log('[StreamDeck] Ad screen');
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -443,7 +467,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Report card (test)
-  if (req.method === 'POST' && req.url === '/api/reportcard') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/reportcard') {
     broadcast(wss, {
       type: 'report_card',
       nickname: getSession()?.nickname || 'CHALLENGER',
@@ -460,8 +484,35 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Bingo toggle
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/bingo/toggle') {
+    broadcast(wss, { type: 'bingo_update', squares: getBingoBoard().squares, hits: getBingoBoard().hits });
+    console.log('[StreamDeck] Bingo toggled');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Credibility toggle
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/credibility/toggle') {
+    broadcast(wss, { type: 'credibility_update', value: getCredibility() });
+    console.log('[StreamDeck] Credibility toggled');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Graph toggle
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/graph/toggle') {
+    broadcast(wss, { type: 'conspiracy_graph_update', ...getGraph() });
+    console.log('[StreamDeck] Graph toggled');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
   // Loop breaker (test)
-  if (req.method === 'POST' && req.url === '/api/loopbreaker') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/loopbreaker') {
     broadcast(wss, {
       type: 'loop_breaker',
       claim: 'NATURAL IMMUNITY',
@@ -478,7 +529,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Bingo toggle
-  if (req.method === 'POST' && req.url === '/api/bingo/toggle') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/bingo/toggle') {
     broadcast(wss, { type: 'bingo_toggle' });
     console.log('[StreamDeck] Bingo toggle');
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -487,7 +538,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Credibility toggle
-  if (req.method === 'POST' && req.url === '/api/credibility/toggle') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/credibility/toggle') {
     broadcast(wss, { type: 'credibility_toggle' });
     console.log('[StreamDeck] Credibility toggle');
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -659,7 +710,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Quiz — Marie picks a random quiz and hosts it
-  if (req.method === 'POST' && req.url === '/api/quiz') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/quiz') {
     try {
       const quiz = getRandomQuiz();
       if (!quiz) {
@@ -723,7 +774,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // This or That — Marie picks a random comparison
-  if (req.method === 'POST' && req.url === '/api/thisorthat') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/thisorthat') {
     try {
       const tt = getRandomThisOrThat();
       if (!tt) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
@@ -797,7 +848,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Marie TTS test — generates speech and broadcasts to all clients
-  if (req.method === 'POST' && req.url === '/api/marie/test') {
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/marie/test') {
     const testData = {
       claim: 'VACCINES CAUSE AUTISM',
       verdict: 'DEBUNKED',
