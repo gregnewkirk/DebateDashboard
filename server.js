@@ -423,7 +423,7 @@ const server = http.createServer(async (req, res) => {
     const action = req.url.replace('/api/streamdeck/', '');
     const remap = {
       'reset': '/api/reset',
-      'donation': '/api/payment',
+      'donation': '/api/donation/test',
       'reportcard': '/api/reportcard',
       'loopbreaker': '/api/loopbreaker',
       'ad': '/api/adscreen',
@@ -506,6 +506,23 @@ const server = http.createServer(async (req, res) => {
   if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/graph/toggle') {
     broadcast(wss, { type: 'conspiracy_graph_update', ...getGraph() });
     console.log('[StreamDeck] Graph toggled');
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Test donation (Stream Deck / GET-friendly)
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/donation/test') {
+    const testPayment = { source: 'test', name: 'Test Donor', amount: '$5.00', message: 'Stream Deck test donation!' };
+    testPayment.name = testPayment.name.split(/\s+/)[0];
+    broadcast(wss, { type: 'payment', ...testPayment });
+    flashPaymentLight().catch(() => {});
+    const donationText = getDonationResponse(testPayment.name, testPayment.amount);
+    smartTTS(donationText).then(audioUrl => {
+      marieStartSpeaking();
+      broadcast(wss, { type: 'tts_ready', audioUrl, text: donationText });
+    }).catch(() => {});
+    console.log('[StreamDeck] Test donation');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
