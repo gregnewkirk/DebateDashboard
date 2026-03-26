@@ -152,6 +152,24 @@ function connectWebSocket() {
         case "quiz_reveal":
           revealQuizAnswer(msg);
           break;
+        case "this_or_that":
+          showThisOrThat(msg);
+          break;
+        case "science_fact":
+          showScienceFact(msg);
+          break;
+        case "myth_buster":
+          showMythBuster(msg);
+          break;
+        case "scientist_spotlight":
+          showScientistSpotlight(msg);
+          break;
+        case "outbreak":
+          showOutbreakCard(msg);
+          break;
+        case "breakthrough":
+          showBreakthroughCard(msg);
+          break;
         default:
           console.log("[WS] Unknown message type:", msg.type);
       }
@@ -1905,12 +1923,11 @@ function showQuiz(data) {
   if (!container) return;
   clearContainer(container);
 
-  // Quiz card
   const card = document.createElement("div");
   card.className = "quiz-card";
   card.id = "quiz-card";
 
-  // Header
+  // POP QUIZ header
   const header = document.createElement("div");
   header.className = "quiz-header slam-in";
   header.textContent = "POP QUIZ";
@@ -1922,10 +1939,11 @@ function showQuiz(data) {
   question.textContent = (data.question || "").toUpperCase();
   card.appendChild(question);
 
-  // Options
+  // Options — ALL 3 VISIBLE for the entire 30 seconds
   const optionsContainer = document.createElement("div");
   optionsContainer.className = "quiz-options";
-  const labels = ["A", "B", "C", "D"];
+  optionsContainer.id = "quiz-options";
+  const labels = ["A", "B", "C"];
   (data.options || []).forEach((opt, i) => {
     const optEl = document.createElement("div");
     optEl.className = "quiz-option bounce-in";
@@ -1943,9 +1961,17 @@ function showQuiz(data) {
   });
   card.appendChild(optionsContainer);
 
-  // Timer
+  // CTA — always visible during countdown
+  const cta = document.createElement("div");
+  cta.className = "quiz-cta";
+  cta.id = "quiz-cta";
+  cta.innerHTML = '<span class="quiz-cta-main">TYPE A, B, OR C IN CHAT!</span><span class="quiz-cta-sub">ANSWER REVEALS IN 30 SECONDS</span>';
+  card.appendChild(cta);
+
+  // Timer bar with time display
   const timerWrap = document.createElement("div");
   timerWrap.className = "quiz-timer-wrap";
+  timerWrap.id = "quiz-timer-wrap";
   const timerBar = document.createElement("div");
   timerBar.className = "quiz-timer-bar";
   timerBar.id = "quiz-timer-bar";
@@ -1953,14 +1979,20 @@ function showQuiz(data) {
   const timerText = document.createElement("div");
   timerText.className = "quiz-timer-text";
   timerText.id = "quiz-timer-text";
-  timerText.textContent = (data.seconds || 20) + "";
+  timerText.textContent = "0:" + String(data.seconds || 30).padStart(2, "0");
   timerWrap.appendChild(timerText);
   card.appendChild(timerWrap);
 
+  // Answer reveal container — hidden, slides up on reveal
+  const revealEl = document.createElement("div");
+  revealEl.className = "quiz-reveal";
+  revealEl.id = "quiz-reveal";
+  card.appendChild(revealEl);
+
   container.appendChild(card);
 
-  // Countdown
-  let remaining = data.seconds || 20;
+  // Countdown from 30s
+  let remaining = data.seconds || 30;
   const total = remaining;
   quizTimerInterval = setInterval(() => {
     remaining--;
@@ -1968,7 +2000,7 @@ function showQuiz(data) {
     const bar = document.getElementById("quiz-timer-bar");
     const text = document.getElementById("quiz-timer-text");
     if (bar) bar.style.width = pct + "%";
-    if (text) text.textContent = remaining;
+    if (text) text.textContent = "0:" + String(remaining).padStart(2, "0");
 
     // Color shift as time runs out
     if (bar) {
@@ -1978,7 +2010,7 @@ function showQuiz(data) {
 
     // Timer shake at 5s
     if (remaining === 5) {
-      const wrap = document.querySelector(".quiz-timer-wrap");
+      const wrap = document.getElementById("quiz-timer-wrap");
       if (wrap) wrap.classList.add("shake");
     }
 
@@ -1994,28 +2026,41 @@ function revealQuizAnswer(data) {
   if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
 
   const answerIndex = data.answer;
+  const labels = ["A", "B", "C"];
   SFX.verdict();
 
-  // Highlight correct answer
+  // Highlight correct answer green, fade wrong ones
   const options = document.querySelectorAll(".quiz-option");
   options.forEach((opt, i) => {
     if (i === answerIndex) {
-      opt.classList.add("quiz-correct", "slam-in");
+      opt.classList.add("quiz-correct");
     } else {
       opt.classList.add("quiz-wrong");
     }
   });
 
-  // Show explanation
-  const card = document.getElementById("quiz-card");
-  if (card && data.explanation) {
-    const explainEl = document.createElement("div");
-    explainEl.className = "quiz-explanation bounce-in";
-    explainEl.textContent = (data.explanation || "").toUpperCase();
-    card.appendChild(explainEl);
+  // Hide CTA
+  const cta = document.getElementById("quiz-cta");
+  if (cta) cta.style.display = "none";
+
+  // Hide timer
+  const timerWrap = document.getElementById("quiz-timer-wrap");
+  if (timerWrap) timerWrap.style.display = "none";
+
+  // Slide in the answer explanation from bottom
+  const revealEl = document.getElementById("quiz-reveal");
+  if (revealEl) {
+    const answerLetter = labels[answerIndex] || "?";
+    const answerText = (data.options && data.options[answerIndex]) ? data.options[answerIndex] : "";
+    revealEl.innerHTML =
+      '<div class="quiz-reveal-label">ANSWER</div>' +
+      '<div class="quiz-reveal-answer">' + answerLetter + ": " + (answerText).toUpperCase() + '</div>' +
+      '<div class="quiz-reveal-explanation">' + (data.explanation || "").toUpperCase() + '</div>';
+    revealEl.classList.add("show");
   }
 
-  // Hold 12 seconds then fade
+  // Hold 12 seconds then fade out
+  const card = document.getElementById("quiz-card");
   setTimeout(() => {
     if (card) card.classList.add("fade-out");
     setTimeout(() => {
@@ -2025,6 +2070,480 @@ function revealQuizAnswer(data) {
       startIdlePopIns();
     }, 1000);
   }, 12000);
+}
+
+// --- New Card Display Functions ---
+
+function showThisOrThat(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+  if (quizTimerInterval) clearInterval(quizTimerInterval);
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "tot-card";
+  card.id = "tot-card";
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "tot-header slam-in";
+  header.textContent = "THIS OR THAT";
+  card.appendChild(header);
+
+  // Question
+  const question = document.createElement("div");
+  question.className = "tot-question bounce-in";
+  question.textContent = (data.question || "").toUpperCase();
+  card.appendChild(question);
+
+  // VS layout
+  const vsWrap = document.createElement("div");
+  vsWrap.className = "tot-vs-wrap";
+
+  const optA = document.createElement("div");
+  optA.className = "tot-option-box tot-option-a bounce-in";
+  optA.innerHTML =
+    '<span class="tot-emoji">' + (data.emojiA || "A") + '</span>' +
+    '<span class="tot-label">' + (data.labelA || "OPTION A").toUpperCase() + '</span>' +
+    '<span class="tot-letter">A</span>';
+
+  const vsDivider = document.createElement("div");
+  vsDivider.className = "tot-vs-divider";
+  vsDivider.textContent = "VS";
+
+  const optB = document.createElement("div");
+  optB.className = "tot-option-box tot-option-b bounce-in";
+  optB.innerHTML =
+    '<span class="tot-emoji">' + (data.emojiB || "B") + '</span>' +
+    '<span class="tot-label">' + (data.labelB || "OPTION B").toUpperCase() + '</span>' +
+    '<span class="tot-letter">B</span>';
+
+  vsWrap.appendChild(optA);
+  vsWrap.appendChild(vsDivider);
+  vsWrap.appendChild(optB);
+  card.appendChild(vsWrap);
+
+  // CTA
+  const cta = document.createElement("div");
+  cta.className = "tot-cta";
+  cta.id = "tot-cta";
+  cta.innerHTML = '<span class="tot-cta-main">TYPE A OR B IN CHAT!</span>';
+  card.appendChild(cta);
+
+  // Timer
+  const timerWrap = document.createElement("div");
+  timerWrap.className = "quiz-timer-wrap";
+  timerWrap.id = "tot-timer-wrap";
+  const timerBar = document.createElement("div");
+  timerBar.className = "quiz-timer-bar";
+  timerBar.id = "tot-timer-bar";
+  timerWrap.appendChild(timerBar);
+  const timerText = document.createElement("div");
+  timerText.className = "quiz-timer-text";
+  timerText.id = "tot-timer-text";
+  timerText.textContent = "0:20";
+  timerWrap.appendChild(timerText);
+  card.appendChild(timerWrap);
+
+  // Reveal container
+  const revealEl = document.createElement("div");
+  revealEl.className = "tot-reveal";
+  revealEl.id = "tot-reveal";
+  card.appendChild(revealEl);
+
+  container.appendChild(card);
+
+  // 20s countdown
+  let remaining = data.seconds || 20;
+  const total = remaining;
+  quizTimerInterval = setInterval(() => {
+    remaining--;
+    const pct = (remaining / total) * 100;
+    const bar = document.getElementById("tot-timer-bar");
+    const text = document.getElementById("tot-timer-text");
+    if (bar) bar.style.width = pct + "%";
+    if (text) text.textContent = "0:" + String(remaining).padStart(2, "0");
+    if (bar) {
+      if (remaining <= 5) bar.style.background = "var(--red)";
+      else if (remaining <= 10) bar.style.background = "var(--gold)";
+    }
+    if (remaining <= 0) {
+      clearInterval(quizTimerInterval);
+      quizTimerInterval = null;
+      // Auto-reveal
+      revealThisOrThat(data);
+    }
+  }, 1000);
+}
+
+function revealThisOrThat(data) {
+  if (quizTimerInterval) { clearInterval(quizTimerInterval); quizTimerInterval = null; }
+  SFX.verdict();
+
+  const cta = document.getElementById("tot-cta");
+  if (cta) cta.style.display = "none";
+  const timerWrap = document.getElementById("tot-timer-wrap");
+  if (timerWrap) timerWrap.style.display = "none";
+
+  const revealEl = document.getElementById("tot-reveal");
+  if (revealEl) {
+    revealEl.innerHTML =
+      '<div class="tot-reveal-label">ANSWER</div>' +
+      '<div class="tot-reveal-answer">' + (data.answer || "").toUpperCase() + '</div>' +
+      '<div class="tot-reveal-explanation">' + (data.explanation || "").toUpperCase() + '</div>';
+    revealEl.classList.add("show");
+  }
+
+  const card = document.getElementById("tot-card");
+  setTimeout(() => {
+    if (card) card.classList.add("fade-out");
+    setTimeout(() => {
+      const container = document.getElementById("main-content");
+      if (container) clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 12000);
+}
+
+function showScienceFact(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "science-fact-card";
+  card.id = "science-fact-card";
+
+  const header = document.createElement("div");
+  header.className = "sf-header slam-in";
+  header.textContent = "SCIENCE FACT";
+  card.appendChild(header);
+
+  const icon = document.createElement("div");
+  icon.className = "sf-icon bounce-in";
+  icon.textContent = data.icon || "\uD83E\uDDEC";
+  card.appendChild(icon);
+
+  const title = document.createElement("div");
+  title.className = "sf-title bounce-in";
+  title.textContent = (data.title || "").toUpperCase();
+  card.appendChild(title);
+
+  const body = document.createElement("div");
+  body.className = "sf-body bounce-in";
+  body.textContent = (data.body || data.description || "").toUpperCase();
+  card.appendChild(body);
+
+  if (data.source) {
+    const source = document.createElement("div");
+    source.className = "sf-source";
+    source.textContent = "SOURCE: " + (data.source || "").toUpperCase();
+    card.appendChild(source);
+  }
+
+  container.appendChild(card);
+
+  // Hold 15 seconds then fade
+  setTimeout(() => {
+    card.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 15000);
+}
+
+function showMythBuster(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "myth-buster-card";
+  card.id = "myth-buster-card";
+
+  const header = document.createElement("div");
+  header.className = "myth-header slam-in";
+  header.textContent = "MYTH BUSTED";
+  card.appendChild(header);
+
+  // Verdict badge
+  const verdictClass = (data.verdict || "").toLowerCase() === "false" ? "myth-false" :
+    (data.verdict || "").toLowerCase() === "misleading" ? "myth-misleading" : "myth-misunderstood";
+  const verdict = document.createElement("div");
+  verdict.className = "myth-verdict-badge " + verdictClass;
+  verdict.textContent = (data.verdict || "FALSE").toUpperCase();
+  card.appendChild(verdict);
+
+  // The myth claim
+  const claim = document.createElement("div");
+  claim.className = "myth-claim bounce-in";
+  claim.textContent = "\u201C" + (data.myth || data.claim || "").toUpperCase() + "\u201D";
+  card.appendChild(claim);
+
+  // Conspiracy context
+  if (data.conspiracy) {
+    const conspiracy = document.createElement("div");
+    conspiracy.className = "myth-conspiracy";
+    conspiracy.textContent = (data.conspiracy || "").toUpperCase();
+    card.appendChild(conspiracy);
+  }
+
+  // The actual science
+  const scienceLabel = document.createElement("div");
+  scienceLabel.className = "myth-science-label";
+  scienceLabel.textContent = "THE ACTUAL SCIENCE";
+  card.appendChild(scienceLabel);
+
+  const science = document.createElement("div");
+  science.className = "myth-science bounce-in";
+  science.textContent = (data.science || data.fact || "").toUpperCase();
+  card.appendChild(science);
+
+  if (data.evidence) {
+    const evidence = document.createElement("div");
+    evidence.className = "myth-evidence";
+    evidence.textContent = "EVIDENCE: " + (data.evidence || "").toUpperCase();
+    card.appendChild(evidence);
+  }
+
+  container.appendChild(card);
+
+  setTimeout(() => {
+    card.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 18000);
+}
+
+function showScientistSpotlight(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "spotlight-card";
+  card.id = "spotlight-card";
+
+  const header = document.createElement("div");
+  header.className = "spot-header slam-in";
+  header.textContent = "SCIENTIST SPOTLIGHT";
+  card.appendChild(header);
+
+  if (data.image || data.img) {
+    const img = document.createElement("img");
+    img.className = "spot-photo";
+    img.src = data.image || data.img;
+    img.alt = data.name || "";
+    img.onerror = function() { this.style.display = "none"; };
+    card.appendChild(img);
+  }
+
+  const name = document.createElement("div");
+  name.className = "spot-name bounce-in";
+  name.textContent = (data.name || "").toUpperCase();
+  card.appendChild(name);
+
+  if (data.title) {
+    const title = document.createElement("div");
+    title.className = "spot-title";
+    title.textContent = (data.title || "").toUpperCase();
+    card.appendChild(title);
+  }
+
+  if (data.institution || data.inst) {
+    const inst = document.createElement("div");
+    inst.className = "spot-inst";
+    inst.textContent = (data.institution || data.inst || "").toUpperCase();
+    card.appendChild(inst);
+  }
+
+  if (data.tags && data.tags.length) {
+    const tagsWrap = document.createElement("div");
+    tagsWrap.className = "spot-tags";
+    data.tags.forEach(function(t) {
+      const tag = document.createElement("span");
+      tag.className = "spot-tag";
+      tag.textContent = t.toUpperCase();
+      tagsWrap.appendChild(tag);
+    });
+    card.appendChild(tagsWrap);
+  }
+
+  if (data.breakthrough) {
+    const btWrap = document.createElement("div");
+    btWrap.className = "spot-breakthrough";
+    btWrap.innerHTML =
+      '<div class="spot-bt-label">LATEST BREAKTHROUGH</div>' +
+      '<div class="spot-bt-text">' + (data.breakthrough || "").toUpperCase() + '</div>';
+    card.appendChild(btWrap);
+  }
+
+  container.appendChild(card);
+
+  setTimeout(() => {
+    card.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 18000);
+}
+
+function showOutbreakCard(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "outbreak-card";
+  card.id = "outbreak-card";
+
+  const header = document.createElement("div");
+  header.className = "outbreak-header slam-in";
+  header.innerHTML =
+    '<span class="outbreak-emoji">' + (data.emoji || "\uD83E\uDDA0") + '</span>' +
+    '<span class="outbreak-title">OUTBREAK REPORT</span>';
+  card.appendChild(header);
+
+  const disease = document.createElement("div");
+  disease.className = "outbreak-disease-badge bounce-in";
+  disease.textContent = (data.disease || "").toUpperCase();
+  card.appendChild(disease);
+
+  if (data.status || data.year) {
+    const status = document.createElement("div");
+    status.className = "outbreak-status";
+    status.textContent = ((data.status || "") + " \u00B7 " + (data.year || "")).toUpperCase();
+    card.appendChild(status);
+  }
+
+  const headline = document.createElement("div");
+  headline.className = "outbreak-headline bounce-in";
+  headline.textContent = (data.headline || "").toUpperCase();
+  card.appendChild(headline);
+
+  // Stats grid
+  if (data.stats && data.stats.length) {
+    const statsGrid = document.createElement("div");
+    statsGrid.className = "outbreak-stats-grid";
+    data.stats.forEach(function(s) {
+      const stat = document.createElement("div");
+      stat.className = "ob-stat";
+      const trendClass = s.trend === "up" ? "ob-val-up" : s.trend === "down" ? "ob-val-down" : "ob-val-baseline";
+      stat.innerHTML =
+        '<div class="ob-stat-val ' + trendClass + '">' + (s.value || "") + '</div>' +
+        '<div class="ob-stat-label">' + (s.label || "").toUpperCase() + '</div>';
+      statsGrid.appendChild(stat);
+    });
+    card.appendChild(statsGrid);
+  }
+
+  if (data.detail) {
+    const detail = document.createElement("div");
+    detail.className = "outbreak-detail";
+    detail.textContent = (data.detail || "").toUpperCase();
+    card.appendChild(detail);
+  }
+
+  if (data.cdc) {
+    const cdc = document.createElement("div");
+    cdc.className = "outbreak-cdc";
+    cdc.textContent = (data.cdc || "").toUpperCase();
+    card.appendChild(cdc);
+  }
+
+  container.appendChild(card);
+
+  setTimeout(() => {
+    card.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 18000);
+}
+
+function showBreakthroughCard(data) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  const container = document.getElementById("main-content");
+  if (!container) return;
+  clearContainer(container);
+
+  const card = document.createElement("div");
+  card.className = "breakthrough-card";
+  card.id = "breakthrough-card";
+
+  const header = document.createElement("div");
+  header.className = "bt-header slam-in";
+  header.textContent = "BREAKTHROUGH";
+  card.appendChild(header);
+
+  if (data.year) {
+    const year = document.createElement("div");
+    year.className = "bt-year bounce-in";
+    year.textContent = data.year;
+    card.appendChild(year);
+  }
+
+  const icon = document.createElement("div");
+  icon.className = "bt-icon bounce-in";
+  icon.textContent = data.emoji || "\uD83D\uDD2C";
+  card.appendChild(icon);
+
+  const title = document.createElement("div");
+  title.className = "bt-title bounce-in";
+  title.textContent = (data.title || "").toUpperCase();
+  card.appendChild(title);
+
+  const simple = document.createElement("div");
+  simple.className = "bt-simple bounce-in";
+  simple.textContent = (data.simple || data.description || "").toUpperCase();
+  card.appendChild(simple);
+
+  if (data.impact) {
+    const impactWrap = document.createElement("div");
+    impactWrap.className = "bt-impact";
+    impactWrap.innerHTML =
+      '<div class="bt-impact-label">WHY IT MATTERS TODAY</div>' +
+      '<div class="bt-impact-text">' + (data.impact || "").toUpperCase() + '</div>';
+    card.appendChild(impactWrap);
+  }
+
+  container.appendChild(card);
+
+  setTimeout(() => {
+    card.classList.add("fade-out");
+    setTimeout(() => {
+      clearContainer(container);
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 1000);
+  }, 18000);
 }
 
 // --- Debug Keyboard Shortcuts ---
@@ -2107,6 +2626,36 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "z" || e.key === "Z") {
     // Z = trigger quiz via server (Marie hosts it)
     fetch("/api/quiz", { method: "POST" }).catch(() => {});
+  }
+  if (e.key === "x" || e.key === "X") {
+    // X = trigger this-or-that test card
+    showThisOrThat({
+      question: "WHICH IS MORE DANGEROUS?",
+      emojiA: "\uD83E\uDDA0", labelA: "MEASLES",
+      emojiB: "\uD83D\uDC89", labelB: "MMR VACCINE",
+      answer: "MEASLES — 1-2 DEATHS PER 1000 CASES",
+      explanation: "THE MMR VACCINE HAS A SERIOUS ADVERSE EVENT RATE OF ABOUT 1 IN A MILLION. MEASLES KILLS 1-2 PER 1,000 INFECTED.",
+      seconds: 20
+    });
+  }
+  if (e.key === "f" || e.key === "F") {
+    // F = trigger science fact test card
+    showScienceFact({
+      icon: "\uD83E\uDDEC",
+      title: "YOUR DNA IS 99.9% IDENTICAL TO EVERY OTHER HUMAN",
+      body: "THE 0.1% DIFFERENCE ACCOUNTS FOR ALL HUMAN GENETIC VARIATION — SKIN COLOR, HEIGHT, DISEASE RISK. WE ARE FAR MORE ALIKE THAN DIFFERENT.",
+      source: "HUMAN GENOME PROJECT, NIH"
+    });
+  }
+  if (e.key === "m" || e.key === "M") {
+    // M = trigger myth buster test card
+    showMythBuster({
+      verdict: "FALSE",
+      myth: "VACCINES CAUSE AUTISM",
+      conspiracy: "ANTI-VAX GROUPS CITE A RETRACTED 1998 STUDY BY ANDREW WAKEFIELD",
+      science: "DOZENS OF STUDIES INVOLVING MILLIONS OF CHILDREN HAVE FOUND ZERO LINK BETWEEN VACCINES AND AUTISM.",
+      evidence: "LANCET RETRACTION (2010), COCHRANE REVIEW (2012), CDC STUDIES"
+    });
   }
   if (e.key === "b" || e.key === "B") {
     // Toggle bingo board visibility

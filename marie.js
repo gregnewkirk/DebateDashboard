@@ -737,6 +737,20 @@ function getRandomQuiz() {
   return { question: q.q, options: q.o, answer: q.o[q.a], explanation: q.e };
 }
 
+function getRandomThisOrThat() {
+  const pool = SCIENCE.THIS_OR_THAT || [];
+  if (pool.length === 0) return null;
+  const tt = pool[Math.floor(Math.random() * pool.length)];
+  return { question: tt.q, a: tt.a, al: tt.al, b: tt.b, bl: tt.bl, ans: tt.ans, explanation: tt.e };
+}
+
+function getRandomOutbreak() {
+  const pool = SCIENCE.OUTBREAKS || [];
+  if (pool.length === 0) return null;
+  const o = pool[Math.floor(Math.random() * pool.length)];
+  return o;
+}
+
 function getRandomBreakthrough() {
   const breakthroughs = SCIENCE.BREAKTHROUGHS || [];
   if (breakthroughs.length === 0) return null;
@@ -783,5 +797,6 @@ module.exports = {
   generateResponse, shouldRespond, shouldStop, getRandomFallback, matchConversation,
   getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse,
   getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough,
+  getRandomThisOrThat, getRandomOutbreak,
   SCIENCE,
 };

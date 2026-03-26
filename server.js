@@ -15,7 +15,7 @@ const { onFactCheck, onLoopBreaker, onMomJoke, onPayment, onSessionStart, onSess
 const { startEmailMonitor } = require('./emailmonitor');
 const { initTTS, generateSpeech } = require('./tts');
 const { initCache, getCachedAudio, startPreRendering, getCacheStats: getTTSCacheStats } = require('./tts_cache');
-const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse } = require('./marie');
+const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getRandomThisOrThat, getRandomOutbreak, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse } = require('./marie');
 const { startMicListener, getMicStatus, muteMic, isMuted } = require('./mic');
 const { processEvent: moodEvent, getMood, resetMood } = require('./mood');
 const { resetCredibility, processClaimResult, processLoopBreaker: credLoopBreaker, getCredibility, getCredibilityComment } = require('./credibility');
@@ -640,6 +640,80 @@ const server = http.createServer(async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: false, error: err.message }));
       }
+    }
+    return;
+  }
+
+  // This or That — Marie picks a random comparison
+  if (req.method === 'POST' && req.url === '/api/thisorthat') {
+    try {
+      const tt = getRandomThisOrThat();
+      if (!tt) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+
+      broadcast(wss, { type: 'this_or_that', question: tt.q, a: tt.a, al: tt.al, b: tt.b, bl: tt.bl, ans: tt.ans, explanation: tt.e, seconds: 20 });
+
+      const introText = `This or that! ${tt.q}. Option A: ${tt.al}. Option B: ${tt.bl}. Type A or B in chat! You have 20 seconds!`;
+      smartTTS(introText).then(audioUrl => {
+        marieStartSpeaking(12000);
+        broadcast(wss, { type: 'marie_speak', text: introText, audioUrl });
+      }).catch(() => {});
+
+      setTimeout(async () => {
+        broadcast(wss, { type: 'this_or_that_reveal', ans: tt.ans, explanation: tt.e });
+        const revealText = `The answer is ${tt.ans}. ${tt.e}`;
+        try {
+          const audio = await smartTTS(revealText);
+          marieStartSpeaking();
+          broadcast(wss, { type: 'marie_speak', text: revealText, audioUrl: audio });
+        } catch {}
+      }, 23000);
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, question: tt.q }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Science Fact card
+  if (req.method === 'POST' && req.url === '/api/sciencefact') {
+    try {
+      const fact = getRandomFact();
+      if (!fact) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      broadcast(wss, { type: 'science_fact', ...fact });
+
+      const speech = typeof fact === 'string' ? fact : `${fact.title || ''}. ${fact.description || fact.detail || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Myth Buster card
+  if (req.method === 'POST' && req.url === '/api/mythbuster') {
+    try {
+      const myth = getRandomMyth();
+      if (!myth) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      broadcast(wss, { type: 'myth_buster', ...myth });
+
+      const speech = typeof myth === 'string' ? myth : `Myth: ${myth.myth || ''}. Verdict: ${myth.verdict || ''}. ${myth.science || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
     }
     return;
   }
