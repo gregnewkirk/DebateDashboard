@@ -1274,47 +1274,61 @@ body {
 }
 
 /* ===========================================
-   CONSPIRACY BINGO BOARD
+   CONSPIRACY BINGO — Full-page card
    =========================================== */
 .bingo-board {
   position: fixed;
-  bottom: 200px;
-  left: 40px;
-  width: 400px;
-  z-index: 500;
-  background: rgba(0,14,42,0.92);
-  border: 3px solid var(--gold);
-  border-radius: 12px;
-  padding: 12px;
+  top: 0; left: 0;
+  width: 1080px;
+  height: 1920px;
+  z-index: 1400;
+  background: rgba(0,14,42,0.96);
   display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px;
 }
 
 .bingo-header {
-  font-size: 28px;
+  font-size: 64px;
   font-weight: 900;
   color: var(--gold);
   text-align: center;
-  letter-spacing: 6px;
-  margin-bottom: 8px;
+  letter-spacing: 12px;
+  text-shadow: 0 0 30px rgba(255,215,0,0.3);
+}
+
+.bingo-sub {
+  font-size: 24px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 8px;
+  margin-bottom: 10px;
 }
 
 .bingo-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
+  gap: 8px;
+  width: 95%;
 }
 
 .bingo-cell {
   background: var(--dark-navy);
-  border: 2px solid rgba(255,215,0,0.2);
-  border-radius: 4px;
-  padding: 6px 2px;
+  border: 3px solid rgba(255,215,0,0.2);
+  border-radius: 8px;
+  padding: 16px 6px;
   text-align: center;
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: rgba(255,255,255,0.5);
   letter-spacing: 1px;
-  transition: all 0.3s;
+  transition: all 0.4s;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bingo-cell.hit {
@@ -1322,6 +1336,14 @@ body {
   border-color: var(--gold);
   color: var(--white);
   text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  box-shadow: 0 0 20px rgba(191,10,48,0.4);
+}
+
+.bingo-cell.free {
+  background: var(--gold);
+  color: var(--deep);
+  border-color: var(--gold);
+  font-size: 16px;
 }
 
 .bingo-complete {
@@ -1329,59 +1351,72 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 80px;
+  font-size: 120px;
   font-weight: 900;
   color: var(--gold);
-  text-shadow: 0 0 40px rgba(255,215,0,0.6);
-  letter-spacing: 12px;
+  text-shadow: 0 0 60px rgba(255,215,0,0.6);
+  letter-spacing: 16px;
+  z-index: 10;
+}
+
+.bingo-hits-count {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 6px;
 }
 
 /* ===========================================
-   CREDIBILITY METER
+   CREDIBILITY METER — Full-width horizontal bar
    =========================================== */
 .credibility-meter {
   position: fixed;
-  right: 40px;
-  top: 320px;
-  width: 300px;
+  top: 0; left: 0;
+  width: 1080px;
+  height: 1920px;
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  z-index: 500;
-  background: rgba(0,14,42,0.85);
-  border: 3px solid var(--gold);
-  border-radius: 12px;
-  padding: 16px;
+  justify-content: center;
+  gap: 30px;
+  z-index: 1400;
+  background: rgba(0,14,42,0.96);
 }
 
 .cred-label {
-  font-size: 22px;
+  font-size: 52px;
   font-weight: 900;
   color: var(--gold);
-  letter-spacing: 8px;
+  letter-spacing: 16px;
 }
 
 .cred-bar-bg {
-  width: 100%;
-  height: 24px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 12px;
+  width: 90%;
+  height: 80px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 40px;
   overflow: hidden;
-  border: 2px solid rgba(255,215,0,0.3);
+  border: 4px solid var(--gold);
 }
 
 .cred-bar-fill {
   height: 100%;
   background: #00cc44;
-  border-radius: 10px;
-  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 36px;
+  transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cred-value {
-  font-size: 48px;
+  font-size: 160px;
   font-weight: 900;
   color: var(--white);
+  text-shadow: 0 0 40px rgba(255,255,255,0.2);
+}
+
+.cred-subtitle {
+  font-size: 28px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 10px;
 }
 
 /* ===========================================
@@ -1403,17 +1438,63 @@ body {
 }
 
 /* ===========================================
-   CONSPIRACY NETWORK GRAPH
+   CONSPIRACY NETWORK GRAPH — Full-page card
    =========================================== */
-.conspiracy-graph-canvas {
+.graph-overlay {
   position: fixed;
-  bottom: 0;
-  left: 0;
+  top: 0; left: 0;
   width: 1080px;
-  height: 400px;
+  height: 1920px;
   display: none;
-  z-index: 400;
-  pointer-events: none;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1400;
+  background: rgba(0,14,42,0.96);
+  padding: 40px 20px;
+}
+
+.graph-header {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 10px;
+  text-shadow: 0 0 30px rgba(255,215,0,0.3);
+  margin-bottom: 10px;
+}
+
+.graph-sub {
+  font-size: 22px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 8px;
+  margin-bottom: 20px;
+}
+
+.conspiracy-graph-canvas {
+  width: 1000px;
+  height: 1400px;
+  display: block;
+}
+
+.graph-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 20px;
+}
+
+.graph-stat {
+  text-align: center;
+}
+
+.graph-stat-value {
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.graph-stat-label {
+  font-size: 18px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 4px;
 }
 
 /* ===========================================

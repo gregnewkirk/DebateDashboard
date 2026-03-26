@@ -1474,22 +1474,54 @@ function updateBingoBoard(data) {
   board.innerHTML = "";
 
   const header = document.createElement("div");
-  header.className = "bingo-header";
+  header.className = "bingo-header slam-in";
   header.textContent = "CONSPIRACY BINGO";
   board.appendChild(header);
+
+  const sub = document.createElement("div");
+  sub.className = "bingo-sub";
+  sub.textContent = "WHAT WILL THEY SAY NEXT?";
+  board.appendChild(sub);
 
   const grid = document.createElement("div");
   grid.className = "bingo-grid";
 
-  (data.squares || []).forEach((sq, i) => {
+  const squares = data.squares || [];
+  const hits = data.hits || [];
+
+  squares.forEach((sq, i) => {
     const cell = document.createElement("div");
-    cell.className = "bingo-cell" + ((data.hits || []).includes(i) ? " hit" : "");
-    cell.textContent = sq;
+    // Center square = FREE SPACE
+    if (i === 12 && squares.length === 25) {
+      cell.className = "bingo-cell free";
+      cell.textContent = "FREE SPACE";
+    } else {
+      cell.className = "bingo-cell" + (hits.includes(i) ? " hit" : "");
+      cell.textContent = sq;
+    }
     grid.appendChild(cell);
   });
 
   board.appendChild(grid);
-  board.style.display = "block";
+
+  // Hit counter
+  const counter = document.createElement("div");
+  counter.className = "bingo-hits-count";
+  counter.textContent = hits.length + " / " + squares.length + " DETECTED";
+  board.appendChild(counter);
+
+  // Toggle display
+  board.style.display = "flex";
+}
+
+function toggleBingoBoard() {
+  const board = document.getElementById("bingo-board");
+  if (board && board.style.display !== "none") {
+    board.style.display = "none";
+  } else {
+    // Request fresh data from server
+    fetch("/api/bingo/toggle").catch(() => {});
+  }
 }
 
 function animateBingoHit(data) {
@@ -1497,6 +1529,11 @@ function animateBingoHit(data) {
   if (cells[data.index]) {
     cells[data.index].classList.add("hit", "slam-in");
     SFX.factCheck();
+  }
+  // Update counter
+  const counter = document.querySelector(".bingo-hits-count");
+  if (counter && data.totalHits !== undefined) {
+    counter.textContent = data.totalHits + " DETECTED";
   }
 }
 
@@ -1528,9 +1565,19 @@ function initCredibilityMeter() {
       <div class="cred-bar-fill" id="cred-bar-fill" style="width:50%"></div>
     </div>
     <div class="cred-value" id="cred-value">50%</div>
+    <div class="cred-subtitle">CHALLENGER TRUTH SCORE</div>
   `;
   document.body.appendChild(meter);
   return meter;
+}
+
+function toggleCredibilityMeter() {
+  const meter = document.getElementById("credibility-meter");
+  if (meter && meter.style.display !== "none") {
+    meter.style.display = "none";
+  } else {
+    fetch("/api/credibility/toggle").catch(() => {});
+  }
 }
 
 function updateCredibilityMeter(data) {
@@ -1620,45 +1667,105 @@ function updateMoodIndicator(data) {
 // FEATURE #4: CONSPIRACY NETWORK GRAPH
 // ===========================================
 
+let graphOverlay = null;
 let graphCanvas = null;
 let graphNodes = [];
 let graphEdges = [];
 
+function initGraphOverlay() {
+  if (graphOverlay) return graphOverlay;
+  graphOverlay = document.createElement("div");
+  graphOverlay.id = "graph-overlay";
+  graphOverlay.className = "graph-overlay";
+
+  const header = document.createElement("div");
+  header.className = "graph-header";
+  header.textContent = "CONSPIRACY MAP";
+  graphOverlay.appendChild(header);
+
+  const sub = document.createElement("div");
+  sub.className = "graph-sub";
+  sub.textContent = "HOW THEIR CLAIMS CONNECT";
+  graphOverlay.appendChild(sub);
+
+  graphCanvas = document.createElement("canvas");
+  graphCanvas.id = "conspiracy-graph-canvas";
+  graphCanvas.className = "conspiracy-graph-canvas";
+  graphCanvas.width = 1000;
+  graphCanvas.height = 1400;
+  graphOverlay.appendChild(graphCanvas);
+
+  const stats = document.createElement("div");
+  stats.className = "graph-stats";
+  stats.id = "graph-stats";
+  stats.innerHTML = `
+    <div class="graph-stat"><div class="graph-stat-value" id="graph-node-count">0</div><div class="graph-stat-label">CLAIMS</div></div>
+    <div class="graph-stat"><div class="graph-stat-value" id="graph-edge-count">0</div><div class="graph-stat-label">CONNECTIONS</div></div>
+  `;
+  graphOverlay.appendChild(stats);
+
+  document.body.appendChild(graphOverlay);
+  return graphOverlay;
+}
+
 function updateConspiracyGraph(data) {
   graphNodes = data.nodes || [];
   graphEdges = data.edges || [];
+  const overlay = initGraphOverlay();
+  overlay.style.display = "flex";
 
-  if (!graphCanvas) {
-    graphCanvas = document.createElement("canvas");
-    graphCanvas.id = "conspiracy-graph-canvas";
-    graphCanvas.className = "conspiracy-graph-canvas";
-    graphCanvas.width = 1080;
-    graphCanvas.height = 400;
-    document.body.appendChild(graphCanvas);
-  }
+  const nodeCount = document.getElementById("graph-node-count");
+  const edgeCount = document.getElementById("graph-edge-count");
+  if (nodeCount) nodeCount.textContent = graphNodes.length;
+  if (edgeCount) edgeCount.textContent = graphEdges.length;
 
   drawGraph();
 }
 
+function toggleConspiracyGraph() {
+  const overlay = document.getElementById("graph-overlay");
+  if (overlay && overlay.style.display !== "none") {
+    overlay.style.display = "none";
+  } else {
+    fetch("/api/graph/toggle").catch(() => {});
+  }
+}
+
 function drawGraph() {
   if (!graphCanvas || graphNodes.length === 0) return;
+  const W = 1000, H = 1400;
   const ctx = graphCanvas.getContext("2d");
-  ctx.clearRect(0, 0, 1080, 400);
+  ctx.clearRect(0, 0, W, H);
 
-  // Position nodes in a circle
-  const cx = 540, cy = 200, radius = 150;
+  // Force-directed layout — spread nodes across the full canvas
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.38;
   const positions = graphNodes.map((n, i) => {
     const angle = (i / graphNodes.length) * Math.PI * 2 - Math.PI / 2;
-    return { x: cx + Math.cos(angle) * radius, y: cy + Math.sin(angle) * radius, label: n.label, weight: n.weight || 1 };
+    const jitter = (n.weight || 1) * 15;
+    return {
+      x: cx + Math.cos(angle) * (radius + jitter),
+      y: cy + Math.sin(angle) * (radius + jitter),
+      label: n.label || n,
+      weight: n.weight || 1,
+    };
   });
 
-  // Draw edges
-  ctx.strokeStyle = "rgba(191, 10, 48, 0.4)";
-  ctx.lineWidth = 2;
+  // Draw edges with glow
   for (const edge of graphEdges) {
     const from = positions[edge.from];
     const to = positions[edge.to];
     if (from && to) {
+      // Glow
+      ctx.strokeStyle = "rgba(191, 10, 48, 0.15)";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      // Core line
+      ctx.strokeStyle = "rgba(191, 10, 48, 0.6)";
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(from.x, from.y);
       ctx.lineTo(to.x, to.y);
@@ -1668,22 +1775,29 @@ function drawGraph() {
 
   // Draw nodes
   for (const pos of positions) {
-    const r = 8 + pos.weight * 4;
+    const r = 12 + pos.weight * 8;
+
+    // Glow
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, r + 6, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(191, 10, 48, 0.15)";
+    ctx.fill();
+
+    // Node circle
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
     ctx.fillStyle = "#BF0A30";
     ctx.fill();
     ctx.strokeStyle = "#FFD700";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
 
+    // Label
     ctx.fillStyle = "#FFFFFF";
-    ctx.font = "bold 14px Oswald";
+    ctx.font = "bold " + Math.max(16, 14 + pos.weight * 2) + "px Oswald, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(pos.label, pos.x, pos.y - r - 6);
+    ctx.fillText(pos.label, pos.x, pos.y - r - 10);
   }
-
-  graphCanvas.style.display = "block";
 }
 
 // ===========================================
@@ -2673,40 +2787,13 @@ document.addEventListener("keydown", (e) => {
     });
   }
   if (e.key === "b" || e.key === "B") {
-    // Toggle bingo board visibility
-    const board = document.getElementById("bingo-board");
-    if (board) board.style.display = board.style.display === "none" ? "block" : "none";
+    toggleBingoBoard();
   }
   if (e.key === "g" || e.key === "G") {
-    // Toggle conspiracy graph — create with demo data if doesn't exist
-    let graph = document.getElementById("conspiracy-graph-canvas");
-    if (!graph) {
-      updateConspiracyGraph({
-        nodes: [
-          { label: "VACCINES", weight: 3 },
-          { label: "BIG PHARMA", weight: 2 },
-          { label: "BILL GATES", weight: 1 },
-          { label: "5G", weight: 1 },
-          { label: "FLAT EARTH", weight: 2 },
-        ],
-        edges: [
-          { from: 0, to: 1 }, { from: 1, to: 2 },
-          { from: 2, to: 3 }, { from: 0, to: 3 },
-          { from: 3, to: 4 },
-        ],
-      });
-    } else {
-      graph.style.display = graph.style.display === "none" ? "block" : "none";
-    }
+    toggleConspiracyGraph();
   }
   if (e.key === "c" || e.key === "C") {
-    // Toggle credibility meter — create if doesn't exist
-    let meter = document.getElementById("credibility-meter");
-    if (!meter) {
-      updateCredibilityMeter({ value: 50 });
-    } else {
-      meter.style.display = meter.style.display === "none" ? "flex" : "none";
-    }
+    toggleCredibilityMeter();
   }
   if (e.key === "l" || e.key === "L") {
     showLoopBreaker({
