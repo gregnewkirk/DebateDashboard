@@ -54,6 +54,54 @@ const SOLO_COOLDOWN_MS = 4000;    // 4s in solo mode — fast, conversational
 const DEBATE_COOLDOWN_MS = 6000;  // 6s in debate mode — responsive but not overwhelming
 let lastMode = 'solo';
 
+// === ANTI-REPEAT SYSTEM ===
+// Tracks recent claims, responses, and transcripts to prevent loops
+const recentTranscripts = [];     // Last 10 transcripts heard
+const recentFactChecks = [];      // Last 5 claims fact-checked
+const MAX_RECENT_TRANSCRIPTS = 10;
+const MAX_RECENT_FACTCHECKS = 5;
+const REPEAT_SIMILARITY_THRESHOLD = 0.6; // 60% word overlap = same thing
+
+function isSimilar(a, b) {
+  if (!a || !b) return false;
+  const wordsA = new Set(a.toLowerCase().split(/\s+/).filter(w => w.length > 3));
+  const wordsB = new Set(b.toLowerCase().split(/\s+/).filter(w => w.length > 3));
+  if (wordsA.size === 0 || wordsB.size === 0) return false;
+  let overlap = 0;
+  for (const w of wordsA) { if (wordsB.has(w)) overlap++; }
+  return overlap / Math.min(wordsA.size, wordsB.size) >= REPEAT_SIMILARITY_THRESHOLD;
+}
+
+function isRepeatedTranscript(text) {
+  for (const recent of recentTranscripts) {
+    if (isSimilar(text, recent)) return true;
+  }
+  return false;
+}
+
+function isRepeatedFactCheck(claim) {
+  for (const recent of recentFactChecks) {
+    if (isSimilar(claim, recent)) return true;
+  }
+  return false;
+}
+
+function trackTranscriptForRepeat(text) {
+  recentTranscripts.push(text);
+  if (recentTranscripts.length > MAX_RECENT_TRANSCRIPTS) recentTranscripts.shift();
+}
+
+function trackFactCheck(claim) {
+  recentFactChecks.push(claim);
+  if (recentFactChecks.length > MAX_RECENT_FACTCHECKS) recentFactChecks.shift();
+}
+
+function clearRecentHistory() {
+  recentTranscripts.length = 0;
+  recentFactChecks.length = 0;
+  usedResponses.clear();
+}
+
 // ============================================================
 // SYSTEM PROMPTS — Different for each mode
 // ============================================================
@@ -511,6 +559,14 @@ function shouldRespond(text, debateActive = false) {
 
   // Stop command takes priority — never trigger a response
   if (shouldStop(text)) return { should: false };
+
+  // ANTI-REPEAT: Skip if we've heard something very similar recently
+  // This prevents the loop where the same topic keeps triggering Marie
+  if (isRepeatedTranscript(text)) {
+    return { should: false };
+  }
+  trackTranscriptForRepeat(text);
+
   const now = Date.now();
   const mode = debateActive ? 'debate' : 'solo';
   const cooldown = debateActive ? DEBATE_COOLDOWN_MS : SOLO_COOLDOWN_MS;
@@ -798,5 +854,6 @@ module.exports = {
   getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse,
   getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough,
   getRandomThisOrThat, getRandomOutbreak,
+  isRepeatedFactCheck, trackFactCheck, clearRecentHistory,
   SCIENCE,
 };

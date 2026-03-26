@@ -15,7 +15,7 @@ const { onFactCheck, onLoopBreaker, onMomJoke, onPayment, onSessionStart, onSess
 const { startEmailMonitor } = require('./emailmonitor');
 const { initTTS, generateSpeech } = require('./tts');
 const { initCache, getCachedAudio, startPreRendering, getCacheStats: getTTSCacheStats } = require('./tts_cache');
-const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getRandomThisOrThat, getRandomOutbreak, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse } = require('./marie');
+const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getRandomThisOrThat, getRandomOutbreak, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse, isRepeatedFactCheck, trackFactCheck, clearRecentHistory: marieClearHistory } = require('./marie');
 const { startMicListener, getMicStatus, muteMic, isMuted } = require('./mic');
 const { processEvent: moodEvent, getMood, resetMood } = require('./mood');
 const { resetCredibility, processClaimResult, processLoopBreaker: credLoopBreaker, getCredibility, getCredibilityComment } = require('./credibility');
@@ -119,6 +119,7 @@ function isDuplicateClaim(topic) {
 function clearRecentHistory() {
   recentBroadcasts.length = 0;
   recentClaimTopics.length = 0;
+  marieClearHistory(); // Also clear Marie's internal anti-repeat tracking
 }
 
 /**
