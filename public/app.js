@@ -2083,8 +2083,9 @@ document.addEventListener("keydown", (e) => {
     if (guest) guest.style.display = "none";
     const adScreen = document.getElementById("ad-screen");
     if (adScreen) adScreen.remove();
-    // Tell server to stop Marie
+    // Tell server to stop EVERYTHING — Marie, session, all state
     fetch("/api/marie/stop", { method: "POST" }).catch(() => {});
+    fetch("/api/session/end", { method: "POST" }).catch(() => {});
     returnToStandby();
   }
   if (e.key === "p" || e.key === "P") {
@@ -2099,8 +2100,12 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "t" || e.key === "T") {
     showSoundcheck();
   }
-  if (e.key === "q" || e.key === "Q") {
-    // Trigger quiz via server (Marie hosts it)
+  if (e.key === "s" || e.key === "S") {
+    // S = start debate session manually
+    fetch("/api/session/start", { method: "POST" }).catch(() => {});
+  }
+  if (e.key === "z" || e.key === "Z") {
+    // Z = trigger quiz via server (Marie hosts it)
     fetch("/api/quiz", { method: "POST" }).catch(() => {});
   }
   if (e.key === "b" || e.key === "B") {

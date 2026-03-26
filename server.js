@@ -99,7 +99,9 @@ const MIME_TYPES = {
 };
 
 // Fuzzy trigger phrases (all lowercase)
-const START_TRIGGERS = ["hey how's it going", "hey how is it going", "how's it going"];
+// Session start is now MANUAL ONLY — press S key on dashboard
+// These triggers caused false starts from casual conversation
+const START_TRIGGERS = [];
 const END_TRIGGERS = ["ok bye", "okay bye", "alright bye"];
 
 function matchesTrigger(text, triggers) {
@@ -305,9 +307,38 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/api/marie/stop') {
     marieStopSpeaking();
     broadcast(wss, { type: 'marie_stop' });
-    console.log('[Marie] ALL STOP from dev bar');
+    // Also end any active session to stop fact-checking
+    if (isActive()) {
+      endSession();
+      console.log('[Session] Ended via ALL STOP');
+    }
+    console.log('[Marie] ALL STOP');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Manual session start (S key)
+  if (req.method === 'POST' && req.url === '/api/session/start') {
+    if (!isActive()) {
+      startSession();
+      broadcast(wss, { type: 'session_start' });
+      console.log('[Session] Started manually (S key)');
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, active: isActive() }));
+    return;
+  }
+
+  // Manual session end (Q key reset)
+  if (req.method === 'POST' && req.url === '/api/session/end') {
+    if (isActive()) {
+      const sessionData = endSession();
+      broadcast(wss, { type: 'session_end', data: sessionData });
+      console.log('[Session] Ended manually (Q key)');
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, active: isActive() }));
     return;
   }
 
