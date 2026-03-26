@@ -1721,20 +1721,26 @@ body {
 .quiz-option {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
+  gap: 16px;
+  padding: 14px 20px;
   background: rgba(0,40,104,0.6);
   border: 3px solid rgba(255,215,0,0.25);
-  border-radius: 10px;
+  border-radius: 12px;
   transition: all 0.5s ease;
 }
 
-.quiz-option-label {
-  font-size: 34px;
+.quiz-option-badge {
+  font-size: 26px;
   font-weight: 900;
-  color: var(--gold);
-  min-width: 48px;
-  text-align: center;
+  color: var(--deep);
+  background: var(--gold);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .quiz-option-text {
@@ -1751,7 +1757,7 @@ body {
   transform: scale(1.02);
 }
 
-.quiz-option.quiz-correct .quiz-option-label {
+.quiz-option.quiz-correct .quiz-option-badge {
   color: #00ff55;
 }
 
@@ -1923,11 +1929,12 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 18px 12px;
-  border-radius: 14px;
+  padding: 30px 16px;
+  border-radius: 16px;
   text-align: center;
-  border: 3px solid rgba(255,215,0,0.25);
+  border: 4px solid rgba(255,215,0,0.25);
   background: rgba(0,40,104,0.5);
+  gap: 12px;
 }
 
 .tot-option-a {
@@ -1941,36 +1948,35 @@ body {
 }
 
 .tot-emoji {
-  font-size: 52px;
-  display: block;
-  margin-bottom: 8px;
+  font-size: 72px;
+  line-height: 1;
 }
 
 .tot-label {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--white);
-  line-height: 1.2;
-}
-
-.tot-letter {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 900;
-  margin-top: 8px;
-  letter-spacing: 3px;
+  color: var(--white);
+  line-height: 1.15;
 }
 
-.tot-option-a .tot-letter { color: var(--red); }
-.tot-option-b .tot-letter { color: var(--gold); }
+.tot-option-box.tot-correct {
+  border-color: #00cc44;
+  background: rgba(0,180,60,0.3);
+  box-shadow: 0 0 30px rgba(0,204,68,0.3);
+}
+
+.tot-option-box.tot-wrong {
+  opacity: 0.2;
+}
 
 .tot-vs-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 900;
   color: var(--gold);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  text-shadow: 0 0 20px rgba(255,215,0,0.3);
   flex-shrink: 0;
 }
 

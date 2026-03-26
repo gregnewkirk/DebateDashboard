@@ -2089,23 +2089,19 @@ function showQuiz(data) {
   card.appendChild(question);
 
   // Options — ALL 3 VISIBLE for the entire 30 seconds
+  // Each option is a single box with badge letter + answer text inside
   const optionsContainer = document.createElement("div");
   optionsContainer.className = "quiz-options";
   optionsContainer.id = "quiz-options";
-  const labels = ["A", "B", "C"];
+  const labels = ["A", "B", "C", "D"];
   (data.options || []).forEach((opt, i) => {
     const optEl = document.createElement("div");
     optEl.className = "quiz-option bounce-in";
     optEl.id = "quiz-option-" + i;
     optEl.style.animationDelay = (0.3 + i * 0.15) + "s";
-    const labelEl = document.createElement("span");
-    labelEl.className = "quiz-option-label";
-    labelEl.textContent = labels[i];
-    const textEl = document.createElement("span");
-    textEl.className = "quiz-option-text";
-    textEl.textContent = (opt || "").toUpperCase();
-    optEl.appendChild(labelEl);
-    optEl.appendChild(textEl);
+    optEl.innerHTML =
+      '<span class="quiz-option-badge">' + labels[i] + '</span>' +
+      '<span class="quiz-option-text">' + (opt || "").toUpperCase() + '</span>';
     optionsContainer.appendChild(optEl);
   });
   card.appendChild(optionsContainer);
@@ -2248,27 +2244,27 @@ function showThisOrThat(data) {
   question.textContent = (data.question || "").toUpperCase();
   card.appendChild(question);
 
-  // VS layout
+  // VS layout — emoji + label inside each box, no redundant letter
   const vsWrap = document.createElement("div");
   vsWrap.className = "tot-vs-wrap";
 
   const optA = document.createElement("div");
   optA.className = "tot-option-box tot-option-a bounce-in";
+  optA.id = "tot-option-a";
   optA.innerHTML =
-    '<span class="tot-emoji">' + (data.emojiA || "A") + '</span>' +
-    '<span class="tot-label">' + (data.labelA || "OPTION A").toUpperCase() + '</span>' +
-    '<span class="tot-letter">A</span>';
+    '<div class="tot-emoji">' + (data.a || "A") + '</div>' +
+    '<div class="tot-label">' + (data.al || "OPTION A").toUpperCase() + '</div>';
 
   const vsDivider = document.createElement("div");
-  vsDivider.className = "tot-vs-divider";
+  vsDivider.className = "tot-vs-divider slam-in";
   vsDivider.textContent = "VS";
 
   const optB = document.createElement("div");
   optB.className = "tot-option-box tot-option-b bounce-in";
+  optB.id = "tot-option-b";
   optB.innerHTML =
-    '<span class="tot-emoji">' + (data.emojiB || "B") + '</span>' +
-    '<span class="tot-label">' + (data.labelB || "OPTION B").toUpperCase() + '</span>' +
-    '<span class="tot-letter">B</span>';
+    '<div class="tot-emoji">' + (data.b || "B") + '</div>' +
+    '<div class="tot-label">' + (data.bl || "OPTION B").toUpperCase() + '</div>';
 
   vsWrap.appendChild(optA);
   vsWrap.appendChild(vsDivider);
@@ -2337,11 +2333,30 @@ function revealThisOrThat(data) {
   const timerWrap = document.getElementById("tot-timer-wrap");
   if (timerWrap) timerWrap.style.display = "none";
 
+  // Highlight correct/wrong boxes
+  const optA = document.getElementById("tot-option-a");
+  const optB = document.getElementById("tot-option-b");
+  const ans = (data.ans || data.answer || "").toLowerCase();
+
+  // Determine which side won — check if answer contains label A or B
+  if (optA && optB) {
+    const labelA = (optA.querySelector(".tot-label")?.textContent || "").toLowerCase();
+    const labelB = (optB.querySelector(".tot-label")?.textContent || "").toLowerCase();
+    if (ans.toLowerCase().includes(labelA.substring(0, 8))) {
+      optA.classList.add("tot-correct", "slam-in");
+      optB.classList.add("tot-wrong");
+    } else {
+      optB.classList.add("tot-correct", "slam-in");
+      optA.classList.add("tot-wrong");
+    }
+  }
+
+  // Show explanation
   const revealEl = document.getElementById("tot-reveal");
   if (revealEl) {
     revealEl.innerHTML =
       '<div class="tot-reveal-label">ANSWER</div>' +
-      '<div class="tot-reveal-answer">' + (data.answer || "").toUpperCase() + '</div>' +
+      '<div class="tot-reveal-answer">' + (data.ans || data.answer || "").toUpperCase() + '</div>' +
       '<div class="tot-reveal-explanation">' + (data.explanation || "").toUpperCase() + '</div>';
     revealEl.classList.add("show");
   }
