@@ -16,7 +16,7 @@ const { startEmailMonitor } = require('./emailmonitor');
 const { initTTS, generateSpeech } = require('./tts');
 const { initCache, getCachedAudio, startPreRendering, getCacheStats: getTTSCacheStats } = require('./tts_cache');
 const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getRandomThisOrThat, getRandomOutbreak, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse, isRepeatedFactCheck, trackFactCheck, clearRecentHistory: marieClearHistory } = require('./marie');
-const { startMicListener, getMicStatus, muteMic, isMuted } = require('./mic');
+const { startMicListener, getMicStatus, muteMic, isMuted, getRecentTranscripts } = require('./mic');
 const { processEvent: moodEvent, getMood, resetMood } = require('./mood');
 const { resetCredibility, processClaimResult, processLoopBreaker: credLoopBreaker, getCredibility, getCredibilityComment } = require('./credibility');
 const { newBoard: newBingoBoard, checkTranscript: bingoCheck, getBoard: getBingoBoard } = require('./bingo');
@@ -445,6 +445,108 @@ const server = http.createServer(async (req, res) => {
   // === STREAM DECK ENDPOINTS ===
   // All simple POST endpoints for Stream Deck HTTP buttons
 
+  // SCIENCE BUTTON — Random carousel: quiz, this-or-that, fact, myth, scientist, breakthrough, outbreak
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/science') {
+    const types = ['quiz', 'thisorthat', 'fact', 'mythbuster', 'scientist', 'breakthrough', 'outbreak'];
+    const pick = types[Math.floor(Math.random() * types.length)];
+    console.log(`[StreamDeck] SCIENCE → ${pick}`);
+    req.method = 'POST'; // Ensure POST for handlers that require it
+    req.url = '/api/' + pick;
+    // Fall through to the specific handler below
+  }
+
+  // FACT CHECK BUTTON — Analyze last 2-3 min of transcript, debunk biggest claim
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/factcheck') {
+    const recentTranscripts = getRecentTranscripts ? getRecentTranscripts(180) : []; // last 3 min
+    const combined = recentTranscripts.join(' ').trim();
+    if (!combined || combined.length < 10) {
+      console.log('[StreamDeck] FACT CHECK — no recent transcript');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'No recent transcript to analyze' }));
+      return;
+    }
+    console.log(`[StreamDeck] FACT CHECK — analyzing ${combined.length} chars from last 3 min`);
+    try {
+      const result = await analyzeTranscript(combined, [], null);
+      if (result.found) {
+        broadcast(wss, { type: 'fact_check', ...result });
+        flashLight().catch(() => {});
+        // Marie reads the fact check
+        const ttsText = `Fact check! Claim: ${result.claim}. Verdict: ${result.verdict}. ${result.fact}`;
+        smartTTS(ttsText).then(audioUrl => {
+          marieStartSpeaking();
+          broadcast(wss, { type: 'marie_speak', text: ttsText, audioUrl });
+        }).catch(() => {});
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, claim: result.claim, verdict: result.verdict }));
+      } else {
+        // Nothing to debunk — Marie says so
+        const noClaimText = "I've been listening and honestly, nothing debunkable in the last few minutes. That's either good news or they're being sneaky.";
+        smartTTS(noClaimText).then(audioUrl => {
+          marieStartSpeaking();
+          broadcast(wss, { type: 'marie_speak', text: noClaimText, audioUrl });
+        }).catch(() => {});
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, claim: null, message: 'No conspiracy detected' }));
+      }
+    } catch (err) {
+      console.error('[FactCheck] Error:', err.message);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: err.message }));
+    }
+    return;
+  }
+
+  // DEBATE MODE TOGGLE — One button: start debate (bingo+cred+graph) / end debate (report card)
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/debate') {
+    if (!isActive()) {
+      // START debate mode
+      startSession();
+      newBingoBoard();
+      resetCredibility();
+      resetGraph();
+      resetMood();
+      broadcast(wss, { type: 'session_start' });
+      broadcast(wss, { type: 'bingo_update', ...getBingoBoard() });
+      broadcast(wss, { type: 'credibility_update', value: 50 });
+      broadcast(wss, { type: 'conspiracy_graph_update', nodes: [], edges: [] });
+      onSessionStart();
+      console.log('[StreamDeck] DEBATE MODE ON');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, mode: 'started' }));
+    } else {
+      // END debate mode → trigger report card
+      const sessionData = endSession();
+      broadcast(wss, { type: 'session_end', data: sessionData });
+      onSessionEnd(sessionData);
+      // Generate report card
+      generateReportCard(sessionData).then((llmResult) => {
+        broadcast(wss, {
+          type: 'report_card',
+          nickname: sessionData.nickname,
+          nicknameHistory: sessionData.nicknameHistory,
+          grade: llmResult.grade,
+          gradeJoke: llmResult.grade_joke,
+          superlatives: llmResult.superlatives,
+          closer: llmResult.closer,
+          stats: {
+            claimCount: sessionData.claimCount,
+            debunkedCount: sessionData.debunkedCount,
+            misleadingCount: sessionData.misleadingCount,
+            loopBreakerCount: sessionData.loopBreakerCount,
+            momJokeCount: sessionData.momJokeCount,
+          },
+        });
+        flashAllLights().catch(() => {});
+        try { saveSessionLog(sessionData, llmResult); } catch {}
+      }).catch(() => {});
+      console.log('[StreamDeck] DEBATE MODE OFF → REPORT CARD');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, mode: 'ended' }));
+    }
+    return;
+  }
+
   // Reset everything — stop Marie, clear screen, lights off, return to standby
   if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/reset') {
     marieStopSpeaking();
@@ -869,6 +971,91 @@ const server = http.createServer(async (req, res) => {
       if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
     }
     return;
+  }
+
+  // Science Fact
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/fact') {
+    try {
+      const fact = getRandomFact();
+      if (!fact) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      const factObj = typeof fact === 'string' ? { title: fact, description: '', source: '' } : fact;
+      broadcast(wss, { type: 'science_fact', ...factObj });
+      const speech = typeof fact === 'string' ? fact : `${factObj.title || ''}. ${factObj.description || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Scientist Spotlight
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/scientist') {
+    try {
+      const sci = getRandomScientist();
+      if (!sci) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      const sciObj = typeof sci === 'string' ? { name: sci } : sci;
+      broadcast(wss, { type: 'scientist_spotlight', ...sciObj });
+      const speech = typeof sci === 'string' ? sci : `Scientist spotlight: ${sciObj.name || ''}. ${sciObj.breakthrough || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Breakthrough
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/breakthrough') {
+    try {
+      const bt = getRandomBreakthrough();
+      if (!bt) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      const btObj = typeof bt === 'string' ? { title: bt } : bt;
+      broadcast(wss, { type: 'breakthrough', ...btObj });
+      const speech = typeof bt === 'string' ? bt : `Breakthrough: ${btObj.title || ''}. ${btObj.simple || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Outbreak Report
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/outbreak') {
+    try {
+      const ob = getRandomOutbreak();
+      if (!ob) { res.writeHead(200); res.end(JSON.stringify({ ok: false })); return; }
+      broadcast(wss, { type: 'outbreak', ...ob });
+      const speech = `Outbreak report: ${ob.disease || ob.title || ''}. ${ob.headline || ob.detail || ''}`;
+      smartTTS(speech).then(audioUrl => {
+        marieStartSpeaking();
+        broadcast(wss, { type: 'marie_speak', text: speech, audioUrl });
+      }).catch(() => {});
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true }));
+    } catch (err) {
+      if (!res.headersSent) { res.writeHead(200); res.end(JSON.stringify({ ok: false, error: err.message })); }
+    }
+    return;
+  }
+
+  // Myth Buster (alias)
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/myth') {
+    req.url = '/api/mythbuster';
+    // Fall through
   }
 
   // Marie TTS test — generates speech and broadcasts to all clients

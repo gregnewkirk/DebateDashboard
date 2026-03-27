@@ -30,6 +30,27 @@ let transcriptCount = 0;
 let ffmpegProcess = null;
 let muted = false;  // Mute mic while Marie is speaking (prevent feedback loop)
 
+// Rolling transcript history for fact-check button (stores {text, time} pairs)
+const transcriptHistory = [];
+const MAX_HISTORY_AGE_MS = 5 * 60 * 1000; // Keep 5 minutes of history
+
+function addToHistory(text) {
+  transcriptHistory.push({ text, time: Date.now() });
+  // Prune old entries
+  const cutoff = Date.now() - MAX_HISTORY_AGE_MS;
+  while (transcriptHistory.length > 0 && transcriptHistory[0].time < cutoff) {
+    transcriptHistory.shift();
+  }
+}
+
+/**
+ * Get recent transcripts from the last N seconds.
+ */
+function getRecentTranscripts(seconds = 180) {
+  const cutoff = Date.now() - (seconds * 1000);
+  return transcriptHistory.filter(t => t.time >= cutoff).map(t => t.text);
+}
+
 /**
  * Start listening for audio from the network stream.
  * @param {function} callback - Called with (transcriptText) for each chunk
@@ -111,6 +132,7 @@ function recordNextChunk() {
         console.log(`[Mic] Heard: "${cleaned.substring(0, 80)}"`);
         lastTranscript = cleaned;
         lastTranscriptTime = Date.now();
+        addToHistory(cleaned);
         transcriptCount++;
         onTranscript(cleaned);
       }
@@ -252,4 +274,4 @@ function getMicStatus() {
   };
 }
 
-module.exports = { startMicListener, stopMicListener, getMicStatus, muteMic, isMuted };
+module.exports = { startMicListener, stopMicListener, getMicStatus, muteMic, isMuted, getRecentTranscripts };
