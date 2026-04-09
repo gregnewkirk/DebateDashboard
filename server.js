@@ -16,7 +16,7 @@ const { startEmailMonitor } = require('./emailmonitor');
 const { initTTS, generateSpeech } = require('./tts');
 const { initCache, getCachedAudio, startPreRendering, getCacheStats: getTTSCacheStats } = require('./tts_cache');
 const { generateResponse: marieRespond, shouldRespond: marieShouldRespond, shouldStop: marieShouldStop, matchConversation, getRandomFact, getRandomScientist, getRandomMyth, getRandomQuiz, getRandomBreakthrough, getRandomThisOrThat, getRandomOutbreak, getDonationResponse, getMomJokeReaction, getLoopBreakerResponse, getReportCardResponse, isRepeatedFactCheck, trackFactCheck, clearRecentHistory: marieClearHistory } = require('./marie');
-const { startMicListener, getMicStatus, muteMic, isMuted, getRecentTranscripts } = require('./mic');
+const { startMicListener, getMicStatus, muteMic, isMuted, getRecentTranscripts, getFullTranscript, getTranscriptPath, resetTranscriptSession } = require('./mic');
 const { processEvent: moodEvent, getMood, resetMood } = require('./mood');
 const { resetCredibility, processClaimResult, processLoopBreaker: credLoopBreaker, getCredibility, getCredibilityComment } = require('./credibility');
 const { newBoard: newBingoBoard, checkTranscript: bingoCheck, getBoard: getBingoBoard } = require('./bingo');
@@ -39,10 +39,167 @@ const CONFIG = {
   LOOP_WINDOW_SECONDS: 120,
 };
 
+const os = require('os');
+
 const PORT = CONFIG.PORT;
 const recentTopics = [];
 let claimsSinceLastNickname = 0;
 let marieSpeaking = false; // true while TTS is playing — suppress all triggers
+
+// ============================================================
+// BG AUTO-ROTATION — cycles through favorite backgrounds
+// ============================================================
+let currentBg = 'bg-halo-v6-minimal.html'; // Default background — Greg's favorite
+
+const bgRotation = {
+  enabled: false,
+  timer: null,
+  lastType: null,  // track last type to ensure we always switch
+  intervalMs: 5 * 60 * 1000, // 5 minutes
+  // Grouped by TYPE so we can guarantee switching between types every rotation
+  types: {
+    halo: [
+      'bg-halo-v6-minimal.html',
+      'bg-halo-v4-crimson.html',
+      'bg-halo-v3-emerald.html',
+      'bg-halo-v2-electric-purple.html',
+      'bg-halo-v5-cosmic.html',
+      'bg-vanta-halo.html',
+      'bg-halo-v1-deep-ocean.html',
+    ],
+    fog: [
+      'bg-vanta-fog.html',
+      'bg-fog-v2-purple.html',
+      'bg-fog-v1-aurora.html',
+      'bg-fog-v3-emerald.html',
+    ],
+    net: [
+      'bg-vanta-net.html',
+      'bg-net-v5-multicolor.html',
+      'bg-net-v3-purple.html',
+      'bg-net-v7-emerald.html',
+      'bg-net-v4-minimal.html',
+    ],
+  },
+  // Per-type index for round-robin within each type (so we don't repeat the same bg)
+  typeIndex: { halo: 0, fog: 0, net: 0 },
+  // Type rotation order — cycles through types in order, never same type twice
+  typeOrder: ['halo', 'fog', 'net'],
+  typeOrderIndex: 0,
+};
+
+function bgRotationTick() {
+  if (!bgRotation.enabled) return;
+
+  // Pick the next TYPE (always different from last)
+  const nextType = bgRotation.typeOrder[bgRotation.typeOrderIndex];
+  bgRotation.typeOrderIndex = (bgRotation.typeOrderIndex + 1) % bgRotation.typeOrder.length;
+
+  // Pick the next BG within that type (round-robin)
+  const pool = bgRotation.types[nextType];
+  const idx = bgRotation.typeIndex[nextType] % pool.length;
+  const bg = pool[idx];
+  bgRotation.typeIndex[nextType] = idx + 1;
+
+  bgRotation.lastType = nextType;
+  currentBg = bg;
+  broadcast(wss, { type: 'set_bg', bg });
+  console.log(`[BG] Rotated to: ${bg} (type: ${nextType}, idx: ${idx})`);
+}
+
+// Auto-start rotation on server boot
+bgRotation.enabled = true;
+bgRotation.timer = setInterval(bgRotationTick, bgRotation.intervalMs);
+const totalBgs = Object.values(bgRotation.types).reduce((s, arr) => s + arr.length, 0);
+console.log(`[BG] Auto-rotation STARTED on boot (${bgRotation.intervalMs / 1000}s interval, ${totalBgs} backgrounds across ${Object.keys(bgRotation.types).length} types)`);
+
+// ============================================================
+// MARIE FACT-CHECK QUEUE — she analyzes silently, Greg fires
+// ============================================================
+// Instead of auto-speaking, Marie queues fact-checks with pre-rendered TTS.
+// Dashboard flashes red when queue has items. Greg hits F to fire.
+const marieQueue = [];  // { text, audioUrl, result, queuedAt }
+const MARIE_QUEUE_MAX = 5;  // Keep last 5, drop oldest
+
+// Bait lines — Marie goads chat into debating
+let BAIT_LINES = [];
+try { BAIT_LINES = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_bait_lines.json'), 'utf8')); } catch (e) { console.warn('[Marie] No bait lines file found'); }
+let baitIndex = 0;
+
+// Citation database — academic sources by topic
+let CITATIONS = {};
+try { CITATIONS = JSON.parse(fs.readFileSync(path.join(__dirname, 'marie_citations.json'), 'utf8')); } catch (e) { console.warn('[Marie] No citations file found'); }
+
+function getCitationForClaim(claim) {
+  if (!claim) return null;
+  const lower = claim.toLowerCase();
+  const topicMap = {
+    vaccines: ['vaccin', 'autism', 'mmr', 'antivax', 'anti-vax', 'jab', 'immuniz'],
+    flat_earth: ['flat earth', 'globe', 'horizon', 'curvature'],
+    climate: ['climate', 'global warming', 'carbon', 'greenhouse', 'fossil fuel'],
+    evolution: ['evolution', 'darwin', 'fossil', 'species', 'primate', 'creationi'],
+    gmo: ['gmo', 'genetically modified', 'monsanto', 'roundup'],
+    chemtrails: ['chemtrail', 'contrail', 'spray', 'geoengineering'],
+    homeopathy: ['homeopath', 'dilut', 'water memory'],
+    '5g': ['5g', 'cell tower', 'emf', 'radiation.*phone', 'wifi.*danger'],
+    essential_oils: ['essential oil', 'aromatherap', 'doterra', 'young living'],
+    fluoride: ['fluoride', 'fluorid', 'water supply.*poison'],
+    covid: ['covid', 'sars-cov', 'ivermectin', 'lab leak', 'wuhan', 'coronavirus'],
+    moon_landing: ['moon land', 'moon hoax', 'apollo', 'lunar'],
+    acupuncture: ['acupunctur', 'meridian', 'chi.*energy', 'qi.*energy'],
+  };
+  for (const [topic, keywords] of Object.entries(topicMap)) {
+    if (keywords.some(kw => new RegExp(kw, 'i').test(lower))) {
+      const pool = CITATIONS[topic];
+      if (pool && pool.length > 0) return pool[Math.floor(Math.random() * pool.length)];
+    }
+  }
+  // Fallback to general
+  const gen = CITATIONS.general;
+  return gen && gen.length > 0 ? gen[Math.floor(Math.random() * gen.length)] : null;
+}
+
+// ============================================================
+// PERSISTENT EVENT LOG — appends every significant event to disk
+// ============================================================
+const VAULT_CONTENT_DIR = path.join(os.homedir(), 'vaults', 'Mnemosyne', 'DrGreg-Ops', '30-Content');
+let eventLogPath = null;
+let sessionEvents = []; // in-memory copy for API access
+
+function getDateDir() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function ensureEventLogFile() {
+  if (eventLogPath) return eventLogPath;
+  const dateDir = path.join(VAULT_CONTENT_DIR, getDateDir());
+  fs.mkdirSync(dateDir, { recursive: true });
+  eventLogPath = path.join(dateDir, 'live-events.jsonl');
+  console.log(`[Events] Persistent event log: ${eventLogPath}`);
+  return eventLogPath;
+}
+
+function persistEvent(type, data) {
+  try {
+    const filePath = ensureEventLogFile();
+    const entry = { type, data: data || {}, time: Date.now() };
+    fs.appendFileSync(filePath, JSON.stringify(entry) + '\n');
+    sessionEvents.push(entry);
+  } catch (err) {
+    console.error('[Events] Failed to persist event:', err.message);
+  }
+}
+
+function getSessionEvents() {
+  return sessionEvents;
+}
+
+function resetEventSession() {
+  eventLogPath = null;
+  sessionEvents = [];
+}
 
 /**
  * Smart TTS — checks pre-rendered cache first (instant), falls through to live generation (~2s).
@@ -173,9 +330,18 @@ function marieStartConversation(durationMs = 20000) {
 const DEBATE_PROMPTS = [
   "Patriotism requires vaccines.",
   "GMOs feed the world.",
-  "Trump is anti-science.",
   "Climate change is real.",
   "Evolution produced humans.",
+  "Fluoride is safe.",
+  "Natural immunity fails.",
+  "Nuclear is safest.",
+  "Organic is marketing.",
+  "Earth is ancient.",
+  "Homeopathy is placebo.",
+  "Gender isn't sex.",
+  "We're causing extinction.",
+  "Raw milk kills.",
+  "Defund pseudoscience.",
 ];
 const promptTTSCache = {}; // { "prompt text": "/tts/prompt_0.wav" }
 
@@ -341,6 +507,8 @@ const server = http.createServer(async (req, res) => {
         if (isActive()) {
           logEvent({ type: 'payment', data: payment });
         }
+        // Persistent event log (always, regardless of session)
+        persistEvent('payment', payment);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
@@ -511,6 +679,7 @@ const server = http.createServer(async (req, res) => {
       broadcast(wss, { type: 'credibility_update', value: 50 });
       broadcast(wss, { type: 'conspiracy_graph_update', nodes: [], edges: [] });
       onSessionStart();
+      persistEvent('session_start', { trigger: 'streamdeck' });
       console.log('[StreamDeck] DEBATE MODE ON');
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true, mode: 'started' }));
@@ -518,6 +687,7 @@ const server = http.createServer(async (req, res) => {
       // END debate mode → trigger report card
       const sessionData = endSession();
       broadcast(wss, { type: 'session_end', data: sessionData });
+      persistEvent('session_end', { trigger: 'streamdeck', nickname: sessionData.nickname, claimCount: sessionData.claimCount });
       onSessionEnd(sessionData);
       // Generate report card
       generateReportCard(sessionData).then((llmResult) => {
@@ -557,6 +727,67 @@ const server = http.createServer(async (req, res) => {
     console.log('[StreamDeck] RESET ALL');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // Set background — switches the dashboard background live
+  if (req.method === 'POST' && req.url === '/api/set-bg') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const { bg } = JSON.parse(body);
+        currentBg = bg;
+        broadcast(wss, { type: 'set_bg', bg });
+        console.log(`[BG] Switched to: ${bg}`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, bg }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: false, error: 'Bad JSON' }));
+      }
+    });
+    return;
+  }
+
+  // ── BG AUTO-ROTATION — cycles through favorites on a timer ──
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/bg/rotate/start') {
+    if (!bgRotation.timer) {
+      bgRotation.enabled = true;
+      bgRotation.typeOrderIndex = 0;
+      bgRotationTick();
+      bgRotation.timer = setInterval(bgRotationTick, bgRotation.intervalMs);
+      const totalBgs = Object.values(bgRotation.types).reduce((s, arr) => s + arr.length, 0);
+      console.log(`[BG] Auto-rotation STARTED (${bgRotation.intervalMs / 1000}s interval, ${totalBgs} backgrounds across ${Object.keys(bgRotation.types).length} types)`);
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, interval: bgRotation.intervalMs, types: Object.keys(bgRotation.types) }));
+    return;
+  }
+
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/bg/rotate/stop') {
+    if (bgRotation.timer) {
+      clearInterval(bgRotation.timer);
+      bgRotation.timer = null;
+      bgRotation.enabled = false;
+      console.log('[BG] Auto-rotation STOPPED');
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, message: 'Rotation stopped' }));
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === '/api/bg/rotate/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true,
+      enabled: bgRotation.enabled,
+      current: currentBg,
+      lastType: bgRotation.lastType,
+      nextType: bgRotation.typeOrder[bgRotation.typeOrderIndex],
+      interval: bgRotation.intervalMs,
+      types: bgRotation.types,
+    }));
     return;
   }
 
@@ -671,6 +902,7 @@ const server = http.createServer(async (req, res) => {
     if (!isActive()) {
       startSession();
       broadcast(wss, { type: 'session_start' });
+      persistEvent('session_start', { trigger: 'manual' });
       console.log('[Session] Started manually (S key)');
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -683,6 +915,7 @@ const server = http.createServer(async (req, res) => {
     if (isActive()) {
       const sessionData = endSession();
       broadcast(wss, { type: 'session_end', data: sessionData });
+      persistEvent('session_end', { trigger: 'manual', nickname: sessionData.nickname, claimCount: sessionData.claimCount });
       console.log('[Session] Ended manually (Q key)');
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -1083,6 +1316,101 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── MARIE FIRE — Greg hits this to make Marie speak the queued fact-check ──
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/marie/fire') {
+    if (marieQueue.length === 0) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'Queue empty — nothing to fire' }));
+      return;
+    }
+
+    // Pop the FIRST (oldest/most relevant) queued fact-check
+    const queued = marieQueue.shift();
+    console.log(`[Marie] FIRED! "${queued.text.substring(0, 80)}..." (${marieQueue.length} remaining in queue)`);
+
+    // Show the visual fact card — enhanced with citation
+    if (queued.result) {
+      const citation = getCitationForClaim(queued.result.claim);
+      broadcast(wss, { type: 'fact_check', ...queued.result, citation: citation || queued.result.source || null });
+    }
+
+    // Play the pre-rendered TTS immediately — zero delay
+    if (queued.audioUrl) {
+      marieStartSpeaking();
+      broadcast(wss, { type: 'tts_ready', audioUrl: queued.audioUrl, text: queued.text });
+    } else {
+      // TTS wasn't ready — generate now (slight delay)
+      try {
+        const audioUrl = await smartTTS(queued.text);
+        marieStartSpeaking();
+        broadcast(wss, { type: 'tts_ready', audioUrl, text: queued.text });
+      } catch (err) {
+        marieStartSpeaking(5000);
+        broadcast(wss, { type: 'marie_speak', text: queued.text, audioUrl: null });
+      }
+    }
+
+    // Update queue status on dashboard
+    broadcast(wss, { type: 'marie_queue_status', count: marieQueue.length, items: marieQueue.map(q => ({ text: q.text.substring(0, 80), queuedAt: q.queuedAt })) });
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, fired: queued.text.substring(0, 100), remaining: marieQueue.length }));
+    return;
+  }
+
+  // ── MARIE QUEUE STATUS — check what's queued ──
+  if (req.method === 'GET' && req.url === '/api/marie/queue') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      ok: true,
+      count: marieQueue.length,
+      items: marieQueue.map(q => ({
+        text: q.text.substring(0, 120),
+        claim: q.result?.claim || '',
+        verdict: q.result?.verdict || '',
+        queuedAt: q.queuedAt,
+        hasAudio: !!q.audioUrl
+      }))
+    }));
+    return;
+  }
+
+  // ── MARIE QUEUE CLEAR — flush the queue ──
+  if (req.method === 'POST' && req.url === '/api/marie/queue/clear') {
+    marieQueue.length = 0;
+    broadcast(wss, { type: 'marie_queue_status', count: 0, items: [] });
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, message: 'Queue cleared' }));
+    return;
+  }
+
+  // ── MARIE BAIT — Goad chat into debating ──
+  if ((req.method === 'POST' || req.method === 'GET') && req.url === '/api/marie/bait') {
+    if (BAIT_LINES.length === 0) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: 'No bait lines loaded' }));
+      return;
+    }
+    const line = BAIT_LINES[baitIndex % BAIT_LINES.length];
+    baitIndex++;
+
+    // Show bait card on dashboard
+    broadcast(wss, { type: 'marie_bait', text: line });
+
+    // Also TTS it — Marie speaks the bait line
+    smartTTS(line).then(audioUrl => {
+      marieStartSpeaking();
+      broadcast(wss, { type: 'tts_ready', audioUrl, text: line });
+    }).catch(() => {
+      broadcast(wss, { type: 'marie_speak', text: line, audioUrl: null });
+    });
+
+    console.log(`[Marie] BAIT: "${line.substring(0, 80)}..."`);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true, bait: line }));
+    return;
+  }
+
   // Marie conversation test
   if (req.method === 'POST' && req.url === '/api/marie/speak') {
     try {
@@ -1157,6 +1485,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Full transcript for current session (persistent log)
+  if (req.method === 'GET' && req.url === '/api/transcript') {
+    const transcript = getFullTranscript();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ count: transcript.length, path: getTranscriptPath(), segments: transcript }));
+    return;
+  }
+
+  // Full event log for current session (persistent log)
+  if (req.method === 'GET' && req.url === '/api/events') {
+    const events = getSessionEvents();
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ count: events.length, events }));
+    return;
+  }
+
   let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
   const ext = path.extname(filePath);
   fs.readFile(filePath, (err, data) => {
@@ -1185,6 +1529,7 @@ async function processTranscript(text) {
         const bingoHit = bingoCheck(text);
         if (bingoHit) {
           broadcast(wss, { type: 'bingo_hit', ...bingoHit });
+          persistEvent('bingo_hit', bingoHit);
           if (bingoHit.isBingo) {
             broadcast(wss, { type: 'bingo_win', count: bingoHit.bingoCount });
             smartTTS("BINGO! We got a full line! This challenger hit every talking point!").then(audioUrl => {
@@ -1230,6 +1575,7 @@ async function processTranscript(text) {
         if (matchesTrigger(text, START_TRIGGERS)) {
           startSession();
           broadcast(wss, { type: 'session_start' });
+          persistEvent('session_start', { trigger: 'voice' });
           onSessionStart();
           moodEvent({ type: 'session_start' });
           resetCredibility();
@@ -1255,6 +1601,7 @@ async function processTranscript(text) {
         if (matchesTrigger(text, END_TRIGGERS)) {
           const sessionData = endSession();
           broadcast(wss, { type: 'session_end', data: sessionData });
+          persistEvent('session_end', { trigger: 'voice', nickname: sessionData.nickname, claimCount: sessionData.claimCount });
           onSessionEnd(sessionData);
           moodEvent({ type: 'session_end' });
 
@@ -1290,6 +1637,7 @@ async function processTranscript(text) {
               },
             });
             console.log('[ReportCard] Sent to clients');
+            persistEvent('report_card', { nickname: sessionData.nickname, grade: llmResult.grade, stats: { claimCount: sessionData.claimCount, debunkedCount: sessionData.debunkedCount } });
 
             // Marie TTS for report card
             const rcText = `Grade: ${llmResult.grade}. ${llmResult.grade_joke}. ${llmResult.closer}`;
@@ -1365,13 +1713,18 @@ async function processTranscript(text) {
         }
 
         // Marie conversational trigger — mode-aware
-        // Skip if Marie is currently speaking (prevents feedback snowball)
+        // REDESIGN: In debate mode, Marie does NOT auto-speak. Only queues fact-checks.
+        // In solo mode, she only speaks when Greg hits bait button or direct-addresses her.
         const { getTTSStatus } = require('./tts');
         if (getTTSStatus().processing || getTTSStatus().queued > 0) {
           // TTS is busy — don't trigger Marie again
         } else {
         const marieCheck = marieShouldRespond(text, isActive());
-        if (marieCheck.should) {
+        // Only allow auto-speaking for: direct address by name, feminist defense, and stop commands
+        // Block all random facts, science pulls, solo hype, and debate banter
+        const allowedReasons = ['direct', 'feminist', 'stop'];
+        const isAllowed = marieCheck.should && allowedReasons.some(r => marieCheck.reason?.includes(r));
+        if (isAllowed) {
           const lastClaim = recentTopics.length > 0 ? recentTopics[recentTopics.length - 1] : null;
           const session = isActive() ? getSession() : null;
           console.log(`[Marie] Triggered: ${marieCheck.reason} (${isActive() ? 'debate' : 'solo'} mode)`);
@@ -1485,6 +1838,7 @@ async function processTranscript(text) {
             // Credibility meter
             const newCred = processClaimResult(result.verdict);
             broadcast(wss, { type: 'credibility', ...getCredibility() });
+            persistEvent('credibility_update', { verdict: result.verdict, ...getCredibility() });
 
             // Mood
             moodEvent({ type: 'fact_check', verdict: result.verdict });
@@ -1524,16 +1878,20 @@ async function processTranscript(text) {
               broadcast(wss, payload);
               onLoopBreaker(result);
               logEvent({ type: 'loop_breaker', data: result });
+              persistEvent('fact_check', { ...result, loopBreaker: true, loopKeyword: loop.loopKeyword });
               incrementStat('loopBreakerCount');
               credLoopBreaker(); // Extra credibility penalty
               moodEvent({ type: 'loop_breaker' });
               broadcast(wss, { type: 'credibility', ...getCredibility() });
 
-              // Marie TTS for loop breaker
+              // Marie QUEUES loop breaker — same queue system
               const loopText = `Broken record! They said ${result.claim} again. Still ${result.verdict}.`;
-              smartTTS(loopText).then(audioUrl => {
-                marieStartSpeaking(); broadcast(wss, { type: 'tts_ready', audioUrl, text: loopText });
-              }).catch(err => console.warn('[TTS] Loop breaker speech failed:', err.message));
+              const loopEntry = { text: loopText, audioUrl: null, result, queuedAt: new Date().toISOString() };
+              if (marieQueue.length >= MARIE_QUEUE_MAX) marieQueue.shift();
+              marieQueue.push(loopEntry);
+              broadcast(wss, { type: 'marie_queued', count: marieQueue.length, claim: result.claim, verdict: 'LOOP: ' + result.verdict });
+              console.log(`[Marie] QUEUED loop-breaker: "${result.claim}" (${marieQueue.length} in queue)`);
+              smartTTS(loopText).then(audioUrl => { loopEntry.audioUrl = audioUrl; }).catch(() => {});
 
             } else {
               // Anti-repeat: skip if we already covered this claim recently
@@ -1544,6 +1902,7 @@ async function processTranscript(text) {
                 broadcast(wss, payload);
                 onFactCheck(result);
                 logEvent({ type: 'fact_check', data: result });
+                persistEvent('fact_check', result);
 
                 // Increment debunked or misleading based on verdict
                 const verdict = (result.verdict || '').toUpperCase();
@@ -1553,12 +1912,33 @@ async function processTranscript(text) {
                   incrementStat('misleadingCount');
                 }
 
-                // Marie TTS for fact check — also deduplicated
+                // Marie QUEUES fact check — pre-renders TTS but does NOT speak
+                // Greg sees red flash on dashboard, hits F to fire
                 const factText = `Claim: ${result.claim}. Verdict: ${result.verdict}. ${result.fact}`;
                 if (!isDuplicateBroadcast(factText)) {
+                  // Pre-render TTS in background so it's instant when Greg fires
+                  const queueEntry = { text: factText, audioUrl: null, result, queuedAt: new Date().toISOString() };
+
+                  // Drop oldest if queue is full
+                  if (marieQueue.length >= MARIE_QUEUE_MAX) marieQueue.shift();
+                  marieQueue.push(queueEntry);
+
+                  // Flash red on dashboard — Marie has something ready
+                  broadcast(wss, {
+                    type: 'marie_queued',
+                    count: marieQueue.length,
+                    claim: result.claim,
+                    verdict: result.verdict,
+                  });
+                  console.log(`[Marie] QUEUED fact-check: "${result.claim}" (${marieQueue.length} in queue) — waiting for Greg to fire`);
+
+                  // Pre-render TTS in background (so it plays instantly when fired)
                   smartTTS(factText).then(audioUrl => {
-                    marieStartSpeaking(); broadcast(wss, { type: 'tts_ready', audioUrl, text: factText });
-                  }).catch(err => console.warn('[TTS] Fact check speech failed:', err.message));
+                    queueEntry.audioUrl = audioUrl;
+                    console.log(`[Marie] TTS pre-rendered for: "${result.claim.substring(0, 50)}"`);
+                  }).catch(err => {
+                    console.warn('[TTS] Pre-render failed (will generate on fire):', err.message);
+                  });
                 }
               }
             }
@@ -1588,6 +1968,10 @@ async function processTranscript(text) {
 // ============================================================
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  // Send current background to new clients immediately
+  if (currentBg) {
+    ws.send(JSON.stringify({ type: 'set_bg', bg: currentBg }));
+  }
   ws.on('message', async (raw) => {
     try {
       const msg = JSON.parse(raw.toString());

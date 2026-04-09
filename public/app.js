@@ -19,9 +19,18 @@ const SCIENCE_FACTS = [
 const DEBATE_PROMPTS = [
   "Patriotism requires vaccines.",
   "GMOs feed the world.",
-  "Trump is anti-science.",
   "Climate change is real.",
   "Evolution produced humans.",
+  "Fluoride is safe.",
+  "Natural immunity fails.",
+  "Nuclear is safest.",
+  "Organic is marketing.",
+  "Earth is ancient.",
+  "Homeopathy is placebo.",
+  "Gender isn't sex.",
+  "We're causing extinction.",
+  "Raw milk kills.",
+  "Defund pseudoscience.",
 ];
 let debatePromptIndex = 0;
 
@@ -108,6 +117,23 @@ function connectWebSocket() {
             if (speechEl) speechEl.textContent = (msg.text || '').toUpperCase();
             setTimeout(() => Marie.hideContainer(), 6000);
           }
+          break;
+        // === MARIE QUEUE — flash red when she has a fact-check ready ===
+        case "marie_queued":
+          console.log(`[WS] Marie QUEUED: ${msg.claim} — ${msg.verdict} (${msg.count} in queue)`);
+          showMarieAlert(msg.count, msg.claim, msg.verdict);
+          break;
+        case "marie_queue_status":
+          console.log(`[WS] Marie queue: ${msg.count} items`);
+          updateMarieQueueIndicator(msg.count);
+          break;
+        case "marie_bait":
+          console.log(`[WS] Marie BAIT: ${msg.text?.substring(0, 60)}`);
+          showMarieBait(msg.text);
+          break;
+        case "set_bg":
+          console.log(`[WS] Switching background to: ${msg.bg}`);
+          switchBackground(msg.bg);
           break;
         // === STREAM DECK HANDLERS ===
         case "reset":
@@ -206,6 +232,8 @@ function connectWebSocket() {
 // --- Nickname Display ---
 
 function updateNicknameDisplay(nickname) {
+  const section = document.getElementById("challenger-section");
+  if (section) section.classList.add("active");
   const el = document.getElementById("challenger-name");
   if (!el) return;
 
@@ -282,7 +310,9 @@ function handleSessionStart() {
     if (container) clearContainer(container);
     isShowingCard = false;
 
-    // Show challenger name
+    // Show challenger section + name
+    const section = document.getElementById("challenger-section");
+    if (section) section.classList.add("active");
     const el = document.getElementById("challenger-name");
     if (el) el.textContent = "CHALLENGER";
 
@@ -419,6 +449,149 @@ function showReportCard(data) {
   }, 34000);
 }
 
+// --- Marie Queue Alert — Red flash when she has a fact-check ready ---
+
+let marieAlertEl = null;
+let marieAlertTimeout = null;
+
+function showMarieAlert(count, claim, verdict) {
+  // Create or reuse the alert element
+  if (!marieAlertEl) {
+    marieAlertEl = document.createElement('div');
+    marieAlertEl.id = 'marie-queue-alert';
+    marieAlertEl.className = 'marie-queue-alert';
+    document.body.appendChild(marieAlertEl);
+
+    // Inject pulse animation if not already
+    if (!document.getElementById('mq-pulse-style')) {
+      const s = document.createElement('style');
+      s.id = 'mq-pulse-style';
+      s.textContent = `
+        @keyframes mq-pulse { 0% { opacity: 1; box-shadow: 0 0 8px var(--gold); } 100% { opacity: 0.3; box-shadow: 0 0 24px var(--gold); } }
+        @keyframes mq-border-glow { 0% { border-color: rgba(255,215,0,0.4); box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 30px rgba(255,215,0,0.08); } 100% { border-color: rgba(255,215,0,0.15); box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 50px rgba(255,215,0,0.15); } }
+      `;
+      document.head.appendChild(s);
+    }
+  }
+
+  marieAlertEl.innerHTML = `
+    <div class="mq-header">
+      <span class="mq-dot"></span>
+      MARIE CURIE (${count})
+    </div>
+    <div class="mq-claim">${(claim || '').substring(0, 60)}</div>
+    <div class="mq-hint">PRESS F TO FIRE</div>
+  `;
+
+  marieAlertEl.style.animation = 'mq-border-glow 1s ease-in-out infinite alternate';
+  marieAlertEl.style.opacity = '1';
+  marieAlertEl.style.transform = 'translateX(0)';
+
+  // Keep visible for 10 seconds then fade
+  if (marieAlertTimeout) clearTimeout(marieAlertTimeout);
+  marieAlertTimeout = setTimeout(() => {
+    if (marieAlertEl) {
+      marieAlertEl.style.opacity = '0';
+      marieAlertEl.style.transform = 'translateX(40px)';
+    }
+  }, 10000);
+}
+
+function updateMarieQueueIndicator(count) {
+  if (count === 0 && marieAlertEl) {
+    marieAlertEl.style.opacity = '0';
+    marieAlertEl.style.transform = 'translateX(40px)';
+  }
+}
+
+// --- Marie Bait — Full screen call to action ---
+function showMarieBait(text) {
+  stopIdlePopIns();
+  isShowingCard = true;
+
+  // Create bait overlay
+  const bait = document.createElement('div');
+  bait.className = 'marie-bait';
+  bait.id = 'marie-bait-overlay';
+  bait.innerHTML = `
+    <div class="bait-tag">MARIE CURIE</div>
+    <div class="bait-text">${(text || '').toUpperCase()}</div>
+    <div class="bait-cta">JOIN THE DEBATE</div>
+  `;
+  document.body.appendChild(bait);
+
+  // Slam-in animation
+  bait.style.opacity = '0';
+  bait.style.transform = 'scale(0.95)';
+  bait.style.transition = 'opacity 0.5s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+  requestAnimationFrame(() => {
+    bait.style.opacity = '1';
+    bait.style.transform = 'scale(1)';
+  });
+
+  // Auto-dismiss after 12 seconds
+  setTimeout(() => {
+    bait.style.opacity = '0';
+    bait.style.transform = 'scale(1.02)';
+    setTimeout(() => {
+      if (bait.parentNode) bait.remove();
+      isShowingCard = false;
+      startIdlePopIns();
+    }, 600);
+  }, 12000);
+}
+
+// --- Background Switcher — Crossfade between two iframes ---
+// Uses A/B iframes: loads new bg into the hidden one, crossfades over 2.5s
+
+let bgActiveSlot = 'a'; // which iframe is currently visible
+
+function switchBackground(bgFile) {
+  const frameA = document.getElementById('bg-frame-a');
+  const frameB = document.getElementById('bg-frame-b');
+  const bgCanvas = document.getElementById('bg');
+
+  if (!bgFile || bgFile === 'dna-helix.js' || bgFile === 'none') {
+    // Fade out both iframes, show canvas
+    frameA.style.opacity = '0';
+    frameB.style.opacity = '0';
+    setTimeout(() => {
+      frameA.style.display = 'none';
+      frameB.style.display = 'none';
+      frameA.src = '';
+      frameB.src = '';
+      bgCanvas.style.display = 'block';
+    }, 2500);
+    return;
+  }
+
+  bgCanvas.style.display = 'none';
+
+  const incoming = bgActiveSlot === 'a' ? frameB : frameA;
+  const outgoing = bgActiveSlot === 'a' ? frameA : frameB;
+
+  // Load new bg into the hidden iframe
+  incoming.src = bgFile;
+  incoming.style.display = 'block';
+  incoming.style.opacity = '0';
+  // Ensure z-index puts incoming on top during transition
+  incoming.style.zIndex = '1';
+  outgoing.style.zIndex = '0';
+
+  // Wait a beat for the new bg to start rendering, then crossfade
+  setTimeout(() => {
+    incoming.style.opacity = '1';
+    outgoing.style.opacity = '0';
+  }, 500);
+
+  // After transition completes, clean up the old frame
+  setTimeout(() => {
+    outgoing.src = '';
+    outgoing.style.display = 'none';
+    bgActiveSlot = bgActiveSlot === 'a' ? 'b' : 'a';
+  }, 3500);
+}
+
 // --- Fact Card — Liberty Styled Blocks ---
 
 function showFactCard(data) {
@@ -484,19 +657,27 @@ function showFactCard(data) {
   humorWrap.appendChild(humorBlock);
   container.appendChild(humorWrap);
 
-  // Source block — narrow centered
-  const sourceBlock = document.createElement("div");
-  sourceBlock.className = "source-block";
-  sourceBlock.style.opacity = "0";
-  const sourceLabel = document.createElement("div");
-  sourceLabel.className = "source-label";
-  sourceLabel.textContent = "SOURCE";
-  const sourceValue = document.createElement("div");
-  sourceValue.className = "source-value";
-  sourceValue.textContent = data.source || "";
-  sourceBlock.appendChild(sourceLabel);
-  sourceBlock.appendChild(sourceValue);
-  container.appendChild(sourceBlock);
+  // Citation block — prominent academic source (replaces old source pill)
+  const citationBlock = document.createElement("div");
+  citationBlock.className = "source-block";
+  citationBlock.style.opacity = "0";
+  const citationLabel = document.createElement("div");
+  citationLabel.className = "source-label";
+  citationLabel.textContent = "📎 CITATION";
+  const citationValue = document.createElement("div");
+  citationValue.className = "source-value";
+  // Use citation from server (academic source) if available, fallback to source field
+  citationValue.textContent = data.citation || data.source || "";
+  citationBlock.appendChild(citationLabel);
+  citationBlock.appendChild(citationValue);
+  if (data.source && data.citation) {
+    // If we have both, show the general source as meta
+    const sourceMeta = document.createElement("div");
+    sourceMeta.className = "source-meta";
+    sourceMeta.textContent = data.source;
+    citationBlock.appendChild(sourceMeta);
+  }
+  container.appendChild(citationBlock);
 
   // Staggered animations
   setTimeout(() => {
@@ -516,11 +697,11 @@ function showFactCard(data) {
   }, 900);
 
   setTimeout(() => {
-    sourceBlock.style.opacity = "";
-    sourceBlock.classList.add("bounce-in");
+    citationBlock.style.opacity = "";
+    citationBlock.classList.add("bounce-in");
   }, 1200);
 
-  // Fade out after 18 seconds
+  // Fade out after 20 seconds (longer to let viewers read the citation)
   setTimeout(() => {
     container.querySelectorAll(".claim-block, .verdict-block, .fact-block, .humor-block, .source-block").forEach(el => {
       el.classList.add("fade-out");
@@ -531,7 +712,7 @@ function showFactCard(data) {
       isShowingCard = false;
       startIdlePopIns();
     }, 1000);
-  }, 18000);
+  }, 20000);
 }
 
 // --- Loop Breaker — Threat Alert ---
@@ -933,9 +1114,11 @@ function returnToStandby() {
   const container = document.getElementById("main-content");
   if (container) clearContainer(container);
 
-  // Reset challenger name
+  // Hide challenger section
+  const section = document.getElementById("challenger-section");
+  if (section) section.classList.remove("active");
   const el = document.getElementById("challenger-name");
-  if (el) el.textContent = "AWAITING TARGET";
+  if (el) el.textContent = "";
 
   stopSessionTimer();
   if (typeof dismissSoundcheck === 'function') dismissSoundcheck();
@@ -2712,10 +2895,19 @@ function showBreakthroughCard(data) {
 
 // --- Debug Keyboard Shortcuts ---
 document.addEventListener("keydown", (e) => {
+  if (e.key === "f" || e.key === "F") {
+    // F = FIRE MARIE — speak the queued fact-check instantly
+    fetch("/api/marie/fire", { method: "POST" })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.ok) console.log("[Marie] Nothing queued to fire");
+        else console.log(`[Marie] FIRED: ${data.fired}`);
+      })
+      .catch(() => console.warn("[Marie] Fire endpoint unreachable"));
+  }
   if (e.key === "d" || e.key === "D") {
-    // Trigger through server so Marie TTS fires too
+    // D = Test fact-check (debug only)
     fetch("/api/marie/test", { method: "POST" }).catch(() => {
-      // Fallback to local-only if server unreachable
       showFactCard({
         claim: "VACCINES CAUSE AUTISM",
         verdict: "DEBUNKED",
@@ -2779,14 +2971,15 @@ document.addEventListener("keydown", (e) => {
       seconds: 20
     });
   }
-  if (e.key === "f" || e.key === "F") {
-    // F = trigger science fact test card
-    showScienceFact({
-      icon: "\uD83E\uDDEC",
-      title: "YOUR DNA IS 99.9% IDENTICAL TO EVERY OTHER HUMAN",
-      body: "THE 0.1% DIFFERENCE ACCOUNTS FOR ALL HUMAN GENETIC VARIATION — SKIN COLOR, HEIGHT, DISEASE RISK. WE ARE FAR MORE ALIKE THAN DIFFERENT.",
-      source: "HUMAN GENOME PROJECT, NIH"
-    });
+  if (e.key === "e" || e.key === "E") {
+    // E = ENGAGE — Marie bait line to goad chat into debating
+    fetch("/api/marie/bait", { method: "POST" })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) console.log(`[Marie] Bait fired: "${data.bait?.substring(0, 60)}"`);
+        else console.log("[Marie] No bait lines available");
+      })
+      .catch(() => console.warn("[Marie] Bait endpoint unreachable"));
   }
   if (e.key === "m" || e.key === "M") {
     // M = trigger myth buster test card

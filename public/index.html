@@ -2,78 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+  <meta name="viewport" content="width=2160, height=3840, initial-scale=1.0">
   <title>DR. GREG DEBATES</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Oswald:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- PULSING MARGIN STARS -->
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-<div class="star">&#9733;</div>
-
-<!-- SIDE STRIPES -->
-<div class="side-stripe-left"></div>
-<div class="side-stripe-right"></div>
+<!-- BACKGROUND — iframe for WebGL/Vanta or canvas for legacy -->
+<iframe id="bg-frame-a" style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:0;pointer-events:none;display:none;opacity:1;transition:opacity 2.5s ease-in-out;"></iframe>
+<iframe id="bg-frame-b" style="position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:0;pointer-events:none;display:none;opacity:0;transition:opacity 2.5s ease-in-out;"></iframe>
+<canvas id="bg" width="2160" height="3840"></canvas>
 
 <!-- MAIN CONTENT SHELL -->
 <div class="content">
 
   <!-- HEADER -->
   <div class="header-section">
-    <div class="header-stars-row">
-      <span>&#9733;</span>
-      <span>&#9733;</span>
-      <span>&#9733;</span>
-      <span>&#9733;</span>
-      <span>&#9733;</span>
-    </div>
     <h1>DR. GREG DEBATES</h1>
-    <div class="header-subtitle">LIBERTY DEMANDS TRUTH</div>
+    <div class="header-subtitle">SCIENCE DEMANDS TRUTH</div>
   </div>
-
-  <!-- Angled divider: header to challenger -->
-  <div class="angled-divider red-down"></div>
 
   <!-- CHALLENGER BAR -->
   <div class="challenger-section" id="challenger-section">
-    <div class="challenger-label">CHALLENGER &#9654;</div>
+    <div class="challenger-label">CHALLENGER</div>
     <div class="challenger-name" id="challenger-name">AWAITING TARGET</div>
   </div>
-
-  <!-- Angled divider: challenger to middle -->
-  <div class="angled-divider navy-up"></div>
 
   <!-- DYNAMIC CONTENT AREA -->
   <div class="middle-zone" id="main-content">
     <!-- Fact cards, debate prompts, alerts injected here by app.js -->
   </div>
 
-  <!-- Chevron divider: middle to bottom -->
-  <div class="chevron-divider"></div>
-
   <!-- BOTTOM BANNER (always visible) -->
   <div class="bottom-zone">
     <div class="bottom-banner">
-      <div class="bottom-text">PATRIOTISM<br>REQUIRES VACCINES</div>
-      <div class="bottom-sub">&#9733; DR. GREG &#9733;</div>
+      <div class="bottom-text">SUPPORT THE SHOW</div>
+      <div class="bottom-sub">DONATE.DRGREGSHOW.COM</div>
     </div>
   </div>
 
@@ -85,24 +50,17 @@
   <span>ACTIVE</span>
 </div>
 
-<!-- MARIE CURIE — AI CO-HOST: TOP-HALF TAKEOVER (Design #5) -->
+<!-- MARIE CURIE — AI CO-HOST: TOP-HALF TAKEOVER -->
 <div class="marie-container" id="marie-container" style="display:none;">
-  <!-- Gold accent line at very top -->
   <div class="marie-top-accent"></div>
-
-  <!-- Tag line -->
-  <div class="marie-tag">MARIE CURIE</div>
-
-  <!-- DNA Helix Spectrogram — this IS her visual identity -->
-  <canvas class="marie-waveform" id="marie-canvas" width="960" height="280"></canvas>
-
-  <!-- Speech text — large, readable, centered -->
+  <div class="marie-tag">MARIE CURIE — AI CO-HOST</div>
+  <canvas class="marie-waveform" id="marie-canvas" width="1920" height="440"></canvas>
   <div class="marie-speech" id="marie-speech"></div>
-
-  <!-- Subtle subtitle -->
-  <div class="marie-subtitle">AI CO-HOST</div>
-
-  <!-- Bottom gold border that separates Marie from dashboard content below -->
+  <div class="marie-citation" id="marie-citation" style="display:none;">
+    <div class="marie-citation-label">📎 SOURCE</div>
+    <div class="marie-citation-text" id="marie-citation-text"></div>
+  </div>
+  <div class="marie-subtitle">NOBEL LAUREATE · PHYSICS 1903 · CHEMISTRY 1911</div>
   <div class="marie-bottom-border"></div>
 </div>
 
@@ -111,7 +69,7 @@
   <span>TAP TO DISMISS</span>
 </div>
 
-<!-- SLIDE-OUT TOOLBAR — hidden tab on left edge, slides out on hover/click -->
+<!-- SLIDE-OUT TOOLBAR — hidden tab on left edge -->
 <div class="toolbar-tab" id="toolbar-tab" onclick="toggleToolbar()">&#9654;</div>
 <div class="toolbar" id="toolbar">
   <div class="toolbar-close" onclick="toggleToolbar()">&#10005;</div>
@@ -121,9 +79,12 @@
   <div class="toolbar-section">SESSION</div>
   <button class="tb-btn tb-green" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'s'}))">&#9654; START SESSION</button>
   <div class="toolbar-divider"></div>
-  <div class="toolbar-section">MARIE</div>
-  <button class="tb-btn" onclick="fetch('/api/marie/stop',{method:'POST'})">&#9632; STOP MARIE</button>
-  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'d'}))">&#9733; FACT CHECK</button>
+  <div class="toolbar-section">MARIE CURIE</div>
+  <button class="tb-btn tb-gold" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'f'}))">⚡ FIRE FACT CHECK (F)</button>
+  <button class="tb-btn tb-gold" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'e'}))">🎯 BAIT CHAT (E)</button>
+  <button class="tb-btn" onclick="fetch('/api/marie/queue/clear',{method:'POST'})">🗑 CLEAR QUEUE</button>
+  <button class="tb-btn" onclick="fetch('/api/marie/stop',{method:'POST'})">■ STOP MARIE</button>
+  <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'d'}))">★ TEST FACT CHECK</button>
   <button class="tb-btn" onclick="document.dispatchEvent(new KeyboardEvent('keydown',{key:'z'}))">&#10067; POP QUIZ</button>
   <div class="toolbar-divider"></div>
   <div class="toolbar-section">CARDS</div>
@@ -142,6 +103,7 @@
   <button class="tb-btn" onclick="fetch('/api/lights/off',{method:'POST'})">&#128161; LIGHTS OFF</button>
 </div>
 
+<script src="dna-helix.js"></script>
 <script src="sfx.js"></script>
 <script src="marie.js"></script>
 <script src="app.js"></script>
